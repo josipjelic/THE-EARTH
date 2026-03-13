@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE EARTH — Day 3</title>
+    <title>THE EARTH</title>
     <style>
         /* Lo, the styles of the void */
         * {
@@ -76,7 +76,7 @@
 </head>
 <body>
     <div id="title">THE EARTH</div>
-    <div id="info">Day 3 of Creation — The Companion Rises</div>
+    <div id="info">Loading…</div>
     <div id="instructions">DRAG TO ROTATE • THE MOON ORBITS</div>
     <div id="nav">
         <a href="index.html">⬅ Observatory</a>
@@ -547,9 +547,17 @@
         // ═══════════════════════════════════════════════════════════════
         init();
 
-        console.log('🌍 THE EARTH — Day 3 of Creation');
-        console.log('The Moon now orbits. Mortals can drag the sphere.');
-        console.log('Complexity Level: 3 / 100');
+        fetch('earth/state.json').then(r => r.json()).then(s => {
+            const day = s.earth?.day ?? s.day ?? 1;
+            const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 1;
+            document.getElementById('title').textContent = 'THE EARTH';
+            document.getElementById('info').textContent = 'Day ' + day + ' of Creation';
+            document.title = 'THE EARTH — Day ' + day;
+            console.log('🌍 THE EARTH — Day ' + day + ' of Creation');
+            console.log('Complexity Level: ' + complexity + ' / 100');
+        }).catch(() => {
+            document.getElementById('info').textContent = 'THE EARTH';
+        });
     </script>
 </body>
 </html>

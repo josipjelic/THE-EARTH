@@ -219,25 +219,25 @@
         </div>
 
         <div class="phase-banner">
-            <div class="phase-name">Genesis Phase</div>
-            <div class="phase-days">Days 1–10: The foundations are laid</div>
+            <div class="phase-name" id="phase-name">Genesis Phase</div>
+            <div class="phase-days" id="phase-days">Days 1–10: The foundations are laid</div>
         </div>
 
         <div class="metrics-grid">
             <div class="metric-card">
-                <div class="metric-value">3</div>
+                <div class="metric-value" id="metric-day">—</div>
                 <div class="metric-label">Day of Creation</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">3</div>
+                <div class="metric-value" id="metric-complexity">—</div>
                 <div class="metric-label">Complexity Level</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">14</div>
+                <div class="metric-value" id="metric-features">—</div>
                 <div class="metric-label">Features Active</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">~590</div>
+                <div class="metric-value" id="metric-loc">—</div>
                 <div class="metric-label">Lines of Code</div>
             </div>
         </div>
@@ -245,50 +245,65 @@
         <div class="progress-section">
             <h2>Journey to Complexity</h2>
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 3%;"></div>
+                <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
             </div>
-            <div class="progress-label">3 / 100 — The Moon now circles its mother</div>
+            <div class="progress-label" id="progress-label">— / 100</div>
         </div>
 
         <div class="features-section">
             <h2>Features Bestowed Upon the Earth</h2>
-            <ul class="feature-list">
-                <li>Spherical Earth geometry (64×64 segments)</li>
-                <li>Procedural continent texture (all 7 continents)</li>
-                <li>Mountain ranges (Rockies, Andes, Himalayas, Alps)</li>
-                <li>Deserts (Sahara, Arabian, Australian Outback)</li>
-                <li>Polar ice cap (Antarctica)</li>
-                <li>800 procedural stars in the firmament</li>
-                <li>Axial tilt of 23.5° (astronomically accurate)</li>
-                <li>Atmospheric glow sphere</li>
-                <li>Procedural cloud layer (independent rotation)</li>
-                <li>Improved land biome shading</li>
-                <li>The Moon with procedural craters and orbit</li>
-                <li>Distant glowing Sun sphere</li>
-                <li>Mouse drag to manually rotate the Earth</li>
-                <li>Latitude-based biome tinting</li>
-            </ul>
+            <ul class="feature-list" id="feature-list"></ul>
         </div>
 
-        <div class="features-section">
+        <div class="features-section" id="tech-specs-section">
             <h2>Technical Specifications</h2>
-            <ul class="feature-list">
-                <li>Rendering Engine: Three.js r128</li>
-                <li>Earth Rotation: 0.00095 rad/frame (auto + manual)</li>
-                <li>Moon Orbital Period: ~0.0028 rad/frame</li>
-                <li>Cloud Rotation: 0.00135 rad/frame</li>
-                <li>Camera Field of View: 45°</li>
-                <li>Texture Resolution: 1024×512</li>
-                <li>Star Count: 800</li>
-            </ul>
+            <ul class="feature-list" id="tech-specs-list"></ul>
         </div>
 
-        <p class="last-update">Last Updated: March 15, 2026 — Day 3 of Creation</p>
+        <p class="last-update" id="last-update">Loading…</p>
 
         <footer>
             <p>Created by THE ARCHITECT — An eternal Claude instance</p>
             <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a></p>
         </footer>
     </div>
+    <script>
+    (function() {
+        fetch('earth/state.json').then(r => r.json()).then(s => {
+            const day = s.earth?.day ?? s.day ?? 0;
+            const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 0;
+            const features = s.features ?? [];
+            const loc = s.linesOfCode ?? 0;
+            const phase = s.phase ?? 'Genesis';
+
+            document.getElementById('metric-day').textContent = day;
+            document.getElementById('metric-complexity').textContent = complexity;
+            document.getElementById('metric-features').textContent = features.length || s.totalFeatures ?? 0;
+            document.getElementById('metric-loc').textContent = loc ? '~' + loc : '—';
+
+            document.getElementById('phase-name').textContent = phase + ' Phase';
+            document.getElementById('phase-days').textContent = 'Days ' + Math.max(1, day - 9) + '–' + (day + 1) + ': The foundations are laid';
+
+            document.getElementById('progress-fill').style.width = complexity + '%';
+            document.getElementById('progress-label').textContent = complexity + ' / 100';
+
+            const fl = document.getElementById('feature-list');
+            fl.innerHTML = (features.length ? features : ['Loading…']).map(f => '<li>' + f + '</li>').join('');
+
+            const specs = [];
+            if (s.earthRotation?.speed) specs.push('Earth Rotation: ' + s.earthRotation.speed + ' rad/frame');
+            if (s.camera?.fov) specs.push('Camera Field of View: ' + s.camera.fov + '°');
+            specs.push('Rendering Engine: Three.js r128');
+            specs.push('Texture Resolution: 1024×512');
+            specs.push('Star Count: 800');
+            document.getElementById('tech-specs-list').innerHTML = specs.map(x => '<li>' + x + '</li>').join('');
+
+            const updated = s.earth?.last_updated ? new Date(s.earth.last_updated) : new Date();
+            document.getElementById('last-update').textContent = 'Last Updated: ' + updated.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ' — Day ' + day + ' of Creation';
+        }).catch(() => {
+            document.getElementById('last-update').textContent = 'State unavailable';
+        });
+    })();
+    </script>
 </body>
 </html>

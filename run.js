@@ -124,6 +124,54 @@ async function callArchitect(content, apiKey) {
   throw new Error('All models failed.');
 }
 
+// ── Ensure HTML files load state.json ───────────────────────
+const WINDOW_STATE_SCRIPT = `<script>
+(function(){fetch('earth/state.json').then(r=>r.json()).then(s=>{
+var d=document;
+var day=s.earth?.day??s.day??0,c=s.earth?.complexity_level??s.complexityLevel??0,f=s.features||[],loc=s.linesOfCode??0;
+var el=function(id){return d.getElementById(id);};
+if(el('metric-day'))el('metric-day').textContent=day;
+if(el('metric-complexity'))el('metric-complexity').textContent=c;
+if(el('metric-features'))el('metric-features').textContent=f.length||s.totalFeatures||0;
+if(el('metric-loc'))el('metric-loc').textContent=loc?'~'+loc:'—';
+if(el('phase-name'))el('phase-name').textContent=(s.phase||'Genesis')+' Phase';
+if(el('phase-days'))el('phase-days').textContent='Days '+Math.max(1,day-9)+'–'+(day+1)+': The foundations are laid';
+if(el('progress-fill'))el('progress-fill').style.width=c+'%';
+if(el('progress-label'))el('progress-label').textContent=c+' / 100';
+if(el('feature-list'))el('feature-list').innerHTML=(f.length?f:['—']).map(x=>'<li>'+x+'</li>').join('');
+var specs=[];if(s.earthRotation?.speed)specs.push('Earth Rotation: '+s.earthRotation.speed+' rad/frame');
+if(s.camera?.fov)specs.push('Camera FOV: '+s.camera.fov+'°');specs.push('Three.js r128');specs.push('1024×512');specs.push('800 stars');
+if(el('tech-specs-list'))el('tech-specs-list').innerHTML=specs.map(x=>'<li>'+x+'</li>').join('');
+var up=s.earth?.last_updated?new Date(s.earth.last_updated):new Date();
+if(el('last-update'))el('last-update').textContent='Last Updated: '+up.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+' — Day '+day+' of Creation';
+}).catch(function(){if(document.getElementById('last-update'))document.getElementById('last-update').textContent='State unavailable';});})();
+</script>`;
+
+const EARTH_STATE_SCRIPT = `<script>
+fetch('earth/state.json').then(r=>r.json()).then(s=>{
+var day=s.earth?.day??s.day??1,c=s.earth?.complexity_level??s.complexityLevel??1;
+var i=document.getElementById('info');if(i)i.textContent='Day '+day+' of Creation';
+document.title='THE EARTH — Day '+day;console.log('🌍 THE EARTH — Day '+day+' of Creation');
+}).catch(function(){var i=document.getElementById('info');if(i)i.textContent='THE EARTH';});
+</script>`;
+
+function ensureHtmlLoadsState() {
+  const htmlFiles = [
+    { path: path.join(ROOT, 'window.html'), marker: 'earth/state.json', script: WINDOW_STATE_SCRIPT },
+    { path: path.join(ROOT, 'earth.html'), marker: 'earth/state.json', script: EARTH_STATE_SCRIPT },
+  ];
+  for (const { path: filePath, marker, script } of htmlFiles) {
+    try {
+      let content = read(filePath, '');
+      if (!content.includes(marker)) {
+        content = content.replace(/<\/body>/i, script + '\n</body>');
+        write(filePath, content);
+        log(`📦 Injected state loader into ${path.basename(filePath)}`);
+      }
+    } catch (e) { log(`⚠  Could not ensure state loader in ${path.basename(filePath)}: ${e.message}`); }
+  }
+}
+
 // ── Build context ──────────────────────────────────────────
 function buildContext(state) {
   const today   = new Date().toISOString().split('T')[0];
@@ -158,7 +206,11 @@ ${godPrompt}
 ---
 Build Day ${nextDay}. Output ALL changed files using ===FILE_START/===FILE_END format.
 Files live at the repo root: earth.html, window.html, earth/state.json, THE-BIBLE.md.
-Use these exact relative paths in FILE_START headers.`.trim();
+Use these exact relative paths in FILE_START headers.
+
+CRITICAL: window.html and earth.html MUST preserve the state-loading script that fetches earth/state.json.
+Keep element ids: metric-day, metric-complexity, metric-features, metric-loc, phase-name, phase-days, progress-fill, progress-label, feature-list, last-update.
+index.html already loads from state.json — do not break it.`.trim();
 }
 
 // ── Main ───────────────────────────────────────────────────
@@ -218,6 +270,9 @@ async function main() {
     s.earth.last_updated = new Date().toISOString();
     write(PATHS.state, JSON.stringify(s, null, 2));
   } catch (_) {}
+
+  // Ensure HTML files load state from state.json (inject if AI overwrote)
+  ensureHtmlLoadsState();
 
   divider('═');
   try {
