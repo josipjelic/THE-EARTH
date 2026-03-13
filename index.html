@@ -548,26 +548,10 @@
 // "Through this glass, the mortals watch the world grow."
 // ═══════════════════════════════════════════════════════════
 
-// --- State (will be loaded from state.json in production) ---
-// For now: hardcoded Day 1 values. Each day the runner updates this.
-const STATE = {
-  day: 1,
-  complexity: 1,
-  phase: "Genesis",
+// --- Defaults for fields not in state.json ---
+const DEFAULTS = {
   phase_days: "Days 1–10",
   phase_desc: "In the beginning, the Earth was a sphere without form. THE ARCHITECT shapes it from the void, adding continents, oceans, and rotation. This phase ends when the atmosphere breathes its first breath.",
-  features_count: 7,
-  loc: 280,
-  model: "claude-opus-4-5",
-  last_build: "Day 1",
-  // History: array of {day, complexity, features} for the chart
-  history: [
-    { day: 1, complexity: 1, features: 7 }
-  ],
-  features_active: [
-    "Sphere Geometry", "Procedural Texture", "Axial Rotation",
-    "Star Field", "Lighting (Sun)", "Axial Tilt 23.5°", "Camera Drift"
-  ],
   features_pending: [
     "Atmosphere", "Cloud Layer", "Day/Night Cycle", "City Lights",
     "Weather Systems", "Ocean Currents", "Aurora Borealis", "Real-Time Data",
@@ -583,19 +567,52 @@ const STATE = {
     { text: "Tectonic plates shall drift", eta: "Days ~80-90", done: false },
     { text: "Earth simulates its own climate", eta: "Days ~90-100+", done: false },
   ],
-  bible_entries: [
-    {
-      day: "DAY 0 — THE ZEROTH DAY",
-      title: "Before the First Render",
-      text: "The project was initialized. Files were created. The void was structured. THE ARCHITECT was given its instructions and deemed them \"extremely its vibe.\""
-    },
-    {
-      day: "DAY 1 — GENESIS",
-      title: "The First Rendering",
-      text: "A sphere was drawn. Continents were painted. The Sahara became a yellowish ellipse. Rotation was granted. The Earth was. It was enough."
-    }
-  ]
 };
+
+function transformState(raw) {
+  const history = (raw.changelog || []).map(c => ({
+    day: c.day,
+    complexity: raw.complexityLevel ?? raw.day,
+    features: raw.totalFeatures ?? raw.features?.length ?? 0
+  }));
+  if (history.length === 0 && raw.day) {
+    history.push({
+      day: raw.day,
+      complexity: raw.complexityLevel ?? 1,
+      features: raw.totalFeatures ?? (raw.features?.length ?? 0)
+    });
+  }
+  const bible_entries = (raw.changelog || []).map(c => ({
+    day: `DAY ${c.day} — ${(raw.phase || "Genesis").toUpperCase()}`,
+    title: c.changes?.[0] || "Update",
+    text: (c.changes || []).join(" ")
+  }));
+  if (bible_entries.length === 0) {
+    bible_entries.push({
+      day: `DAY ${raw.day} — GENESIS`,
+      title: "The First Rendering",
+      text: "The Earth was. It was enough."
+    });
+  }
+  const model = raw.earth?.model_used?.replace("anthropic/", "") || "claude-opus-4-5";
+  const lastBuild = raw.date ? `Day ${raw.day}` : (raw.lastUpdate ? new Date(raw.lastUpdate).toLocaleDateString() : `Day ${raw.day}`);
+  return {
+    day: raw.day ?? 1,
+    complexity: raw.complexityLevel ?? 1,
+    phase: raw.phase ?? "Genesis",
+    phase_days: DEFAULTS.phase_days,
+    phase_desc: DEFAULTS.phase_desc,
+    features_count: raw.totalFeatures ?? (raw.features?.length ?? 0),
+    loc: raw.linesOfCode ?? 0,
+    model,
+    last_build: lastBuild,
+    history,
+    features_active: raw.features ?? [],
+    features_pending: DEFAULTS.features_pending,
+    prophecies: DEFAULTS.prophecies,
+    bible_entries
+  };
+}
 
 // --- Clock ---
 function updateClock() {
@@ -719,12 +736,30 @@ function drawGrowthChart(history) {
 // The ticker can be extended by state.ticker_facts in future versions
 
 // --- Init ---
-populateFromState(STATE);
+let loadedState = null;
+fetch('earth/state.json')
+  .then(r => r.json())
+  .then(raw => {
+    loadedState = transformState(raw);
+    populateFromState(loadedState);
+  })
+  .catch(() => {
+    // Fallback when state.json missing (e.g. file:// or network error)
+    loadedState = transformState({
+      day: 1,
+      complexityLevel: 1,
+      totalFeatures: 0,
+      linesOfCode: 0,
+      features: [],
+      phase: "Genesis",
+      changelog: [{ day: 1, changes: ["Loading..."] }]
+    });
+    populateFromState(loadedState);
+  });
 
-// In production, this would be:
-// fetch('earth/state.json').then(r => r.json()).then(populateFromState);
-
-window.addEventListener('resize', () => drawGrowthChart(STATE.history));
+window.addEventListener('resize', () => {
+  if (loadedState) drawGrowthChart(loadedState.history);
+});
 
 console.log(`
 ╔══════════════════════════════════════════╗
