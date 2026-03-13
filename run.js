@@ -22,66 +22,13 @@ const PATHS = {
   log       : path.join(ROOT, 'run.log'),
 };
 
-// Fallback model list if the live ranking fetch fails
-const FALLBACK_MODELS = [
-  'anthropic/claude-opus-4-5',
-  'anthropic/claude-sonnet-4-5',
-  'google/gemini-2.5-pro-preview',
-  'openai/gpt-4.1',
-  'anthropic/claude-3-7-sonnet',
+// Cheap models — tried in order. GPT 4o mini first for cost efficiency.
+const MODEL_CANDIDATES = [
+  'openai/gpt-4o-mini',
+  'anthropic/claude-3.5-haiku',
+  'google/gemini-2.0-flash',
+  'anthropic/claude-3.5-sonnet',
 ];
-
-const CODING_PROVIDERS   = ['anthropic', 'openai', 'google', 'deepseek', 'x-ai'];
-const MIN_CONTEXT_TOKENS = 32_000;
-const MAX_CANDIDATES     = 5;
-
-// Score = log2(context_M) + log10(price_per_mtok + ε)
-// Balances large context window vs. premium (expensive = flagship) pricing.
-function scoreModel(m) {
-  const ctx   = Math.log2(Math.max(m.context_length ?? 1, 1) / 1_000);
-  const price = Math.log10(parseFloat(m.pricing?.completion ?? '0') * 1_000_000 + 1e-6) + 6;
-  return ctx + price;
-}
-
-function fetchBestCodingModels(apiKey) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'openrouter.ai',
-      path    : '/api/v1/models',
-      method  : 'GET',
-      headers : {
-        'Authorization' : `Bearer ${apiKey}`,
-        'HTTP-Referer'  : 'https://github.com/self-evolving-earth',
-        'X-Title'       : 'THE EARTH - Self-Evolving Simulation',
-      },
-    };
-    const req = https.request(options, res => {
-      let raw = '';
-      res.on('data', c => { raw += c; });
-      res.on('end', () => {
-        try {
-          const { data: models } = JSON.parse(raw);
-          const ranked = models
-            .filter(m => {
-              const provider = m.id.split('/')[0];
-              if (!CODING_PROVIDERS.includes(provider)) return false;
-              if ((m.context_length ?? 0) < MIN_CONTEXT_TOKENS) return false;
-              if (m.id.endsWith(':free')) return false;
-              if (parseFloat(m.pricing?.completion ?? '0') === 0) return false;
-              return true;
-            })
-            .sort((a, b) => scoreModel(b) - scoreModel(a))
-            .slice(0, MAX_CANDIDATES)
-            .map(m => m.id);
-          if (ranked.length === 0) return reject(new Error('No suitable models found'));
-          resolve(ranked);
-        } catch (e) { reject(new Error(`Models parse fail: ${e.message}`)); }
-      });
-    });
-    req.on('error', reject);
-    req.end();
-  });
-}
 
 const MAX_TOKENS = 12000;
 
@@ -164,16 +111,9 @@ function apiRequest(model, userContent, apiKey) {
 }
 
 async function callArchitect(content, apiKey) {
-  let candidates;
-  try {
-    candidates = await fetchBestCodingModels(apiKey);
-    log(`🏆 Live model ranking fetched: ${candidates.join(', ')}`);
-  } catch (e) {
-    log(`⚠  Could not fetch live model list (${e.message}), using fallback`);
-    candidates = FALLBACK_MODELS;
-  }
+  log(`🤖 Model candidates: ${MODEL_CANDIDATES.join(', ')}`);
 
-  for (const model of candidates) {
+  for (const model of MODEL_CANDIDATES) {
     log(`🤖 Trying: ${model}`);
     try {
       const { text } = await apiRequest(model, content, apiKey);
