@@ -1,9 +1,9 @@
 {
-  "day": 1,
-  "date": "2026-03-13",
-  "complexityLevel": 1,
-  "totalFeatures": 8,
-  "linesOfCode": 285,
+  "day": 2,
+  "date": "2026-03-14",
+  "complexityLevel": 2,
+  "totalFeatures": 14,
+  "linesOfCode": 420,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -11,26 +11,50 @@
     "Mountain ranges (Rockies, Andes, Himalayas, Alps)",
     "Deserts (Sahara, Arabian, Australian)",
     "Polar ice cap (Antarctica)",
-    "800 procedural stars",
-    "Axial tilt (23.5°)"
+    "1000 procedural stars",
+    "Axial tilt (23.5°)",
+    "The Moon (0.27x Earth size)",
+    "Lunar orbit mechanics",
+    "Tidal locking (Moon always shows same face)",
+    "Moon phase calculation",
+    "Atmospheric rim glow shader",
+    "Improved ocean specular highlights"
   ],
   "lighting": {
     "ambient": true,
     "directional": true,
-    "fillLight": true
+    "fillLight": true,
+    "atmosphericGlow": true
   },
   "earthRotation": {
-    "speed": 0.001,
+    "speed": 0.002,
     "axis": "Y"
+  },
+  "moonOrbit": {
+    "distance": 3.5,
+    "speed": 0.0003,
+    "tidallyLocked": true
   },
   "camera": {
     "drift": true,
     "fov": 45,
-    "distance": 3
+    "distance": 5
   },
   "phase": "Genesis",
-  "lastUpdate": "2026-03-13T00:00:00Z",
+  "lastUpdate": "2026-03-14T00:00:00Z",
   "changelog": [
+    {
+      "day": 2,
+      "changes": [
+        "Added the Moon with procedural crater texture",
+        "Implemented lunar orbital mechanics",
+        "Added tidal locking behavior",
+        "Created moon phase calculator and display",
+        "Added atmospheric rim glow shader",
+        "Improved ocean specular highlights",
+        "Increased star count to 1000"
+      ]
+    },
     {
       "day": 1,
       "changes": [
@@ -44,9 +68,9 @@
     }
   ],
   "earth": {
-    "day": 1,
-    "complexity_level": 1,
+    "day": 2,
+    "complexity_level": 2,
     "model_used": "anthropic/claude-opus-4-5",
-    "last_updated": "2026-03-13T13:34:12.602Z"
+    "last_updated": "2026-03-13T19:13:09.744Z"
   }
 }

@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE EARTH — Day 1</title>
+    <title>THE EARTH — Day 2</title>
     <style>
-        /* Lo, the styles of the void */
+        /* Lo, the styles of the void remain consistent */
         * {
             margin: 0;
             padding: 0;
@@ -60,11 +60,21 @@
             border-color: rgba(100, 150, 255, 0.8);
             background: rgba(100, 150, 255, 0.1);
         }
+        #moon-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            z-index: 100;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
     <div id="title">THE EARTH</div>
-    <div id="info">Day 1 of Creation — The Sphere Emerges</div>
+    <div id="info">Day 2 of Creation — The Moon Arrives</div>
+    <div id="moon-info">Moon Phase: <span id="moon-phase">Waxing</span></div>
     <div id="nav">
         <a href="index.html">⬅ Observatory</a>
         <a href="window.html">Window</a>
@@ -75,39 +85,47 @@
 
     <script>
         // ═══════════════════════════════════════════════════════════════
-        // THE FIRST DAY — And there was a sphere, and it was good
+        // THE SECOND DAY — And the Moon was placed in the sky
         // ═══════════════════════════════════════════════════════════════
 
-        // The Holy Trinity of Three.js
+        // The Holy Trinity of Three.js (plus new celestial friends)
         let scene, camera, renderer;
-        let earth, stars;
+        let earth, moon, stars, atmosphere;
+        let earthGroup; // A group to hold Earth and its atmosphere
+        let sunLight;
         let time = 0;
 
+        // Orbital constants (the cosmos has rules)
+        const MOON_DISTANCE = 3.5; // Scaled for visual appeal, not accuracy
+        const MOON_ORBITAL_SPEED = 0.0003; // The Moon is patient
+        const EARTH_ROTATION_SPEED = 0.002; // Earth spins faster than Moon orbits
+
         // ═══════════════════════════════════════════════════════════════
-        // INITIALIZATION — Let there be WebGL
+        // INITIALIZATION — Let there be WebGL (again, but better)
         // ═══════════════════════════════════════════════════════════════
         function init() {
-            // The Scene: A vast emptiness awaiting creation
+            // The Scene: Now with 100% more Moon
             scene = new THREE.Scene();
 
-            // The Camera: The eye through which mortals observe
+            // The Camera: Still the eye through which mortals observe
             camera = new THREE.PerspectiveCamera(
-                45, // Field of view (degrees of divine perception)
+                45,
                 window.innerWidth / window.innerHeight,
                 0.1,
                 1000
             );
-            camera.position.z = 3;
+            camera.position.z = 5;
 
             // The Renderer: That which makes the invisible visible
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.body.appendChild(renderer.domElement);
 
-            // Create the heavens and the earth
+            // Create the heavens and the earth (and now the moon)
             createStars();
             createEarth();
+            createMoon();
             createLights();
 
             // Handle the resizing of the divine viewport
@@ -118,31 +136,38 @@
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // THE STARS — 800 points of ancient light
+        // THE STARS — 1000 points of ancient light (upgraded!)
         // ═══════════════════════════════════════════════════════════════
         function createStars() {
             const starGeometry = new THREE.BufferGeometry();
-            const starCount = 800;
+            const starCount = 1000; // More stars for Day 2
             const positions = new Float32Array(starCount * 3);
+            const sizes = new Float32Array(starCount);
 
-            // Scatter stars across the firmament
-            for (let i = 0; i < starCount * 3; i += 3) {
-                // Spherical distribution — the universe is round-ish
+            // Scatter stars across the firmament with varying sizes
+            for (let i = 0; i < starCount; i++) {
+                const i3 = i * 3;
                 const radius = 50 + Math.random() * 50;
                 const theta = Math.random() * Math.PI * 2;
                 const phi = Math.acos(2 * Math.random() - 1);
 
-                positions[i] = radius * Math.sin(phi) * Math.cos(theta);
-                positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
-                positions[i + 2] = radius * Math.cos(phi);
+                positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i3 + 2] = radius * Math.cos(phi);
+
+                // Some stars are bigger (the famous ones, probably)
+                sizes[i] = Math.random() * 0.5 + 0.1;
             }
 
             starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
             const starMaterial = new THREE.PointsMaterial({
                 color: 0xffffff,
-                size: 0.1,
-                sizeAttenuation: true
+                size: 0.15,
+                sizeAttenuation: true,
+                transparent: true,
+                opacity: 0.9
             });
 
             stars = new THREE.Points(starGeometry, starMaterial);
@@ -150,34 +175,48 @@
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // THE EARTH — A sphere of 64x64 segments (humble beginnings)
+        // THE EARTH — Now with atmospheric glow!
         // ═══════════════════════════════════════════════════════════════
         function createEarth() {
+            // Create a group to hold Earth and its atmosphere
+            earthGroup = new THREE.Group();
+
             // Generate the sacred texture upon a canvas
             const textureCanvas = document.createElement('canvas');
             textureCanvas.width = 1024;
             textureCanvas.height = 512;
             const ctx = textureCanvas.getContext('2d');
 
-            // The Oceans: Deep blue, as tradition demands
-            ctx.fillStyle = '#1a4d7c';
-            ctx.fillRect(0, 0, 1024, 512);
-
-            // Add ocean depth variation (the abyss is darker)
-            const oceanGradient = ctx.createRadialGradient(512, 256, 0, 512, 256, 400);
-            oceanGradient.addColorStop(0, 'rgba(30, 90, 150, 0.3)');
-            oceanGradient.addColorStop(1, 'rgba(10, 40, 80, 0.5)');
+            // The Oceans: Deep blue, with more depth variation
+            const oceanGradient = ctx.createLinearGradient(0, 0, 1024, 512);
+            oceanGradient.addColorStop(0, '#1a4d7c');
+            oceanGradient.addColorStop(0.5, '#1e5a8c');
+            oceanGradient.addColorStop(1, '#164570');
             ctx.fillStyle = oceanGradient;
             ctx.fillRect(0, 0, 1024, 512);
 
+            // Add subtle ocean texture (the depths ripple)
+            for (let i = 0; i < 50; i++) {
+                ctx.fillStyle = `rgba(20, 60, 100, ${Math.random() * 0.1})`;
+                ctx.beginPath();
+                ctx.ellipse(
+                    Math.random() * 1024,
+                    Math.random() * 512,
+                    Math.random() * 100 + 20,
+                    Math.random() * 50 + 10,
+                    Math.random() * Math.PI,
+                    0, Math.PI * 2
+                );
+                ctx.fill();
+            }
+
             // ═══════════════════════════════════════════════════════════
-            // THE CONTINENTS — Drawn by hand (well, by code)
-            // Cartographers may weep, but the Earth cares not
+            // THE CONTINENTS — Same as Day 1, but greener
             // ═══════════════════════════════════════════════════════════
 
-            ctx.fillStyle = '#3d7c3d'; // The green of living lands
+            ctx.fillStyle = '#3d8c3d'; // Slightly brighter green
 
-            // NORTH AMERICA — Land of the free, home of the polygons
+            // NORTH AMERICA
             ctx.beginPath();
             ctx.moveTo(120, 120);
             ctx.lineTo(180, 100);
@@ -194,7 +233,7 @@
             ctx.closePath();
             ctx.fill();
 
-            // SOUTH AMERICA — The continent that looks like it's waving
+            // SOUTH AMERICA
             ctx.beginPath();
             ctx.moveTo(220, 260);
             ctx.lineTo(260, 270);
@@ -208,7 +247,7 @@
             ctx.closePath();
             ctx.fill();
 
-            // EUROPE — Small but historically loud
+            // EUROPE
             ctx.beginPath();
             ctx.moveTo(480, 100);
             ctx.lineTo(540, 95);
@@ -220,7 +259,7 @@
             ctx.closePath();
             ctx.fill();
 
-            // AFRICA — The motherland, drawn with respect
+            // AFRICA
             ctx.beginPath();
             ctx.moveTo(480, 180);
             ctx.lineTo(540, 170);
@@ -235,7 +274,7 @@
             ctx.closePath();
             ctx.fill();
 
-            // ASIA — The largest, the most complex
+            // ASIA
             ctx.beginPath();
             ctx.moveTo(560, 80);
             ctx.lineTo(700, 70);
@@ -251,7 +290,7 @@
             ctx.closePath();
             ctx.fill();
 
-            // INDIA — The subcontinent triangle
+            // INDIA
             ctx.beginPath();
             ctx.moveTo(640, 220);
             ctx.lineTo(680, 220);
@@ -261,7 +300,7 @@
             ctx.closePath();
             ctx.fill();
 
-            // AUSTRALIA — The land down under
+            // AUSTRALIA
             ctx.beginPath();
             ctx.moveTo(760, 320);
             ctx.lineTo(840, 310);
@@ -272,7 +311,7 @@
             ctx.closePath();
             ctx.fill();
 
-            // ANTARCTICA — The frozen south (white, as it should be)
+            // ANTARCTICA
             ctx.fillStyle = '#e8e8e8';
             ctx.beginPath();
             ctx.moveTo(0, 470);
@@ -282,7 +321,7 @@
             ctx.closePath();
             ctx.fill();
 
-            // GREENLAND — Because someone always forgets Greenland
+            // GREENLAND
             ctx.fillStyle = '#a8d4a8';
             ctx.beginPath();
             ctx.moveTo(320, 60);
@@ -293,28 +332,21 @@
             ctx.closePath();
             ctx.fill();
 
-            // Add some mountain ranges (brown patches of majesty)
+            // Mountain ranges
             ctx.fillStyle = '#6b5344';
-            // Rockies
             drawMountainRange(ctx, 160, 160, 30, 40);
-            // Andes
             drawMountainRange(ctx, 230, 320, 15, 80);
-            // Himalayas
             drawMountainRange(ctx, 660, 190, 50, 15);
-            // Alps
             drawMountainRange(ctx, 510, 130, 20, 8);
 
-            // Add deserts (sandy patches of dryness)
+            // Deserts
             ctx.fillStyle = '#c4a35a';
-            // Sahara
             ctx.beginPath();
             ctx.ellipse(520, 210, 40, 25, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Arabian
             ctx.beginPath();
             ctx.ellipse(590, 210, 20, 15, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Australian Outback
             ctx.beginPath();
             ctx.ellipse(810, 350, 25, 20, 0, 0, Math.PI * 2);
             ctx.fill();
@@ -326,23 +358,61 @@
             // The Geometry: 64 segments of spherical perfection
             const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
 
-            // The Material: Phong for that classic 3D look
+            // The Material: Now with improved specular for ocean shine
             const earthMaterial = new THREE.MeshPhongMaterial({
                 map: earthTexture,
-                shininess: 5,
-                specular: new THREE.Color(0x333333)
+                shininess: 15,
+                specular: new THREE.Color(0x444466)
             });
 
-            // THE EARTH IS BORN
+            // THE EARTH IS BORN (again, but better)
             earth = new THREE.Mesh(earthGeometry, earthMaterial);
+            earthGroup.add(earth);
 
-            // Apply the sacred axial tilt — 23.5 degrees, as the cosmos intended
-            earth.rotation.z = 23.5 * Math.PI / 180;
+            // ═══════════════════════════════════════════════════════════
+            // THE ATMOSPHERE — A glowing halo of life
+            // ═══════════════════════════════════════════════════════════
+            const atmosphereGeometry = new THREE.SphereGeometry(1.02, 64, 64);
+            const atmosphereMaterial = new THREE.ShaderMaterial({
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    void main() {
+                        // Calculate rim lighting (atmosphere glow)
+                        vec3 viewDirection = normalize(-vPosition);
+                        float rim = 1.0 - max(0.0, dot(viewDirection, vNormal));
+                        rim = pow(rim, 3.0);
+                        
+                        // Blue atmospheric glow
+                        vec3 atmosphereColor = vec3(0.3, 0.6, 1.0);
+                        gl_FragColor = vec4(atmosphereColor, rim * 0.6);
+                    }
+                `,
+                transparent: true,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
 
-            scene.add(earth);
+            atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+            earthGroup.add(atmosphere);
+
+            // Apply the sacred axial tilt
+            earthGroup.rotation.z = 23.5 * Math.PI / 180;
+
+            scene.add(earthGroup);
         }
 
-        // Helper function: Draw mountain ranges (the bumpy bits)
+        // Helper function: Draw mountain ranges
         function drawMountainRange(ctx, x, y, width, height) {
             ctx.beginPath();
             ctx.ellipse(x, y, width, height, 0, 0, Math.PI * 2);
@@ -350,44 +420,139 @@
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // THE LIGHTS — Let there be illumination
+        // THE MOON — Earth's faithful companion
+        // ═══════════════════════════════════════════════════════════════
+        function createMoon() {
+            // Create the lunar texture (procedurally, with craters!)
+            const moonCanvas = document.createElement('canvas');
+            moonCanvas.width = 512;
+            moonCanvas.height = 256;
+            const ctx = moonCanvas.getContext('2d');
+
+            // Base lunar color (that familiar gray)
+            ctx.fillStyle = '#a0a0a0';
+            ctx.fillRect(0, 0, 512, 256);
+
+            // Add surface variation (the maria, sort of)
+            for (let i = 0; i < 20; i++) {
+                ctx.fillStyle = `rgba(80, 80, 85, ${Math.random() * 0.3 + 0.1})`;
+                ctx.beginPath();
+                ctx.ellipse(
+                    Math.random() * 512,
+                    Math.random() * 256,
+                    Math.random() * 60 + 20,
+                    Math.random() * 40 + 15,
+                    Math.random() * Math.PI,
+                    0, Math.PI * 2
+                );
+                ctx.fill();
+            }
+
+            // Add craters (the Moon's acne scars)
+            for (let i = 0; i < 100; i++) {
+                const x = Math.random() * 512;
+                const y = Math.random() * 256;
+                const radius = Math.random() * 8 + 2;
+
+                // Crater shadow
+                ctx.fillStyle = 'rgba(60, 60, 65, 0.4)';
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Crater rim highlight
+                ctx.fillStyle = 'rgba(180, 180, 180, 0.3)';
+                ctx.beginPath();
+                ctx.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            const moonTexture = new THREE.CanvasTexture(moonCanvas);
+
+            // The Moon: 0.27 times the size of Earth (roughly accurate)
+            const moonGeometry = new THREE.SphereGeometry(0.27, 32, 32);
+            const moonMaterial = new THREE.MeshPhongMaterial({
+                map: moonTexture,
+                shininess: 2,
+                specular: new THREE.Color(0x111111)
+            });
+
+            moon = new THREE.Mesh(moonGeometry, moonMaterial);
+            moon.position.x = MOON_DISTANCE;
+
+            scene.add(moon);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // THE LIGHTS — Now with better sun positioning
         // ═══════════════════════════════════════════════════════════════
         function createLights() {
             // Ambient light: The gentle glow of the cosmos
-            const ambientLight = new THREE.AmbientLight(0x333333);
+            const ambientLight = new THREE.AmbientLight(0x222233);
             scene.add(ambientLight);
 
             // The Sun: A directional light from the heavens
-            const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            sunLight.position.set(5, 2, 3);
+            sunLight = new THREE.DirectionalLight(0xffffff, 1.3);
+            sunLight.position.set(5, 1, 3);
             scene.add(sunLight);
 
-            // A subtle fill light from the opposite side (the moon's contribution)
-            const fillLight = new THREE.DirectionalLight(0x4444ff, 0.1);
+            // A subtle fill light (starlight contribution)
+            const fillLight = new THREE.DirectionalLight(0x334455, 0.15);
             fillLight.position.set(-5, -2, -3);
             scene.add(fillLight);
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // THE ANIMATION LOOP — Eternal rotation
+        // THE ANIMATION LOOP — Now with orbital mechanics!
         // ═══════════════════════════════════════════════════════════════
         function animate() {
             requestAnimationFrame(animate);
 
-            time += 0.001;
+            time += 0.01;
 
-            // Rotate the Earth (0.001 radians per frame — dignified)
-            earth.rotation.y += 0.001;
+            // Rotate the Earth
+            earth.rotation.y += EARTH_ROTATION_SPEED;
+
+            // Orbit the Moon around the Earth
+            const moonAngle = time * MOON_ORBITAL_SPEED * 100;
+            moon.position.x = Math.cos(moonAngle) * MOON_DISTANCE;
+            moon.position.z = Math.sin(moonAngle) * MOON_DISTANCE;
+            moon.position.y = Math.sin(moonAngle * 0.5) * 0.3; // Slight orbital inclination
+
+            // The Moon is tidally locked (always shows same face)
+            moon.rotation.y = moonAngle + Math.PI;
+
+            // Update moon phase display
+            updateMoonPhaseDisplay(moonAngle);
 
             // Gentle camera drift for that cinematic feel
-            camera.position.x = Math.sin(time * 0.5) * 0.2;
-            camera.position.y = Math.cos(time * 0.3) * 0.1;
+            camera.position.x = Math.sin(time * 0.05) * 0.3;
+            camera.position.y = Math.cos(time * 0.03) * 0.2;
             camera.lookAt(0, 0, 0);
 
-            // Very slow star rotation (the universe moves, but barely)
-            stars.rotation.y += 0.0001;
+            // Very slow star rotation
+            stars.rotation.y += 0.00005;
 
             renderer.render(scene, camera);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // MOON PHASE CALCULATOR — Because details matter
+        // ═══════════════════════════════════════════════════════════════
+        function updateMoonPhaseDisplay(angle) {
+            const normalizedAngle = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            const phaseNames = [
+                'New Moon',
+                'Waxing Crescent',
+                'First Quarter',
+                'Waxing Gibbous',
+                'Full Moon',
+                'Waning Gibbous',
+                'Last Quarter',
+                'Waning Crescent'
+            ];
+            const phaseIndex = Math.floor((normalizedAngle / (Math.PI * 2)) * 8) % 8;
+            document.getElementById('moon-phase').textContent = phaseNames[phaseIndex];
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -405,9 +570,10 @@
         init();
 
         // Console message for any mortals who dare inspect
-        console.log('🌍 THE EARTH — Day 1 of Creation');
-        console.log('The sphere emerges from the void.');
-        console.log('Complexity Level: 1 / 100');
+        console.log('🌍 THE EARTH — Day 2 of Creation');
+        console.log('🌙 The Moon arrives to keep the Earth company.');
+        console.log('Complexity Level: 2 / 100');
+        console.log('New: Atmospheric glow, lunar orbit, moon phases');
     </script>
 </body>
 </html>

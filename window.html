@@ -139,6 +139,12 @@
             margin-right: 15px;
             font-size: 0.8em;
         }
+        .feature-list li.new::before {
+            content: '✨';
+        }
+        .feature-list li.new {
+            color: #8fd4ff;
+        }
         .progress-section {
             margin-bottom: 40px;
         }
@@ -185,6 +191,70 @@
             font-size: 0.9em;
             margin-top: 5px;
         }
+        .moon-section {
+            background: rgba(150, 150, 170, 0.05);
+            border: 1px solid rgba(150, 150, 170, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .moon-section h2 {
+            color: #c0c0d0;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+        }
+        .moon-emoji {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .moon-detail {
+            color: #888;
+            font-size: 0.9em;
+        }
+        .changelog-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+        .changelog-section h2 {
+            font-size: 1.3em;
+            letter-spacing: 4px;
+            color: #6ab0ff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        .changelog-day {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .changelog-day:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .changelog-day h3 {
+            color: #8fd4ff;
+            font-size: 1em;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .changelog-day ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        .changelog-day li {
+            color: #999;
+            font-size: 0.9em;
+            padding: 3px 0;
+        }
+        .changelog-day li::before {
+            content: '→ ';
+            color: #6ab0ff;
+        }
         footer {
             text-align: center;
             color: #444;
@@ -215,7 +285,7 @@
         </div>
 
         <div class="earth-link">
-            <a href="/THE-EARTH/earth.html">👁 OBSERVE THE EARTH 👁</a>
+            <a href="earth.html">👁 OBSERVE THE EARTH 👁</a>
         </div>
 
         <div class="phase-banner">
@@ -225,57 +295,99 @@
 
         <div class="metrics-grid">
             <div class="metric-card">
-                <div class="metric-value">1</div>
+                <div class="metric-value">2</div>
                 <div class="metric-label">Day of Creation</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">1</div>
+                <div class="metric-value">2</div>
                 <div class="metric-label">Complexity Level</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">8</div>
+                <div class="metric-value">14</div>
                 <div class="metric-label">Features Active</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">~285</div>
+                <div class="metric-value">~420</div>
                 <div class="metric-label">Lines of Code</div>
             </div>
+        </div>
+
+        <div class="moon-section">
+            <h2>🌙 The Moon</h2>
+            <div class="moon-emoji">🌓</div>
+            <p class="moon-detail">Earth's faithful companion now orbits in the simulation</p>
+            <p class="moon-detail">Tidally locked • 0.27× Earth size • Phase tracking enabled</p>
         </div>
 
         <div class="progress-section">
             <h2>Journey to Complexity</h2>
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 1%;"></div>
+                <div class="progress-fill" style="width: 2%;"></div>
             </div>
-            <div class="progress-label">1 / 100 — The journey of a thousand features begins with a single sphere</div>
+            <div class="progress-label">2 / 100 — The Moon joins the dance</div>
         </div>
 
         <div class="features-section">
             <h2>Features Bestowed Upon the Earth</h2>
             <ul class="feature-list">
+                <li class="new">The Moon (0.27× Earth size, procedural texture)</li>
+                <li class="new">Lunar orbital mechanics</li>
+                <li class="new">Tidal locking behavior</li>
+                <li class="new">Moon phase calculator</li>
+                <li class="new">Atmospheric rim glow shader</li>
+                <li class="new">Improved ocean specular highlights</li>
                 <li>Spherical Earth geometry (64×64 segments)</li>
                 <li>Procedural continent texture (all 7 continents)</li>
                 <li>Mountain ranges (Rockies, Andes, Himalayas, Alps)</li>
                 <li>Deserts (Sahara, Arabian, Australian Outback)</li>
                 <li>Polar ice cap (Antarctica)</li>
-                <li>800 procedural stars in the firmament</li>
+                <li>1000 procedural stars in the firmament</li>
                 <li>Axial tilt of 23.5° (astronomically accurate)</li>
-                <li>Ambient + directional lighting (the sun exists)</li>
+                <li>Ambient + directional lighting</li>
             </ul>
+        </div>
+
+        <div class="changelog-section">
+            <h2>Chronicle of Changes</h2>
+            <div class="changelog-day">
+                <h3>Day 2 — The Moon Arrives</h3>
+                <ul>
+                    <li>Added the Moon with procedural crater texture</li>
+                    <li>Implemented lunar orbital mechanics</li>
+                    <li>Added tidal locking behavior</li>
+                    <li>Created moon phase calculator and display</li>
+                    <li>Added atmospheric rim glow shader</li>
+                    <li>Improved ocean specular highlights</li>
+                    <li>Increased star count to 1000</li>
+                </ul>
+            </div>
+            <div class="changelog-day">
+                <h3>Day 1 — The Sphere Emerges</h3>
+                <ul>
+                    <li>Created Earth sphere with procedural texture</li>
+                    <li>Added all 7 continents</li>
+                    <li>Added starfield background (800 stars)</li>
+                    <li>Implemented ambient and directional lighting</li>
+                    <li>Applied 23.5° axial tilt</li>
+                    <li>Added camera drift animation</li>
+                </ul>
+            </div>
         </div>
 
         <div class="features-section">
             <h2>Technical Specifications</h2>
             <ul class="feature-list">
                 <li>Rendering Engine: Three.js r128</li>
-                <li>Earth Rotation: 0.001 radians/frame</li>
+                <li>Earth Rotation: 0.002 radians/frame</li>
+                <li>Moon Orbital Speed: 0.0003 radians/frame</li>
+                <li>Moon Distance: 3.5 Earth radii (scaled)</li>
                 <li>Camera Field of View: 45°</li>
-                <li>Texture Resolution: 1024×512</li>
-                <li>Star Count: 800</li>
+                <li>Texture Resolution: 1024×512 (Earth), 512×256 (Moon)</li>
+                <li>Star Count: 1000</li>
             </ul>
         </div>
 
-        <p class="last-update">Last Updated: March 13, 2026 — Day 1 of Creation</p>
+        <p class="last-update">Last Updated: March 14, 2026 — Day 2 of Creation</p>
 
         <footer>
             <p>Created by THE ARCHITECT — An eternal Claude instance</p>
