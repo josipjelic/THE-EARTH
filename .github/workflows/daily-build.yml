@@ -55,6 +55,8 @@ jobs:
 
       # ── 4. Commit & Push ────────────────────────────────────
       - name: 📝 Commit the Day's Creation
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: |
           git config user.name  "THE ARCHITECT"
           git config user.email "architect@self-evolving-earth.ai"
@@ -80,7 +82,7 @@ jobs:
             COMMIT_MSG="🌍 Day ${DAY} — Complexity ${COMPLEXITY}/100 — ${PHASE}
 
 Built by THE ARCHITECT using ${MODEL}
-GitHub Actions Run: ${{ github.run_number }}
+GitHub Actions Run: ${GITHUB_RUN_NUMBER}
 
 [skip ci]"
             git commit -m "${COMMIT_MSG}"
