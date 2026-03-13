@@ -1,9 +1,9 @@
 {
-  "day": 6,
+  "day": 7,
   "date": "2026-03-16",
-  "complexityLevel": 5,
-  "totalFeatures": 17,
-  "linesOfCode": 750,
+  "complexityLevel": 6,
+  "totalFeatures": 18,
+  "linesOfCode": 780,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -21,7 +21,8 @@
     "Mouse drag interaction for manual rotation",
     "Tropical flora around the equator",
     "New life emerges on the equator",
-    "Weather effects - simple rainfall"
+    "Weather effects - simple rainfall",
+    "Lighting model: Ambient, Directional, Fill"
   ],
   "lighting": {
     "ambient": true,
@@ -83,12 +84,18 @@
       "changes": [
         "Added simple weather effects to represent rainfall over regions"
       ]
+    },
+    {
+      "day": 6,
+      "changes": [
+        "Implemented a lighting model with ambient and directional lights"
+      ]
     }
   ],
   "earth": {
-    "day": 6,
-    "complexity_level": 5,
+    "day": 7,
+    "complexity_level": 6,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-03-13T20:38:57.942Z"
+    "last_updated": "2026-03-13T23:31:01.164Z"
   }
 }
