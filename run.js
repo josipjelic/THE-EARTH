@@ -1,279 +1,211 @@
 #!/usr/bin/env node
 /**
- * ╔═══════════════════════════════════════════════════════╗
- * ║              THE DAILY RUNNER                         ║
- * ║    "Each dawn, the Architect awakens and builds."     ║
- * ║                                                       ║
- * ║  Run this with: node run.js                           ║
- * ║  Schedule with: cron / Task Scheduler / Cursor        ║
- * ╚═══════════════════════════════════════════════════════╝
- *
- * What this does:
- * 1. Reads the GOD PROMPT
- * 2. Reads current Earth state (state.json + all HTML files)
- * 3. Finds the latest available Anthropic model
- * 4. Calls Claude with full context
- * 5. Parses the response for file changes
- * 6. Applies file changes
- * 7. Commits a log entry
- * 8. Optionally: opens the WINDOW in browser
+ * THE DAILY RUNNER — Self-Evolving Earth
+ * Runs via GitHub Actions at 8AM UTC every day.
+ * Can also be run locally: node run.js
  */
 
-const fs = require('fs');
-const path = require('path');
+'use strict';
+
+const fs    = require('fs');
+const path  = require('path');
 const https = require('https');
 
-// ── Configuration ──────────────────────────────────────────
-const CONFIG = {
-  // Anthropic API key — set in environment or .env file
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
+const ROOT = __dirname;
 
-  // Always use the latest model — update this when new models release
-  // The runner itself will try to determine the latest via a quick API call
-  defaultModel: 'claude-opus-4-5',
-
-  // File paths (relative to this script's location)
-  paths: {
-    godPrompt:  './GOD_PROMPT.md',
-    state:      './earth/state.json',
-    earth:      './earth/earth.html',
-    window:     './window/index.html',
-    bible:      './THE-BIBLE.md',
-    log:        './run.log',
-  },
-
-  // Max tokens for the daily build response
-  maxTokens: 8192,
-
-  // Open browser after build?
-  openBrowser: false,
+const PATHS = {
+  godPrompt : path.join(ROOT, 'GOD_PROMPT.md'),
+  state     : path.join(ROOT, 'earth', 'state.json'),
+  earth     : path.join(ROOT, 'earth', 'earth.html'),
+  window    : path.join(ROOT, 'window', 'index.html'),
+  bible     : path.join(ROOT, 'THE-BIBLE.md'),
+  log       : path.join(ROOT, 'run.log'),
 };
 
-// ── Helpers ────────────────────────────────────────────────
+const MODEL_CANDIDATES = [
+  'claude-opus-4-5',
+  'claude-sonnet-4-5',
+  'claude-haiku-4-5-20251001',
+];
 
+const MAX_TOKENS = 12000;
+
+// ── Logging ────────────────────────────────────────────────
 function log(msg) {
-  const timestamp = new Date().toISOString();
-  const line = `[${timestamp}] ${msg}`;
+  const ts   = new Date().toISOString();
+  const line = `[${ts}] ${msg}`;
   console.log(line);
-  fs.appendFileSync(CONFIG.paths.log, line + '\n');
+  try { fs.appendFileSync(PATHS.log, line + '\n'); } catch (_) {}
 }
 
-function readFile(filePath) {
-  try {
-    return fs.readFileSync(filePath, 'utf8');
-  } catch (e) {
-    log(`⚠️  Could not read ${filePath}: ${e.message}`);
-    return '';
-  }
+function divider(c = '─') { log(c.repeat(60)); }
+
+// ── File I/O ───────────────────────────────────────────────
+function read(filePath, fallback = '') {
+  try { return fs.readFileSync(filePath, 'utf8'); }
+  catch (e) { log(`⚠  Cannot read ${path.relative(ROOT, filePath)}: ${e.message}`); return fallback; }
 }
 
-function writeFile(filePath, content) {
+function write(filePath, content) {
   try {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     fs.writeFileSync(filePath, content, 'utf8');
-    log(`✅ Written: ${filePath}`);
+    log(`✅ Written: ${path.relative(ROOT, filePath)}`);
+    return true;
   } catch (e) {
-    log(`❌ Failed to write ${filePath}: ${e.message}`);
+    log(`❌ Write failed ${path.relative(ROOT, filePath)}: ${e.message}`);
+    return false;
   }
 }
 
-// ── Parse THE ARCHITECT's response ────────────────────────
-/**
- * The GOD PROMPT instructs Claude to output file changes in this format:
- * ===FILE_START: path/to/file.ext===
- * [content]
- * ===FILE_END===
- */
-function parseFileChanges(response) {
-  const changes = [];
-  const regex = /===FILE_START: (.+?)===\n([\s\S]*?)\n===FILE_END===/g;
-  let match;
-  while ((match = regex.exec(response)) !== null) {
-    changes.push({
-      path: match[1].trim(),
-      content: match[2]
-    });
+// ── Parse ===FILE_START/END=== blocks ─────────────────────
+function parseFileBlocks(text) {
+  const blocks = [];
+  const re = /===FILE_START:\s*(.+?)===\n([\s\S]*?)\n===FILE_END===/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    blocks.push({ relativePath: m[1].trim(), content: m[2] });
   }
-  return changes;
+  return blocks;
 }
 
-// ── Anthropic API Call ─────────────────────────────────────
-function callClaude(model, messages, maxTokens) {
+// ── Anthropic API ──────────────────────────────────────────
+function apiRequest(model, userContent, apiKey) {
   return new Promise((resolve, reject) => {
-    const body = JSON.stringify({
-      model,
-      max_tokens: maxTokens,
-      messages,
-    });
-
+    const body = JSON.stringify({ model, max_tokens: MAX_TOKENS, messages: [{ role: 'user', content: userContent }] });
     const options = {
-      hostname: 'api.anthropic.com',
-      path: '/v1/messages',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': CONFIG.apiKey,
-        'anthropic-version': '2023-06-01',
-        'Content-Length': Buffer.byteLength(body),
-      },
+      hostname: 'api.anthropic.com', path: '/v1/messages', method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'Content-Length': Buffer.byteLength(body) },
     };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
+    const req = https.request(options, res => {
+      let raw = '';
+      res.on('data', c => { raw += c; });
       res.on('end', () => {
         try {
-          const parsed = JSON.parse(data);
-          if (parsed.error) {
-            reject(new Error(`API Error: ${parsed.error.message}`));
-          } else {
-            resolve(parsed);
-          }
-        } catch (e) {
-          reject(new Error(`Parse error: ${e.message}\nRaw: ${data.slice(0, 500)}`));
-        }
+          const parsed = JSON.parse(raw);
+          if (parsed.error) return reject(new Error(`API: ${parsed.error.message}`));
+          resolve(parsed);
+        } catch (e) { reject(new Error(`Parse fail. Status ${res.statusCode}. Body: ${raw.slice(0,400)}`)); }
       });
     });
-
     req.on('error', reject);
     req.write(body);
     req.end();
   });
 }
 
-// ── Get Latest Model ───────────────────────────────────────
-async function getLatestModel() {
-  // Model priority list — update as Anthropic releases new models
-  // The runner tries the first one; falls back down the list
-  const modelCandidates = [
-    'claude-opus-4-5',
-    'claude-sonnet-4-5',
-    'claude-haiku-4-5',
-  ];
-
-  // For now: return the configured default
-  // Future: could call /v1/models endpoint to get latest
-  log(`🤖 Using model: ${CONFIG.defaultModel}`);
-  return CONFIG.defaultModel;
+async function callArchitect(content, apiKey) {
+  for (const model of MODEL_CANDIDATES) {
+    log(`🤖 Trying: ${model}`);
+    try {
+      const result = await apiRequest(model, content, apiKey);
+      const text = result.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+      log(`✅ Success: ${model} (${text.length} chars)`);
+      return { model, text };
+    } catch (e) { log(`⚠  ${model} failed: ${e.message}`); }
+  }
+  throw new Error('All models failed.');
 }
 
-// ── Build the Context for THE ARCHITECT ───────────────────
+// ── Build context ──────────────────────────────────────────
 function buildContext(state) {
-  const today = new Date().toISOString().split('T')[0];
-  const dayNumber = (state.earth?.day || 0) + 1;
+  const today   = new Date().toISOString().split('T')[0];
+  const nextDay = (state?.earth?.day ?? 0) + 1;
+  const repo    = process.env.GITHUB_REPOSITORY  ? `GitHub Repo: ${process.env.GITHUB_REPOSITORY}` : '(local run)';
+  const run     = process.env.GITHUB_RUN_NUMBER   ? `Actions Run: #${process.env.GITHUB_RUN_NUMBER}` : '';
+  const earthHtml  = read(PATHS.earth);
+  const windowHtml = read(PATHS.window);
+  const bibleSnip  = read(PATHS.bible).slice(-4000);
+  const godPrompt  = read(PATHS.godPrompt);
 
-  return `
-Today's Date: ${today}
-Day Number: ${dayNumber}
-Model Available: ${CONFIG.defaultModel}
+  return `Today's Date: ${today}
+Day to Build: ${nextDay}
+${repo}
+${run}
 
-=== CURRENT STATE (state.json) ===
+=== CURRENT state.json ===
 ${JSON.stringify(state, null, 2)}
 
-=== CURRENT EARTH (earth.html) — ${readFile(CONFIG.paths.earth).length} chars ===
-${readFile(CONFIG.paths.earth)}
+=== CURRENT earth/earth.html (${earthHtml.length} chars) ===
+${earthHtml}
 
-=== CURRENT WINDOW (window/index.html) — ${readFile(CONFIG.paths.window).length} chars ===
-${readFile(CONFIG.paths.window)}
+=== CURRENT window/index.html (${windowHtml.length} chars) ===
+${windowHtml}
 
-=== THE BIBLE (last 3000 chars) ===
-${readFile(CONFIG.paths.bible).slice(-3000)}
+=== THE-BIBLE.md (last 4000 chars) ===
+${bibleSnip}
 
-=== YOUR DIVINE MANDATE ===
-${readFile(CONFIG.paths.godPrompt)}
+=== GOD_PROMPT.md ===
+${godPrompt}
 
-Now build Day ${dayNumber}. Make it more magnificent than yesterday.
-Output your changes using the ===FILE_START/END=== format.
-`.trim();
+---
+Build Day ${nextDay}. Output ALL changed files using ===FILE_START/===FILE_END format.`.trim();
 }
 
-// ── Main Execution ─────────────────────────────────────────
+// ── Main ───────────────────────────────────────────────────
 async function main() {
-  log('');
-  log('═══════════════════════════════════════════════════');
-  log('   THE DAILY RUNNER — Self-Evolving Earth Build     ');
-  log('═══════════════════════════════════════════════════');
+  divider('═');
+  log('   THE DAILY RUNNER — Self-Evolving Earth');
+  divider('═');
 
-  // 1. Validate API key
-  if (!CONFIG.apiKey) {
-    log('❌ ANTHROPIC_API_KEY not set. Export it or add to .env');
-    log('   export ANTHROPIC_API_KEY=sk-ant-...');
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || !apiKey.startsWith('sk-')) {
+    log('❌ ANTHROPIC_API_KEY missing or invalid. Set it in environment or GitHub Secrets.');
     process.exit(1);
   }
 
-  // 2. Read current state
-  const stateRaw = readFile(CONFIG.paths.state);
   let state;
   try {
-    state = JSON.parse(stateRaw);
-    log(`📖 Current state: Day ${state.earth?.day}, Complexity ${state.earth?.complexity_level}`);
+    state = JSON.parse(read(PATHS.state, '{}'));
+    log(`📖 State: Day ${state?.earth?.day ?? 0}, Complexity ${state?.earth?.complexity_level ?? 0}/100`);
   } catch (e) {
-    log('❌ Failed to parse state.json: ' + e.message);
-    process.exit(1);
+    log('⚠  state.json unreadable — starting fresh'); state = {};
   }
 
-  // 3. Get latest model
-  const model = await getLatestModel();
-
-  // 4. Build context
-  log('🔭 Building context for THE ARCHITECT...');
+  log('🔭 Building context...');
   const context = buildContext(state);
-  log(`📏 Context size: ${context.length} chars`);
+  log(`📏 Context: ${context.length} chars`);
 
-  // 5. Call Claude
-  log(`⚡ Summoning THE ARCHITECT (${model})...`);
-  let response;
+  divider();
+  log('⚡ Summoning THE ARCHITECT...');
+  divider();
+  const { model, text: response } = await callArchitect(context, apiKey);
+
+  const blocks = parseFileBlocks(response);
+  log(`📝 File blocks found: ${blocks.length}`);
+
+  if (blocks.length === 0) {
+    log('⚠  No FILE blocks in response. Writing debug file.');
+    write(path.join(ROOT, 'debug-last-response.txt'), response);
+    process.exit(1);
+  }
+
+  divider();
+  log('🌍 Applying changes...');
+  let written = 0;
+  for (const block of blocks) {
+    if (write(path.join(ROOT, block.relativePath), block.content)) written++;
+  }
+  log(`📦 ${written}/${blocks.length} files written`);
+
+  // Stamp model & timestamp into state
   try {
-    const result = await callClaude(model, [
-      { role: 'user', content: context }
-    ], CONFIG.maxTokens);
+    const s = JSON.parse(read(PATHS.state, '{}'));
+    if (!s.earth) s.earth = {};
+    s.earth.model_used   = model;
+    s.earth.last_updated = new Date().toISOString();
+    write(PATHS.state, JSON.stringify(s, null, 2));
+  } catch (_) {}
 
-    response = result.content
-      .filter(b => b.type === 'text')
-      .map(b => b.text)
-      .join('\n');
-
-    log(`✅ THE ARCHITECT has spoken (${response.length} chars)`);
-  } catch (e) {
-    log('❌ API call failed: ' + e.message);
-    process.exit(1);
-  }
-
-  // 6. Parse file changes
-  log('🔍 Parsing divine instructions...');
-  const changes = parseFileChanges(response);
-  log(`📝 Found ${changes.length} file(s) to update`);
-
-  if (changes.length === 0) {
-    log('⚠️  No file changes found in response. Check GOD_PROMPT format.');
-    log('--- Raw response (first 2000 chars) ---');
-    log(response.slice(0, 2000));
-    process.exit(1);
-  }
-
-  // 7. Apply changes
-  log('🌍 Applying changes to the Earth...');
-  for (const change of changes) {
-    writeFile(change.path, change.content);
-  }
-
-  // 8. Log build
-  const newState = JSON.parse(readFile(CONFIG.paths.state));
-  log('');
-  log('═══════════════════════════════════════════════════');
-  log(`   BUILD COMPLETE — Day ${newState.earth?.day} of the Earth          `);
-  log(`   Complexity: ${newState.earth?.complexity_level}/100                          `);
-  log(`   Features: ${newState.features?.active?.length || '?'}                                    `);
-  log('═══════════════════════════════════════════════════');
-
-  // 9. Optional: open browser
-  if (CONFIG.openBrowser) {
-    const { exec } = require('child_process');
-    exec(`open ./window/index.html || xdg-open ./window/index.html || start ./window/index.html`);
-  }
+  divider('═');
+  try {
+    const f = JSON.parse(read(PATHS.state, '{}'));
+    log(`   ✅ COMPLETE — Day ${f?.earth?.day}, Complexity ${f?.earth?.complexity_level}/100, Model: ${model}`);
+  } catch (_) { log('   ✅ Build complete'); }
+  divider('═');
 }
 
 main().catch(e => {
-  log('💀 Fatal error: ' + e.message);
+  log(`💀 Fatal: ${e.message}`);
   process.exit(1);
 });

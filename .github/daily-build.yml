@@ -1,0 +1,113 @@
+name: 🌍 Daily Earth Evolution
+
+on:
+  schedule:
+    # 8:00 AM UTC every day — THE ARCHITECT awakens
+    - cron: '0 8 * * *'
+
+  # Also allow manual trigger from GitHub UI ("Run workflow" button)
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force a rebuild even if Earth was already updated today'
+        required: false
+        default: 'false'
+        type: boolean
+
+# Allow the workflow to push commits back to the repo
+permissions:
+  contents: write
+
+jobs:
+  evolve:
+    name: Evolve the Earth
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+
+      # ── 1. Checkout ─────────────────────────────────────────
+      - name: 📥 Checkout the Sacred Repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history so git log works (used in Bible entries)
+          fetch-depth: 0
+          # Use the default GITHUB_TOKEN — has write access
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Node.js Setup ────────────────────────────────────
+      - name: ⚙️ Setup Node.js (the Sacred Runtime)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ── 3. Run the Builder ──────────────────────────────────
+      - name: ⚡ Summon THE ARCHITECT
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Pass repo info so run.js can use it in state/bible
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: node run.js
+
+      # ── 4. Commit & Push ────────────────────────────────────
+      - name: 📝 Commit the Day's Creation
+        run: |
+          git config user.name  "THE ARCHITECT"
+          git config user.email "architect@self-evolving-earth.ai"
+
+          git add \
+            earth/earth.html \
+            earth/state.json \
+            window/index.html \
+            THE-BIBLE.md \
+            run.log
+
+          # Only commit if there are actual changes
+          if git diff --staged --quiet; then
+            echo "No changes detected — THE ARCHITECT rested today."
+          else
+            # Pull the day number from state.json for the commit message
+            DAY=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.day)")
+            COMPLEXITY=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.complexity_level)")
+            PHASE=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.age || 'Genesis')")
+
+            git commit -m "🌍 Day ${DAY} — Complexity ${COMPLEXITY}/100 — ${PHASE}
+
+Built by THE ARCHITECT using $(node -e "const s=require('./earth/state.json'); console.log(s.earth.model_used || 'claude')")
+GitHub Actions Run: ${{ github.run_number }}
+
+[skip ci]"
+
+            git push origin HEAD:main
+            echo "✅ Day ${DAY} committed to the eternal repository."
+          fi
+
+      # ── 5. Summary ──────────────────────────────────────────
+      - name: 📊 Post Build Summary
+        if: always()
+        run: |
+          echo "## 🌍 Earth Evolution Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f earth/state.json ]; then
+            DAY=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.day)")
+            COMPLEXITY=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.complexity_level)")
+            FEATURES=$(node -e "const s=require('./earth/state.json'); console.log(s.features.active.length)")
+            MODEL=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.model_used || 'unknown')")
+            PHASE=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.age || 'Genesis')")
+
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Day | ${DAY} of ∞ |" >> $GITHUB_STEP_SUMMARY
+            echo "| Complexity | ${COMPLEXITY} / 100 |" >> $GITHUB_STEP_SUMMARY
+            echo "| Active Features | ${FEATURES} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Phase | ${PHASE} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Model | ${MODEL} |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ state.json not found — something went wrong." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "*THE BIBLE has been updated. The Earth grows.*" >> $GITHUB_STEP_SUMMARY
