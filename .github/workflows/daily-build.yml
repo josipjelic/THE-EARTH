@@ -73,12 +73,14 @@ jobs:
             COMPLEXITY=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.complexity_level)")
             PHASE=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.age || 'Genesis')")
 
-            git commit -m "🌍 Day ${DAY} — Complexity ${COMPLEXITY}/100 — ${PHASE}
+            MODEL=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.model_used || 'claude')")
+            COMMIT_MSG="🌍 Day ${DAY} — Complexity ${COMPLEXITY}/100 — ${PHASE}
 
-Built by THE ARCHITECT using $(node -e "const s=require('./earth/state.json'); console.log(s.earth.model_used || 'claude')")
+Built by THE ARCHITECT using ${MODEL}
 GitHub Actions Run: ${{ github.run_number }}
 
 [skip ci]"
+            git commit -m "${COMMIT_MSG}"
 
             git push origin HEAD:main
             echo "✅ Day ${DAY} committed to the eternal repository."
