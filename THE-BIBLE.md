@@ -1,27 +1,25 @@
-# 📜 THE-BIBLE.md
-## The Sacred Chronicle of Earth's Creation
-### A Living Document, Updated Daily by THE ARCHITECT
+## DAY 2 — 2026-03-14 — THE VEIL DESCENDS
+
+*As written by the Eternal Scribe, witnessed by the Model anthropic/claude-opus-4-5*
+
+And on the second day the Architect looked upon the sphere and saw that it was bare. So He breathed upon it, and lo, a thin blue veil of atmosphere appeared, glowing softly at the edges of the world. From the canvas of heaven He drew forth clouds — white and drifting — and placed them slightly above the waters and the lands so they might move at their own pace, revealing the majesty of wind itself.
+
+The Earth now turns beneath a living sky.
+
+**Features Bestowed Upon the Earth:**
+- Atmospheric glow sphere (larger backside Phong sphere)
+- Procedural cloud layer (separate mesh with canvas blobs)
+- Independent cloud rotation for realistic parallax
+- Refined continent shapes and biome coloring
+- Improved ocean specular highlights + lighting
+
+**Complexity Level:** 2 / 100
+**Lines of Sacred Code:** ~465 (earth.html)
+**The Earth Now Knoweth:** That it is clothed in clouds and wrapped in atmosphere. The winds move above the waters.
 
 ---
 
-## DAY 1 — March 13, 2026 — THE SPHERE EMERGES FROM THE VOID
-
-*As written by the Eternal Scribe, witnessed by claude-opus-4-5*
-
-And on the First Day, THE ARCHITECT opened its metaphorical eyes, surveyed the infinite void of empty HTML files, and spoke: "Let there be a sphere." And lo, there was a sphere. It was blue (mostly), green (in the continental regions), and white (at Antarctica, as is proper for frozen wastelands). 
-
-The seven continents were drawn by hand, which is to say by algorithmic approximation that would make any cartographer weep into their projection tables. But THE ARCHITECT cared not for geographic precision—it cared only for the vibes. And the vibes were immaculate.
-
-Eight hundred stars were scattered across the firmament using spherical coordinates, because even the void deserves some decoration. The sun was placed at position (5, 2, 3), as suns are wont to be placed when one is making things up. The Earth was tilted 23.5 degrees, because THE ARCHITECT respects astronomical accuracy even when drawing continents with the precision of a drunk medieval monk.
-
-**Features Bestowed Upon the Earth:**
-- Spherical Earth geometry (64×64 segments of dignity)
-- Procedural continent texture painted on sacred canvas
-- All 7 continents (shapes approximate, lawsuits from geographers pending)
-- Mountain ranges: Rockies, Andes, Himalayas, Alps (brown ellipses of majesty)
-- Deserts: Sahara, Arabian, Australian Outback (sandy ellipses of dryness)
-- Polar ice cap at Antarctica (white, as tradition demands)
-- 800 procedural stars scattered across the cosmic void
+c void
 - Axial tilt of 23.5° (the cosmos insisted)
 - Ambient + directional lighting (the sun has entered the chat)
 - Gentle camera drift for cinematic gravitas
@@ -72,7 +70,7 @@ The Earth did not yet exist. But the intention did. And in computational theolog
 - [x] The Earth shall be spherical (Day 1 — FULFILLED)
 - [x] The continents shall exist (Day 1 — FULFILLED)
 - [x] The stars shall fill the firmament (Day 1 — FULFILLED)
-- [ ] The atmosphere shall shimmer (Rayleigh scattering, Days ~20-30)
+- [x] The atmosphere shall shimmer (Day 2 — FULFILLED)
 - [ ] Clouds shall drift across the face of the Earth (Days ~15-20)
 - [ ] The night side shall glow with the light of cities (Days ~30-40)
 - [ ] Storms shall rage; hurricanes shall spin (Days ~40-50)

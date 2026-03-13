@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE EARTH — Day 1</title>
+    <title>THE EARTH — Day 2</title>
     <style>
         /* Lo, the styles of the void */
         * {
@@ -64,7 +64,7 @@
 </head>
 <body>
     <div id="title">THE EARTH</div>
-    <div id="info">Day 1 of Creation — The Sphere Emerges</div>
+    <div id="info">Day 2 of Creation — The Veil Descends</div>
     <div id="nav">
         <a href="index.html">⬅ Observatory</a>
         <a href="window.html">Window</a>
@@ -75,12 +75,12 @@
 
     <script>
         // ═══════════════════════════════════════════════════════════════
-        // THE FIRST DAY — And there was a sphere, and it was good
+        // THE SECOND DAY — The veil of clouds and breath of atmosphere
         // ═══════════════════════════════════════════════════════════════
 
         // The Holy Trinity of Three.js
         let scene, camera, renderer;
-        let earth, stars;
+        let earth, stars, atmosphere, clouds;
         let time = 0;
 
         // ═══════════════════════════════════════════════════════════════
@@ -127,7 +127,6 @@
 
             // Scatter stars across the firmament
             for (let i = 0; i < starCount * 3; i += 3) {
-                // Spherical distribution — the universe is round-ish
                 const radius = 50 + Math.random() * 50;
                 const theta = Math.random() * Math.PI * 2;
                 const phi = Math.acos(2 * Math.random() - 1);
@@ -150,10 +149,9 @@
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // THE EARTH — A sphere of 64x64 segments (humble beginnings)
+        // THE EARTH — A sphere of 64x64 segments
         // ═══════════════════════════════════════════════════════════════
         function createEarth() {
-            // Generate the sacred texture upon a canvas
             const textureCanvas = document.createElement('canvas');
             textureCanvas.width = 1024;
             textureCanvas.height = 512;
@@ -163,186 +161,231 @@
             ctx.fillStyle = '#1a4d7c';
             ctx.fillRect(0, 0, 1024, 512);
 
-            // Add ocean depth variation (the abyss is darker)
+            // Ocean depth variation
             const oceanGradient = ctx.createRadialGradient(512, 256, 0, 512, 256, 400);
-            oceanGradient.addColorStop(0, 'rgba(30, 90, 150, 0.3)');
-            oceanGradient.addColorStop(1, 'rgba(10, 40, 80, 0.5)');
+            oceanGradient.addColorStop(0, 'rgba(30, 90, 150, 0.4)');
+            oceanGradient.addColorStop(1, 'rgba(10, 40, 80, 0.6)');
             ctx.fillStyle = oceanGradient;
             ctx.fillRect(0, 0, 1024, 512);
 
-            // ═══════════════════════════════════════════════════════════
-            // THE CONTINENTS — Drawn by hand (well, by code)
-            // Cartographers may weep, but the Earth cares not
-            // ═══════════════════════════════════════════════════════════
+            // Improved continents with better biome coloring
+            ctx.fillStyle = '#3d7c3d';
 
-            ctx.fillStyle = '#3d7c3d'; // The green of living lands
-
-            // NORTH AMERICA — Land of the free, home of the polygons
+            // NORTH AMERICA — refined shape
             ctx.beginPath();
-            ctx.moveTo(120, 120);
-            ctx.lineTo(180, 100);
-            ctx.lineTo(240, 110);
-            ctx.lineTo(260, 140);
-            ctx.lineTo(250, 180);
-            ctx.lineTo(230, 200);
-            ctx.lineTo(200, 220);
-            ctx.lineTo(180, 250);
-            ctx.lineTo(160, 240);
-            ctx.lineTo(140, 200);
-            ctx.lineTo(100, 180);
-            ctx.lineTo(80, 150);
+            ctx.moveTo(110, 115);
+            ctx.lineTo(175, 95);
+            ctx.lineTo(245, 105);
+            ctx.lineTo(265, 135);
+            ctx.lineTo(255, 175);
+            ctx.lineTo(235, 195);
+            ctx.lineTo(195, 225);
+            ctx.lineTo(175, 255);
+            ctx.lineTo(155, 240);
+            ctx.lineTo(135, 195);
+            ctx.lineTo(95, 175);
+            ctx.lineTo(75, 145);
             ctx.closePath();
             ctx.fill();
 
-            // SOUTH AMERICA — The continent that looks like it's waving
+            // SOUTH AMERICA
             ctx.beginPath();
-            ctx.moveTo(220, 260);
-            ctx.lineTo(260, 270);
-            ctx.lineTo(280, 320);
-            ctx.lineTo(270, 380);
-            ctx.lineTo(250, 420);
-            ctx.lineTo(230, 430);
-            ctx.lineTo(210, 400);
-            ctx.lineTo(200, 340);
-            ctx.lineTo(210, 290);
+            ctx.moveTo(215, 255);
+            ctx.lineTo(265, 265);
+            ctx.lineTo(275, 315);
+            ctx.lineTo(265, 380);
+            ctx.lineTo(245, 425);
+            ctx.lineTo(225, 430);
+            ctx.lineTo(200, 390);
+            ctx.lineTo(205, 330);
             ctx.closePath();
             ctx.fill();
 
-            // EUROPE — Small but historically loud
+            // EUROPE
             ctx.beginPath();
-            ctx.moveTo(480, 100);
-            ctx.lineTo(540, 95);
-            ctx.lineTo(560, 110);
-            ctx.lineTo(550, 140);
-            ctx.lineTo(520, 160);
-            ctx.lineTo(490, 150);
-            ctx.lineTo(470, 130);
+            ctx.moveTo(470, 95);
+            ctx.lineTo(540, 90);
+            ctx.lineTo(565, 115);
+            ctx.lineTo(550, 145);
+            ctx.lineTo(515, 160);
+            ctx.lineTo(485, 145);
             ctx.closePath();
             ctx.fill();
 
-            // AFRICA — The motherland, drawn with respect
+            // AFRICA
             ctx.beginPath();
-            ctx.moveTo(480, 180);
-            ctx.lineTo(540, 170);
-            ctx.lineTo(580, 200);
-            ctx.lineTo(590, 260);
-            ctx.lineTo(570, 320);
-            ctx.lineTo(530, 360);
-            ctx.lineTo(500, 350);
-            ctx.lineTo(470, 300);
-            ctx.lineTo(460, 240);
-            ctx.lineTo(470, 200);
+            ctx.moveTo(475, 175);
+            ctx.lineTo(545, 165);
+            ctx.lineTo(585, 195);
+            ctx.lineTo(595, 265);
+            ctx.lineTo(570, 325);
+            ctx.lineTo(525, 365);
+            ctx.lineTo(495, 355);
+            ctx.lineTo(465, 295);
             ctx.closePath();
             ctx.fill();
 
-            // ASIA — The largest, the most complex
+            // ASIA
             ctx.beginPath();
-            ctx.moveTo(560, 80);
-            ctx.lineTo(700, 70);
-            ctx.lineTo(780, 100);
-            ctx.lineTo(820, 140);
-            ctx.lineTo(800, 180);
-            ctx.lineTo(750, 200);
-            ctx.lineTo(700, 220);
-            ctx.lineTo(650, 200);
-            ctx.lineTo(600, 180);
-            ctx.lineTo(580, 140);
-            ctx.lineTo(560, 110);
+            ctx.moveTo(555, 75);
+            ctx.lineTo(710, 65);
+            ctx.lineTo(790, 95);
+            ctx.lineTo(835, 135);
+            ctx.lineTo(810, 185);
+            ctx.lineTo(745, 215);
+            ctx.lineTo(695, 225);
+            ctx.lineTo(640, 195);
+            ctx.lineTo(580, 145);
             ctx.closePath();
             ctx.fill();
 
-            // INDIA — The subcontinent triangle
+            // INDIA
             ctx.beginPath();
-            ctx.moveTo(640, 220);
-            ctx.lineTo(680, 220);
-            ctx.lineTo(670, 280);
-            ctx.lineTo(650, 290);
-            ctx.lineTo(630, 270);
+            ctx.moveTo(635, 215);
+            ctx.lineTo(690, 215);
+            ctx.lineTo(675, 275);
+            ctx.lineTo(640, 285);
             ctx.closePath();
             ctx.fill();
 
-            // AUSTRALIA — The land down under
+            // AUSTRALIA
             ctx.beginPath();
-            ctx.moveTo(760, 320);
-            ctx.lineTo(840, 310);
-            ctx.lineTo(860, 350);
-            ctx.lineTo(840, 390);
-            ctx.lineTo(790, 400);
-            ctx.lineTo(760, 370);
+            ctx.moveTo(755, 315);
+            ctx.lineTo(845, 305);
+            ctx.lineTo(865, 345);
+            ctx.lineTo(840, 395);
+            ctx.lineTo(780, 405);
+            ctx.lineTo(755, 370);
             ctx.closePath();
             ctx.fill();
 
-            // ANTARCTICA — The frozen south (white, as it should be)
-            ctx.fillStyle = '#e8e8e8';
+            // ANTARCTICA — brighter ice
+            ctx.fillStyle = '#f0f4f8';
             ctx.beginPath();
-            ctx.moveTo(0, 470);
-            ctx.lineTo(1024, 470);
+            ctx.moveTo(0, 465);
+            ctx.lineTo(1024, 465);
             ctx.lineTo(1024, 512);
             ctx.lineTo(0, 512);
             ctx.closePath();
             ctx.fill();
 
-            // GREENLAND — Because someone always forgets Greenland
-            ctx.fillStyle = '#a8d4a8';
+            // GREENLAND
+            ctx.fillStyle = '#b8e0b8';
             ctx.beginPath();
-            ctx.moveTo(320, 60);
-            ctx.lineTo(370, 55);
-            ctx.lineTo(380, 90);
-            ctx.lineTo(350, 110);
-            ctx.lineTo(320, 95);
+            ctx.moveTo(310, 55);
+            ctx.lineTo(375, 48);
+            ctx.lineTo(390, 85);
+            ctx.lineTo(355, 115);
+            ctx.lineTo(315, 95);
             ctx.closePath();
             ctx.fill();
 
-            // Add some mountain ranges (brown patches of majesty)
-            ctx.fillStyle = '#6b5344';
-            // Rockies
-            drawMountainRange(ctx, 160, 160, 30, 40);
-            // Andes
-            drawMountainRange(ctx, 230, 320, 15, 80);
-            // Himalayas
-            drawMountainRange(ctx, 660, 190, 50, 15);
-            // Alps
-            drawMountainRange(ctx, 510, 130, 20, 8);
+            // Mountain ranges (darker)
+            ctx.fillStyle = '#5a4638';
+            drawMountainRange(ctx, 155, 155, 32, 42);
+            drawMountainRange(ctx, 225, 325, 18, 82);
+            drawMountainRange(ctx, 665, 185, 52, 18);
+            drawMountainRange(ctx, 505, 125, 22, 10);
 
-            // Add deserts (sandy patches of dryness)
-            ctx.fillStyle = '#c4a35a';
-            // Sahara
+            // Deserts
+            ctx.fillStyle = '#d2b46a';
             ctx.beginPath();
-            ctx.ellipse(520, 210, 40, 25, 0, 0, Math.PI * 2);
+            ctx.ellipse(515, 205, 42, 27, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Arabian
             ctx.beginPath();
-            ctx.ellipse(590, 210, 20, 15, 0, 0, Math.PI * 2);
+            ctx.ellipse(595, 205, 23, 17, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Australian Outback
             ctx.beginPath();
-            ctx.ellipse(810, 350, 25, 20, 0, 0, Math.PI * 2);
+            ctx.ellipse(815, 345, 27, 22, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Create the texture from our divine canvas
             const earthTexture = new THREE.CanvasTexture(textureCanvas);
             earthTexture.wrapS = THREE.RepeatWrapping;
 
-            // The Geometry: 64 segments of spherical perfection
             const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
 
-            // The Material: Phong for that classic 3D look
             const earthMaterial = new THREE.MeshPhongMaterial({
                 map: earthTexture,
-                shininess: 5,
-                specular: new THREE.Color(0x333333)
+                shininess: 12,
+                specular: new THREE.Color(0x112233),
+                flatShading: false
             });
 
-            // THE EARTH IS BORN
             earth = new THREE.Mesh(earthGeometry, earthMaterial);
-
-            // Apply the sacred axial tilt — 23.5 degrees, as the cosmos intended
             earth.rotation.z = 23.5 * Math.PI / 180;
+
+            // Create atmosphere
+            const atmosphereGeometry = new THREE.SphereGeometry(1.12, 64, 64);
+            const atmosphereMaterial = new THREE.MeshPhongMaterial({
+                color: 0x77aaff,
+                transparent: true,
+                opacity: 0.18,
+                side: THREE.BackSide,
+                shininess: 2
+            });
+            atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+            earth.add(atmosphere);
+
+            // Create clouds
+            const cloudsCanvas = document.createElement('canvas');
+            cloudsCanvas.width = 1024;
+            cloudsCanvas.height = 512;
+            const cloudsCtx = cloudsCanvas.getContext('2d');
+            
+            // Draw procedural clouds
+            cloudsCtx.fillStyle = '#ffffff';
+            createCloudBlobs(cloudsCtx, 1024, 512);
+            
+            const cloudTexture = new THREE.CanvasTexture(cloudsCanvas);
+            const cloudGeometry = new THREE.SphereGeometry(1.015, 64, 64);
+            const cloudMaterial = new THREE.MeshPhongMaterial({
+                map: cloudTexture,
+                transparent: true,
+                opacity: 0.85,
+                depthWrite: false,
+                shininess: 1
+            });
+            clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+            earth.add(clouds);
 
             scene.add(earth);
         }
 
-        // Helper function: Draw mountain ranges (the bumpy bits)
+        function createCloudBlobs(ctx, w, h) {
+            ctx.globalAlpha = 0.75;
+            // Multiple cloud formations
+            const cloudPositions = [
+                {x: 120, y: 80, size: 65},
+                {x: 280, y: 110, size: 45},
+                {x: 480, y: 65, size: 55},
+                {x: 680, y: 95, size: 80},
+                {x: 850, y: 140, size: 40},
+                {x: 160, y: 190, size: 35},
+                {x: 720, y: 240, size: 50},
+                {x: 380, y: 280, size: 30},
+                {x: 910, y: 260, size: 38},
+                {x: 510, y: 340, size: 45}
+            ];
+            
+            for (let cloud of cloudPositions) {
+                ctx.globalAlpha = 0.65 + Math.random() * 0.25;
+                ctx.beginPath();
+                ctx.ellipse(cloud.x, cloud.y, cloud.size, cloud.size * 0.55, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add softer overlapping blobs for natural look
+                ctx.globalAlpha = 0.45;
+                ctx.beginPath();
+                ctx.ellipse(cloud.x - cloud.size*0.45, cloud.y - 8, cloud.size*0.6, cloud.size*0.55, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cloud.x + cloud.size*0.4, cloud.y + 5, cloud.size*0.55, cloud.size*0.45, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1.0;
+        }
+
+        // Helper function: Draw mountain ranges
         function drawMountainRange(ctx, x, y, width, height) {
             ctx.beginPath();
             ctx.ellipse(x, y, width, height, 0, 0, Math.PI * 2);
@@ -353,39 +396,39 @@
         // THE LIGHTS — Let there be illumination
         // ═══════════════════════════════════════════════════════════════
         function createLights() {
-            // Ambient light: The gentle glow of the cosmos
-            const ambientLight = new THREE.AmbientLight(0x333333);
+            const ambientLight = new THREE.AmbientLight(0x334455, 0.6);
             scene.add(ambientLight);
 
-            // The Sun: A directional light from the heavens
-            const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            sunLight.position.set(5, 2, 3);
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.35);
+            sunLight.position.set(5, 1, 4);
             scene.add(sunLight);
 
-            // A subtle fill light from the opposite side (the moon's contribution)
-            const fillLight = new THREE.DirectionalLight(0x4444ff, 0.1);
-            fillLight.position.set(-5, -2, -3);
+            const fillLight = new THREE.DirectionalLight(0x8899ff, 0.25);
+            fillLight.position.set(-4, -2, -5);
             scene.add(fillLight);
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // THE ANIMATION LOOP — Eternal rotation
+        // THE ANIMATION LOOP — Eternal rotation with new layers
         // ═══════════════════════════════════════════════════════════════
         function animate() {
             requestAnimationFrame(animate);
 
             time += 0.001;
 
-            // Rotate the Earth (0.001 radians per frame — dignified)
-            earth.rotation.y += 0.001;
+            // Rotate the Earth
+            earth.rotation.y += 0.00095;
+
+            // Clouds rotate slightly faster (winds in the firmament)
+            if (clouds) clouds.rotation.y += 0.00125;
 
             // Gentle camera drift for that cinematic feel
-            camera.position.x = Math.sin(time * 0.5) * 0.2;
-            camera.position.y = Math.cos(time * 0.3) * 0.1;
+            camera.position.x = Math.sin(time * 0.4) * 0.25;
+            camera.position.y = Math.cos(time * 0.25) * 0.15 + Math.sin(time * 0.1) * 0.05;
             camera.lookAt(0, 0, 0);
 
-            // Very slow star rotation (the universe moves, but barely)
-            stars.rotation.y += 0.0001;
+            // Very slow star rotation
+            stars.rotation.y += 0.00008;
 
             renderer.render(scene, camera);
         }
@@ -404,10 +447,9 @@
         // ═══════════════════════════════════════════════════════════════
         init();
 
-        // Console message for any mortals who dare inspect
-        console.log('🌍 THE EARTH — Day 1 of Creation');
-        console.log('The sphere emerges from the void.');
-        console.log('Complexity Level: 1 / 100');
+        console.log('🌍 THE EARTH — Day 2 of Creation');
+        console.log('The veil of clouds now covers the sphere.');
+        console.log('Atmosphere glows. Complexity Level: 2 / 100');
     </script>
 </body>
 </html>
