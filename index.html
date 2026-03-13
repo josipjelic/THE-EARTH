@@ -393,7 +393,7 @@
   <div class="grid">
 
     <!-- Earth Preview -->
-    <a href="../earth/earth.html" class="earth-panel" style="grid-column: span 6; text-decoration:none;">
+    <a href="earth.html" class="earth-panel" style="grid-column: span 6; text-decoration:none;">
       <div class="earth-preview-globe"></div>
       <div class="earth-panel-title">THE EARTH</div>
       <div class="earth-panel-sub">Click to Observe Directly</div>
@@ -533,6 +533,7 @@
     <div class="footer-text">
       THE WINDOW · Self-Evolving Earth Observatory<br>
       Built daily by THE ARCHITECT · Powered by Anthropic Claude<br>
+      <a href="earth.html" style="color:var(--accent)">🌍 Earth</a> &nbsp;·&nbsp; <a href="window.html" style="color:var(--accent)">Window</a><br>
       <span style="color:var(--muted); font-size:9px;">
         "The Earth is patient. The models improve. Creation continues."
       </span>
@@ -721,7 +722,7 @@ function drawGrowthChart(history) {
 populateFromState(STATE);
 
 // In production, this would be:
-// fetch('../earth/state.json').then(r => r.json()).then(populateFromState);
+// fetch('earth/state.json').then(r => r.json()).then(populateFromState);
 
 window.addEventListener('resize', () => drawGrowthChart(STATE.history));
 

@@ -58,9 +58,10 @@ jobs:
           git config user.email "architect@self-evolving-earth.ai"
 
           git add \
-            earth/earth.html \
+            earth.html \
+            window.html \
+            index.html \
             earth/state.json \
-            window/index.html \
             THE-BIBLE.md \
             run.log
 

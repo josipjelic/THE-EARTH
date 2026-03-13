@@ -16,8 +16,8 @@ const ROOT = __dirname;
 const PATHS = {
   godPrompt : path.join(ROOT, 'GOD_PROMPT.md'),
   state     : path.join(ROOT, 'earth', 'state.json'),
-  earth     : path.join(ROOT, 'earth', 'earth.html'),
-  window    : path.join(ROOT, 'window', 'index.html'),
+  earth     : path.join(ROOT, 'earth.html'),
+  window    : path.join(ROOT, 'window.html'),
   bible     : path.join(ROOT, 'THE-BIBLE.md'),
   log       : path.join(ROOT, 'run.log'),
 };
@@ -142,10 +142,10 @@ ${run}
 === CURRENT state.json ===
 ${JSON.stringify(state, null, 2)}
 
-=== CURRENT earth/earth.html (${earthHtml.length} chars) ===
+=== CURRENT earth.html (${earthHtml.length} chars) ===
 ${earthHtml}
 
-=== CURRENT window/index.html (${windowHtml.length} chars) ===
+=== CURRENT window.html (${windowHtml.length} chars) ===
 ${windowHtml}
 
 === THE-BIBLE.md (last 4000 chars) ===
@@ -155,7 +155,9 @@ ${bibleSnip}
 ${godPrompt}
 
 ---
-Build Day ${nextDay}. Output ALL changed files using ===FILE_START/===FILE_END format.`.trim();
+Build Day ${nextDay}. Output ALL changed files using ===FILE_START/===FILE_END format.
+Files live at the repo root: earth.html, window.html, earth/state.json, THE-BIBLE.md.
+Use these exact relative paths in FILE_START headers.`.trim();
 }
 
 // ── Main ───────────────────────────────────────────────────
