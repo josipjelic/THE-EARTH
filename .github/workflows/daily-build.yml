@@ -79,12 +79,8 @@ jobs:
             PHASE=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.age || 'Genesis')")
 
             MODEL=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.model_used || 'claude')")
-            COMMIT_MSG="🌍 Day ${DAY} — Complexity ${COMPLEXITY}/100 — ${PHASE}
-
-Built by THE ARCHITECT using ${MODEL}
-GitHub Actions Run: ${GITHUB_RUN_NUMBER}
-
-[skip ci]"
+            COMMIT_MSG=$(printf '🌍 Day %s — Complexity %s/100 — %s\n\nBuilt by THE ARCHITECT using %s\nGitHub Actions Run: %s\n\n[skip ci]' \
+              "${DAY}" "${COMPLEXITY}" "${PHASE}" "${MODEL}" "${GITHUB_RUN_NUMBER}")
             git commit -m "${COMMIT_MSG}"
 
             git push origin HEAD:main
