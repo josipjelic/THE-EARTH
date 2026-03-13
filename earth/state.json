@@ -1,9 +1,9 @@
 {
-  "day": 7,
-  "date": "2026-03-16",
-  "complexityLevel": 6,
-  "totalFeatures": 18,
-  "linesOfCode": 780,
+  "day": 8,
+  "date": "2026-03-17",
+  "complexityLevel": 7,
+  "totalFeatures": 21,
+  "linesOfCode": 860,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -22,7 +22,9 @@
     "Tropical flora around the equator",
     "New life emerges on the equator",
     "Weather effects - simple rainfall",
-    "Lighting model: Ambient, Directional, Fill"
+    "Dynamic weather effects: moving cloud layer",
+    "Interactive seasonal changes",
+    "Biomes change colors with seasons"
   ],
   "lighting": {
     "ambient": true,
@@ -39,7 +41,7 @@
     "distance": 3
   },
   "phase": "Genesis",
-  "lastUpdate": "2026-03-16T00:00:00Z",
+  "lastUpdate": "2026-03-17T00:00:00Z",
   "changelog": [
     {
       "day": 1,
@@ -90,12 +92,25 @@
       "changes": [
         "Implemented a lighting model with ambient and directional lights"
       ]
+    },
+    {
+      "day": 7,
+      "changes": [
+        "Enhanced cloud layer with dynamic, moving patterns for realism"
+      ]
+    },
+    {
+      "day": 8,
+      "changes": [
+        "Implemented interactive seasonal changes affecting color of biomes",
+        "Biomes now change colors with the seasons"
+      ]
     }
   ],
   "earth": {
-    "day": 7,
-    "complexity_level": 6,
+    "day": 8,
+    "complexity_level": 7,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-03-13T23:31:01.164Z"
+    "last_updated": "2026-03-13T23:47:47.907Z"
   }
 }
