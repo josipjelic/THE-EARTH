@@ -166,6 +166,9 @@ async function main() {
   log('   THE DAILY RUNNER — Self-Evolving Earth');
   divider('═');
 
+  const forceRebuild = process.env.FORCE_REBUILD === 'true';
+  if (forceRebuild) log('🔁 FORCE_REBUILD=true — manually triggered from GitHub Actions');
+
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey || !apiKey.startsWith('sk-')) {
     log('❌ OPENROUTER_API_KEY missing or invalid. Set it in environment or GitHub Secrets.');
