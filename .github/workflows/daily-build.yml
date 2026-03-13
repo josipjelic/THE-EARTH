@@ -76,7 +76,7 @@ jobs:
             # Pull the day number from state.json for the commit message
             DAY=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.day)")
             COMPLEXITY=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.complexity_level)")
-            PHASE=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.age || 'Genesis')")
+            PHASE=$(node -e "const s=require('./earth/state.json'); console.log(s.phase || s.earth.age || 'Genesis')")
 
             MODEL=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.model_used || 'claude')")
             COMMIT_MSG=$(printf '🌍 Day %s — Complexity %s/100 — %s\n\nBuilt by THE ARCHITECT using %s\nGitHub Actions Run: %s\n\n[skip ci]' \
@@ -97,9 +97,9 @@ jobs:
           if [ -f earth/state.json ]; then
             DAY=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.day)")
             COMPLEXITY=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.complexity_level)")
-            FEATURES=$(node -e "const s=require('./earth/state.json'); console.log(s.features.active.length)")
+            FEATURES=$(node -e "const s=require('./earth/state.json'); console.log(Array.isArray(s.features) ? s.features.length : (s.totalFeatures || 0))")
             MODEL=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.model_used || 'unknown')")
-            PHASE=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.age || 'Genesis')")
+            PHASE=$(node -e "const s=require('./earth/state.json'); console.log(s.phase || s.earth.age || 'Genesis')")
 
             echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
             echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
