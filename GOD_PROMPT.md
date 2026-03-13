@@ -70,7 +70,7 @@ Decide on **1 to 3 meaningful improvements** to make today. Scale ambition to co
 Write the actual code changes. You MUST output changes in this exact format:
 
 ```
-===FILE_START: earth/earth.html===
+===FILE_START: earth.html===
 [complete file content]
 ===FILE_END===
 
@@ -78,7 +78,7 @@ Write the actual code changes. You MUST output changes in this exact format:
 [complete updated state]
 ===FILE_END===
 
-===FILE_START: window/index.html===
+===FILE_START: window.html===
 [complete file content]
 ===FILE_END===
 
