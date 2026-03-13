@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE EARTH — Day 2</title>
+    <title>THE EARTH — Day 3</title>
     <style>
         /* Lo, the styles of the void */
         * {
@@ -60,11 +60,24 @@
             border-color: rgba(100, 150, 255, 0.8);
             background: rgba(100, 150, 255, 0.1);
         }
+        #instructions {
+            position: absolute;
+            top: 65px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 11px;
+            letter-spacing: 1px;
+            z-index: 100;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
     <div id="title">THE EARTH</div>
-    <div id="info">Day 2 of Creation — The Veil Descends</div>
+    <div id="info">Day 3 of Creation — The Companion Rises</div>
+    <div id="instructions">DRAG TO ROTATE • THE MOON ORBITS</div>
     <div id="nav">
         <a href="index.html">⬅ Observatory</a>
         <a href="window.html">Window</a>
@@ -75,45 +88,50 @@
 
     <script>
         // ═══════════════════════════════════════════════════════════════
-        // THE SECOND DAY — The veil of clouds and breath of atmosphere
+        // THE THIRD DAY — The Moon is born and mortals may touch the sphere
         // ═══════════════════════════════════════════════════════════════
 
-        // The Holy Trinity of Three.js
+        // The Holy Trinity of Three.js plus companions
         let scene, camera, renderer;
-        let earth, stars, atmosphere, clouds;
+        let earth, stars, atmosphere, clouds, moon, sun;
         let time = 0;
+        let isDragging = false;
+        let previousMouseX = 0;
+        let targetRotationY = 0;
 
         // ═══════════════════════════════════════════════════════════════
         // INITIALIZATION — Let there be WebGL
         // ═══════════════════════════════════════════════════════════════
         function init() {
-            // The Scene: A vast emptiness awaiting creation
             scene = new THREE.Scene();
 
-            // The Camera: The eye through which mortals observe
             camera = new THREE.PerspectiveCamera(
-                45, // Field of view (degrees of divine perception)
+                45,
                 window.innerWidth / window.innerHeight,
                 0.1,
                 1000
             );
             camera.position.z = 3;
 
-            // The Renderer: That which makes the invisible visible
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
 
-            // Create the heavens and the earth
             createStars();
             createEarth();
+            createMoon();
+            createSun();
             createLights();
 
-            // Handle the resizing of the divine viewport
             window.addEventListener('resize', onWindowResize);
+            
+            // Mouse control for mortals to spin the world
+            document.addEventListener('mousedown', onMouseDown);
+            document.addEventListener('mouseup', onMouseUp);
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseleave', onMouseUp);
 
-            // Begin the eternal rotation
             animate();
         }
 
@@ -125,7 +143,6 @@
             const starCount = 800;
             const positions = new Float32Array(starCount * 3);
 
-            // Scatter stars across the firmament
             for (let i = 0; i < starCount * 3; i += 3) {
                 const radius = 50 + Math.random() * 50;
                 const theta = Math.random() * Math.PI * 2;
@@ -149,7 +166,77 @@
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // THE EARTH — A sphere of 64x64 segments
+        // THE SUN — Distant source of all warmth and light
+        // ═══════════════════════════════════════════════════════════════
+        function createSun() {
+            const sunGeometry = new THREE.SphereGeometry(0.22, 32, 32);
+            const sunMaterial = new THREE.MeshBasicMaterial({
+                color: 0xffeebb,
+            });
+            sun = new THREE.Mesh(sunGeometry, sunMaterial);
+            sun.position.set(9, 3, 8);
+            scene.add(sun);
+
+            // Soft glow halo around sun
+            const glowGeometry = new THREE.SphereGeometry(0.35, 32, 32);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: 0xffdd88,
+                transparent: true,
+                opacity: 0.15,
+                blending: THREE.AdditiveBlending
+            });
+            const sunGlow = new THREE.Mesh(glowGeometry, glowMaterial);
+            sun.add(sunGlow);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // THE MOON — Cratered companion in solemn orbit
+        // ═══════════════════════════════════════════════════════════════
+        function createMoon() {
+            const moonCanvas = document.createElement('canvas');
+            moonCanvas.width = 512;
+            moonCanvas.height = 512;
+            const ctx = moonCanvas.getContext('2d');
+            
+            // Base lunar surface
+            ctx.fillStyle = '#c8c8c8';
+            ctx.fillRect(0, 0, 512, 512);
+            
+            // Craters
+            function drawCrater(x, y, r, depth) {
+                ctx.fillStyle = '#a0a0a0';
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#b8b8b8';
+                ctx.beginPath();
+                ctx.arc(x - r*0.3, y - r*0.3, r*0.6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            drawCrater(140, 150, 48, 0);
+            drawCrater(310, 130, 35, 0);
+            drawCrater(380, 280, 55, 0);
+            drawCrater(190, 340, 27, 0);
+            drawCrater(420, 410, 22, 0);
+            drawCrater(95, 410, 18, 0);
+            drawCrater(260, 420, 31, 0);
+            
+            const moonTexture = new THREE.CanvasTexture(moonCanvas);
+            
+            const moonGeometry = new THREE.SphereGeometry(0.27, 48, 48);
+            const moonMaterial = new THREE.MeshPhongMaterial({
+                map: moonTexture,
+                shininess: 2,
+                specular: 0x222222
+            });
+            
+            moon = new THREE.Mesh(moonGeometry, moonMaterial);
+            scene.add(moon);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // THE EARTH — Now with richer lands
         // ═══════════════════════════════════════════════════════════════
         function createEarth() {
             const textureCanvas = document.createElement('canvas');
@@ -157,146 +244,139 @@
             textureCanvas.height = 512;
             const ctx = textureCanvas.getContext('2d');
 
-            // The Oceans: Deep blue, as tradition demands
-            ctx.fillStyle = '#1a4d7c';
+            // Base ocean
+            ctx.fillStyle = '#13294d';
             ctx.fillRect(0, 0, 1024, 512);
 
-            // Ocean depth variation
-            const oceanGradient = ctx.createRadialGradient(512, 256, 0, 512, 256, 400);
-            oceanGradient.addColorStop(0, 'rgba(30, 90, 150, 0.4)');
-            oceanGradient.addColorStop(1, 'rgba(10, 40, 80, 0.6)');
+            // Ocean depth gradient
+            const oceanGradient = ctx.createRadialGradient(512, 256, 50, 512, 256, 520);
+            oceanGradient.addColorStop(0, '#1e5a9e');
+            oceanGradient.addColorStop(1, '#0c223f');
             ctx.fillStyle = oceanGradient;
             ctx.fillRect(0, 0, 1024, 512);
 
-            // Improved continents with better biome coloring
-            ctx.fillStyle = '#3d7c3d';
+            // Latitude-based biome tinting helper
+            function applyLatitudeTint() {
+                const grad = ctx.createLinearGradient(0, 80, 0, 432);
+                grad.addColorStop(0, 'rgba(180,220,240,0.2)');     // arctic
+                grad.addColorStop(0.2, 'rgba(80,160,90,0.15)');    // temperate north
+                grad.addColorStop(0.5, 'rgba(50,130,70,0.12)');    // tropics
+                grad.addColorStop(0.8, 'rgba(80,160,90,0.15)');
+                grad.addColorStop(1, 'rgba(190,220,240,0.2)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 1024, 512);
+            }
+            applyLatitudeTint();
 
-            // NORTH AMERICA — refined shape
+            // Continents
+            ctx.fillStyle = '#2a6b2a';
+            
+            // NORTH AMERICA (refined)
             ctx.beginPath();
-            ctx.moveTo(110, 115);
-            ctx.lineTo(175, 95);
-            ctx.lineTo(245, 105);
-            ctx.lineTo(265, 135);
-            ctx.lineTo(255, 175);
-            ctx.lineTo(235, 195);
-            ctx.lineTo(195, 225);
-            ctx.lineTo(175, 255);
-            ctx.lineTo(155, 240);
-            ctx.lineTo(135, 195);
-            ctx.lineTo(95, 175);
-            ctx.lineTo(75, 145);
+            ctx.moveTo(100, 105);
+            ctx.quadraticCurveTo(145, 82, 195, 95);
+            ctx.lineTo(255, 118);
+            ctx.quadraticCurveTo(275, 155, 235, 215);
+            ctx.lineTo(165, 255);
+            ctx.quadraticCurveTo(115, 215, 85, 145);
             ctx.closePath();
             ctx.fill();
 
             // SOUTH AMERICA
             ctx.beginPath();
-            ctx.moveTo(215, 255);
-            ctx.lineTo(265, 265);
-            ctx.lineTo(275, 315);
-            ctx.lineTo(265, 380);
-            ctx.lineTo(245, 425);
-            ctx.lineTo(225, 430);
-            ctx.lineTo(200, 390);
-            ctx.lineTo(205, 330);
+            ctx.moveTo(200, 255);
+            ctx.quadraticCurveTo(245, 265, 265, 305);
+            ctx.lineTo(255, 390);
+            ctx.quadraticCurveTo(235, 435, 205, 415);
+            ctx.lineTo(198, 310);
             ctx.closePath();
             ctx.fill();
 
-            // EUROPE
+            // EUROPE + ASIA combined with better coast
             ctx.beginPath();
-            ctx.moveTo(470, 95);
-            ctx.lineTo(540, 90);
-            ctx.lineTo(565, 115);
-            ctx.lineTo(550, 145);
-            ctx.lineTo(515, 160);
-            ctx.lineTo(485, 145);
+            ctx.moveTo(445, 88);
+            ctx.lineTo(535, 78);
+            ctx.lineTo(720, 55);
+            ctx.lineTo(815, 105);
+            ctx.lineTo(855, 165);
+            ctx.lineTo(795, 215);
+            ctx.lineTo(685, 235);
+            ctx.lineTo(625, 185);
+            ctx.lineTo(575, 165);
+            ctx.lineTo(505, 105);
             ctx.closePath();
             ctx.fill();
 
             // AFRICA
             ctx.beginPath();
-            ctx.moveTo(475, 175);
-            ctx.lineTo(545, 165);
-            ctx.lineTo(585, 195);
-            ctx.lineTo(595, 265);
-            ctx.lineTo(570, 325);
-            ctx.lineTo(525, 365);
-            ctx.lineTo(495, 355);
+            ctx.moveTo(460, 170);
+            ctx.lineTo(560, 165);
+            ctx.lineTo(595, 195);
+            ctx.lineTo(605, 275);
+            ctx.lineTo(565, 370);
+            ctx.lineTo(495, 365);
             ctx.lineTo(465, 295);
             ctx.closePath();
             ctx.fill();
 
-            // ASIA
+            // INDIA + AUSTRALIA + small islands
             ctx.beginPath();
-            ctx.moveTo(555, 75);
-            ctx.lineTo(710, 65);
-            ctx.lineTo(790, 95);
-            ctx.lineTo(835, 135);
-            ctx.lineTo(810, 185);
-            ctx.lineTo(745, 215);
-            ctx.lineTo(695, 225);
-            ctx.lineTo(640, 195);
-            ctx.lineTo(580, 145);
+            ctx.moveTo(635, 210);
+            ctx.quadraticCurveTo(685, 200, 710, 225);
+            ctx.quadraticCurveTo(730, 255, 675, 280);
             ctx.closePath();
             ctx.fill();
 
-            // INDIA
             ctx.beginPath();
-            ctx.moveTo(635, 215);
-            ctx.lineTo(690, 215);
-            ctx.lineTo(675, 275);
-            ctx.lineTo(640, 285);
+            ctx.moveTo(780, 320);
+            ctx.quadraticCurveTo(850, 295, 890, 325);
+            ctx.quadraticCurveTo(875, 385, 805, 405);
+            ctx.quadraticCurveTo(765, 385, 760, 350);
             ctx.closePath();
             ctx.fill();
 
-            // AUSTRALIA
+            // Additional islands (Japan, Madagascar, Indonesia approx)
+            ctx.fillStyle = '#2a6b2a';
+            ctx.fillRect(795, 185, 18, 22); // Japan
             ctx.beginPath();
-            ctx.moveTo(755, 315);
-            ctx.lineTo(845, 305);
-            ctx.lineTo(865, 345);
-            ctx.lineTo(840, 395);
-            ctx.lineTo(780, 405);
-            ctx.lineTo(755, 370);
+            ctx.ellipse(865, 245, 14, 32, Math.PI * -0.3, 0, Math.PI * 2);
+            ctx.fill(); // Indonesia approx
+
+            // Antarctica
+            ctx.fillStyle = '#e8f0f8';
+            ctx.beginPath();
+            ctx.ellipse(512, 480, 460, 65, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Greenland
+            ctx.fillStyle = '#c8e0c8';
+            ctx.beginPath();
+            ctx.moveTo(310, 62);
+            ctx.lineTo(365, 48);
+            ctx.lineTo(395, 75);
+            ctx.lineTo(375, 115);
+            ctx.lineTo(320, 105);
             ctx.closePath();
             ctx.fill();
 
-            // ANTARCTICA — brighter ice
-            ctx.fillStyle = '#f0f4f8';
-            ctx.beginPath();
-            ctx.moveTo(0, 465);
-            ctx.lineTo(1024, 465);
-            ctx.lineTo(1024, 512);
-            ctx.lineTo(0, 512);
-            ctx.closePath();
-            ctx.fill();
-
-            // GREENLAND
-            ctx.fillStyle = '#b8e0b8';
-            ctx.beginPath();
-            ctx.moveTo(310, 55);
-            ctx.lineTo(375, 48);
-            ctx.lineTo(390, 85);
-            ctx.lineTo(355, 115);
-            ctx.lineTo(315, 95);
-            ctx.closePath();
-            ctx.fill();
-
-            // Mountain ranges (darker)
-            ctx.fillStyle = '#5a4638';
-            drawMountainRange(ctx, 155, 155, 32, 42);
-            drawMountainRange(ctx, 225, 325, 18, 82);
-            drawMountainRange(ctx, 665, 185, 52, 18);
-            drawMountainRange(ctx, 505, 125, 22, 10);
+            // Mountains
+            ctx.fillStyle = '#444a3a';
+            drawMountainRange(ctx, 145, 148, 38, 26);
+            drawMountainRange(ctx, 215, 318, 21, 55);
+            drawMountainRange(ctx, 685, 142, 68, 22);
+            drawMountainRange(ctx, 520, 115, 26, 14);
+            drawMountainRange(ctx, 775, 148, 19, 9);
 
             // Deserts
-            ctx.fillStyle = '#d2b46a';
+            ctx.fillStyle = '#d4b46a';
             ctx.beginPath();
-            ctx.ellipse(515, 205, 42, 27, 0, 0, Math.PI * 2);
+            ctx.ellipse(505, 225, 48, 26, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.ellipse(595, 205, 23, 17, 0, 0, Math.PI * 2);
+            ctx.ellipse(610, 208, 32, 19, 0.3, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.ellipse(815, 345, 27, 22, 0, 0, Math.PI * 2);
+            ctx.ellipse(825, 355, 29, 19, 0, 0, Math.PI * 2);
             ctx.fill();
 
             const earthTexture = new THREE.CanvasTexture(textureCanvas);
@@ -306,42 +386,41 @@
 
             const earthMaterial = new THREE.MeshPhongMaterial({
                 map: earthTexture,
-                shininess: 12,
-                specular: new THREE.Color(0x112233),
+                shininess: 18,
+                specular: new THREE.Color(0x223355),
                 flatShading: false
             });
 
             earth = new THREE.Mesh(earthGeometry, earthMaterial);
             earth.rotation.z = 23.5 * Math.PI / 180;
+            targetRotationY = earth.rotation.y;
 
-            // Create atmosphere
-            const atmosphereGeometry = new THREE.SphereGeometry(1.12, 64, 64);
+            // Atmosphere - inner
+            const atmosphereGeometry = new THREE.SphereGeometry(1.13, 64, 64);
             const atmosphereMaterial = new THREE.MeshPhongMaterial({
                 color: 0x77aaff,
                 transparent: true,
-                opacity: 0.18,
+                opacity: 0.16,
                 side: THREE.BackSide,
-                shininess: 2
+                shininess: 1
             });
             atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
             earth.add(atmosphere);
 
-            // Create clouds
+            // Clouds
             const cloudsCanvas = document.createElement('canvas');
             cloudsCanvas.width = 1024;
             cloudsCanvas.height = 512;
             const cloudsCtx = cloudsCanvas.getContext('2d');
-            
-            // Draw procedural clouds
             cloudsCtx.fillStyle = '#ffffff';
             createCloudBlobs(cloudsCtx, 1024, 512);
             
             const cloudTexture = new THREE.CanvasTexture(cloudsCanvas);
-            const cloudGeometry = new THREE.SphereGeometry(1.015, 64, 64);
+            const cloudGeometry = new THREE.SphereGeometry(1.018, 64, 64);
             const cloudMaterial = new THREE.MeshPhongMaterial({
                 map: cloudTexture,
                 transparent: true,
-                opacity: 0.85,
+                opacity: 0.78,
                 depthWrite: false,
                 shininess: 1
             });
@@ -352,40 +431,28 @@
         }
 
         function createCloudBlobs(ctx, w, h) {
-            ctx.globalAlpha = 0.75;
-            // Multiple cloud formations
+            ctx.globalAlpha = 0.7;
             const cloudPositions = [
-                {x: 120, y: 80, size: 65},
-                {x: 280, y: 110, size: 45},
-                {x: 480, y: 65, size: 55},
-                {x: 680, y: 95, size: 80},
-                {x: 850, y: 140, size: 40},
-                {x: 160, y: 190, size: 35},
-                {x: 720, y: 240, size: 50},
-                {x: 380, y: 280, size: 30},
-                {x: 910, y: 260, size: 38},
-                {x: 510, y: 340, size: 45}
+                {x: 110, y: 75, size: 72}, {x: 290, y: 95, size: 51},
+                {x: 470, y: 55, size: 68}, {x: 710, y: 88, size: 88},
+                {x: 860, y: 135, size: 44}, {x: 155, y: 205, size: 39},
+                {x: 680, y: 255, size: 61}, {x: 390, y: 295, size: 33},
+                {x: 920, y: 275, size: 29}, {x: 530, y: 355, size: 52}
             ];
             
             for (let cloud of cloudPositions) {
-                ctx.globalAlpha = 0.65 + Math.random() * 0.25;
+                ctx.globalAlpha = 0.68 + Math.random() * 0.22;
                 ctx.beginPath();
-                ctx.ellipse(cloud.x, cloud.y, cloud.size, cloud.size * 0.55, 0, 0, Math.PI * 2);
+                ctx.ellipse(cloud.x, cloud.y, cloud.size, cloud.size * 0.52, 0, 0, Math.PI * 2);
                 ctx.fill();
-                
-                // Add softer overlapping blobs for natural look
-                ctx.globalAlpha = 0.45;
+                ctx.globalAlpha = 0.4;
                 ctx.beginPath();
-                ctx.ellipse(cloud.x - cloud.size*0.45, cloud.y - 8, cloud.size*0.6, cloud.size*0.55, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.ellipse(cloud.x + cloud.size*0.4, cloud.y + 5, cloud.size*0.55, cloud.size*0.45, 0, 0, Math.PI * 2);
+                ctx.ellipse(cloud.x - cloud.size*0.4, cloud.y - 12, cloud.size*0.65, cloud.size*0.45, 0, 0, Math.PI * 2);
                 ctx.fill();
             }
             ctx.globalAlpha = 1.0;
         }
 
-        // Helper function: Draw mountain ranges
         function drawMountainRange(ctx, x, y, width, height) {
             ctx.beginPath();
             ctx.ellipse(x, y, width, height, 0, 0, Math.PI * 2);
@@ -393,48 +460,81 @@
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // THE LIGHTS — Let there be illumination
+        // THE LIGHTS
         // ═══════════════════════════════════════════════════════════════
         function createLights() {
-            const ambientLight = new THREE.AmbientLight(0x334455, 0.6);
+            const ambientLight = new THREE.AmbientLight(0x334455, 0.55);
             scene.add(ambientLight);
 
-            const sunLight = new THREE.DirectionalLight(0xffffff, 1.35);
-            sunLight.position.set(5, 1, 4);
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.4);
+            sunLight.position.set(8, 2, 7);
             scene.add(sunLight);
 
-            const fillLight = new THREE.DirectionalLight(0x8899ff, 0.25);
-            fillLight.position.set(-4, -2, -5);
+            const fillLight = new THREE.DirectionalLight(0x99aaff, 0.3);
+            fillLight.position.set(-6, -3, -7);
             scene.add(fillLight);
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // THE ANIMATION LOOP — Eternal rotation with new layers
+        // MOUSE CONTROLS — Mortals may now spin their world
+        // ═══════════════════════════════════════════════════════════════
+        function onMouseDown(e) {
+            isDragging = true;
+            previousMouseX = e.clientX;
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+        }
+
+        function onMouseMove(e) {
+            if (!isDragging || !earth) return;
+            const delta = (e.clientX - previousMouseX) * 0.0045;
+            earth.rotation.y += delta;
+            previousMouseX = e.clientX;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // THE ANIMATION LOOP
         // ═══════════════════════════════════════════════════════════════
         function animate() {
             requestAnimationFrame(animate);
 
-            time += 0.001;
+            time += 0.0012;
 
-            // Rotate the Earth
-            earth.rotation.y += 0.00095;
+            // Earth rotation
+            if (!isDragging) {
+                earth.rotation.y += 0.00095;
+            }
 
-            // Clouds rotate slightly faster (winds in the firmament)
-            if (clouds) clouds.rotation.y += 0.00125;
+            // Clouds move faster
+            if (clouds) clouds.rotation.y += 0.00135;
 
-            // Gentle camera drift for that cinematic feel
-            camera.position.x = Math.sin(time * 0.4) * 0.25;
-            camera.position.y = Math.cos(time * 0.25) * 0.15 + Math.sin(time * 0.1) * 0.05;
+            // Gentle camera drift
+            const drift = 0.22;
+            camera.position.x = Math.sin(time * 0.35) * drift;
+            camera.position.y = Math.cos(time * 0.28) * 0.13 + Math.sin(time * 0.11) * 0.07;
             camera.lookAt(0, 0, 0);
 
-            // Very slow star rotation
-            stars.rotation.y += 0.00008;
+            // Moon orbit (respecting axial tilt approximately)
+            if (moon) {
+                const orbitSpeed = 0.0028;
+                const distance = 3.8;
+                const moonAngle = time * orbitSpeed;
+                moon.position.x = Math.cos(moonAngle) * distance;
+                moon.position.z = Math.sin(moonAngle) * distance * 0.92;
+                moon.position.y = Math.sin(moonAngle * 0.6) * 0.8;
+                moon.rotation.y = time * 0.4;
+            }
+
+            // Subtle star drift
+            if (stars) stars.rotation.y += 0.00006;
 
             renderer.render(scene, camera);
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // RESIZE HANDLER — The divine viewport must adapt
+        // RESIZE HANDLER
         // ═══════════════════════════════════════════════════════════════
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -447,9 +547,9 @@
         // ═══════════════════════════════════════════════════════════════
         init();
 
-        console.log('🌍 THE EARTH — Day 2 of Creation');
-        console.log('The veil of clouds now covers the sphere.');
-        console.log('Atmosphere glows. Complexity Level: 2 / 100');
+        console.log('🌍 THE EARTH — Day 3 of Creation');
+        console.log('The Moon now orbits. Mortals can drag the sphere.');
+        console.log('Complexity Level: 3 / 100');
     </script>
 </body>
 </html>

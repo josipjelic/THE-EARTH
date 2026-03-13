@@ -1,9 +1,9 @@
 {
-  "day": 2,
-  "date": "2026-03-14",
-  "complexityLevel": 2,
-  "totalFeatures": 11,
-  "linesOfCode": 465,
+  "day": 3,
+  "date": "2026-03-15",
+  "complexityLevel": 3,
+  "totalFeatures": 14,
+  "linesOfCode": 590,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -15,7 +15,10 @@
     "Axial tilt (23.5°)",
     "Atmospheric glow sphere",
     "Procedural cloud layer",
-    "Improved land biome shading"
+    "Improved land biome shading",
+    "The Moon with procedural craters and orbit",
+    "Distant glowing Sun sphere",
+    "Mouse drag interaction for manual rotation"
   ],
   "lighting": {
     "ambient": true,
@@ -32,7 +35,7 @@
     "distance": 3
   },
   "phase": "Genesis",
-  "lastUpdate": "2026-03-14T00:00:00Z",
+  "lastUpdate": "2026-03-15T00:00:00Z",
   "changelog": [
     {
       "day": 1,
@@ -54,12 +57,22 @@
         "Enhanced texture with improved continent shapes",
         "Better specular highlights on oceans"
       ]
+    },
+    {
+      "day": 3,
+      "changes": [
+        "Added procedural Moon with cratered canvas texture and realistic orbit",
+        "Added distant glowing Sun sphere as light source visualization",
+        "Implemented mouse drag controls to manually rotate Earth",
+        "Latitude-based biome tinting on texture",
+        "Additional islands and refined continental coastlines"
+      ]
     }
   ],
   "earth": {
-    "day": 2,
-    "complexity_level": 2,
+    "day": 3,
+    "complexity_level": 3,
     "model_used": "x-ai/grok-4.20-multi-agent-beta",
-    "last_updated": "2026-03-13T20:20:23.541Z"
+    "last_updated": "2026-03-13T20:25:29.875Z"
   }
 }
