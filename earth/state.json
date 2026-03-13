@@ -1,9 +1,9 @@
 {
-  "day": 3,
+  "day": 4,
   "date": "2026-03-15",
-  "complexityLevel": 3,
-  "totalFeatures": 14,
-  "linesOfCode": 590,
+  "complexityLevel": 4,
+  "totalFeatures": 15,
+  "linesOfCode": 650,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -18,7 +18,8 @@
     "Improved land biome shading",
     "The Moon with procedural craters and orbit",
     "Distant glowing Sun sphere",
-    "Mouse drag interaction for manual rotation"
+    "Mouse drag interaction for manual rotation",
+    "Tropical flora around the equator"
   ],
   "lighting": {
     "ambient": true,
@@ -35,7 +36,7 @@
     "distance": 3
   },
   "phase": "Genesis",
-  "lastUpdate": "2026-03-15T00:00:00Z",
+  "lastUpdate": "2026-03-14T00:00:00Z",
   "changelog": [
     {
       "day": 1,
@@ -67,12 +68,18 @@
         "Latitude-based biome tinting on texture",
         "Additional islands and refined continental coastlines"
       ]
+    },
+    {
+      "day": 4,
+      "changes": [
+        "Added tropical flora around the equator for ecological variety"
+      ]
     }
   ],
   "earth": {
-    "day": 3,
-    "complexity_level": 3,
-    "model_used": "x-ai/grok-4.20-multi-agent-beta",
-    "last_updated": "2026-03-13T20:25:29.875Z"
+    "day": 4,
+    "complexity_level": 4,
+    "model_used": "openai/gpt-4o-mini",
+    "last_updated": "2026-03-13T20:31:22.471Z"
   }
 }
