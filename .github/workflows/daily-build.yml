@@ -49,6 +49,8 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
           GITHUB_SHA: ${{ github.sha }}
+          # Manual trigger inputs (empty string when triggered by schedule)
+          FORCE_REBUILD: ${{ inputs.force_rebuild }}
         run: node run.js
 
       # ── 4. Commit & Push ────────────────────────────────────
