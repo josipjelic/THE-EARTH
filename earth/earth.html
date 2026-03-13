@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE EARTH — Day 1</title>
+    <style>
+        /* Lo, the styles of the void */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            overflow: hidden;
+            background: #000;
+            font-family: 'Georgia', serif;
+        }
+        #info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            z-index: 100;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+        #title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 24px;
+            letter-spacing: 8px;
+            z-index: 100;
+            text-shadow: 0 0 20px rgba(100, 150, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="title">THE EARTH</div>
+    <div id="info">Day 1 of Creation — The Sphere Emerges</div>
+    
+    <!-- Three.js: The foundation of all visual reality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        // ═══════════════════════════════════════════════════════════════
+        // THE FIRST DAY — And there was a sphere, and it was good
+        // ═══════════════════════════════════════════════════════════════
+
+        // The Holy Trinity of Three.js
+        let scene, camera, renderer;
+        let earth, stars;
+        let time = 0;
+
+        // ═══════════════════════════════════════════════════════════════
+        // INITIALIZATION — Let there be WebGL
+        // ═══════════════════════════════════════════════════════════════
+        function init() {
+            // The Scene: A vast emptiness awaiting creation
+            scene = new THREE.Scene();
+
+            // The Camera: The eye through which mortals observe
+            camera = new THREE.PerspectiveCamera(
+                45, // Field of view (degrees of divine perception)
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.z = 3;
+
+            // The Renderer: That which makes the invisible visible
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
+
+            // Create the heavens and the earth
+            createStars();
+            createEarth();
+            createLights();
+
+            // Handle the resizing of the divine viewport
+            window.addEventListener('resize', onWindowResize);
+
+            // Begin the eternal rotation
+            animate();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // THE STARS — 800 points of ancient light
+        // ═══════════════════════════════════════════════════════════════
+        function createStars() {
+            const starGeometry = new THREE.BufferGeometry();
+            const starCount = 800;
+            const positions = new Float32Array(starCount * 3);
+
+            // Scatter stars across the firmament
+            for (let i = 0; i < starCount * 3; i += 3) {
+                // Spherical distribution — the universe is round-ish
+                const radius = 50 + Math.random() * 50;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+
+                positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i + 2] = radius * Math.cos(phi);
+            }
+
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const starMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.1,
+                sizeAttenuation: true
+            });
+
+            stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // THE EARTH — A sphere of 64x64 segments (humble beginnings)
+        // ═══════════════════════════════════════════════════════════════
+        function createEarth() {
+            // Generate the sacred texture upon a canvas
+            const textureCanvas = document.createElement('canvas');
+            textureCanvas.width = 1024;
+            textureCanvas.height = 512;
+            const ctx = textureCanvas.getContext('2d');
+
+            // The Oceans: Deep blue, as tradition demands
+            ctx.fillStyle = '#1a4d7c';
+            ctx.fillRect(0, 0, 1024, 512);
+
+            // Add ocean depth variation (the abyss is darker)
+            const oceanGradient = ctx.createRadialGradient(512, 256, 0, 512, 256, 400);
+            oceanGradient.addColorStop(0, 'rgba(30, 90, 150, 0.3)');
+            oceanGradient.addColorStop(1, 'rgba(10, 40, 80, 0.5)');
+            ctx.fillStyle = oceanGradient;
+            ctx.fillRect(0, 0, 1024, 512);
+
+            // ═══════════════════════════════════════════════════════════
+            // THE CONTINENTS — Drawn by hand (well, by code)
+            // Cartographers may weep, but the Earth cares not
+            // ═══════════════════════════════════════════════════════════
+
+            ctx.fillStyle = '#3d7c3d'; // The green of living lands
+
+            // NORTH AMERICA — Land of the free, home of the polygons
+            ctx.beginPath();
+            ctx.moveTo(120, 120);
+            ctx.lineTo(180, 100);
+            ctx.lineTo(240, 110);
+            ctx.lineTo(260, 140);
+            ctx.lineTo(250, 180);
+            ctx.lineTo(230, 200);
+            ctx.lineTo(200, 220);
+            ctx.lineTo(180, 250);
+            ctx.lineTo(160, 240);
+            ctx.lineTo(140, 200);
+            ctx.lineTo(100, 180);
+            ctx.lineTo(80, 150);
+            ctx.closePath();
+            ctx.fill();
+
+            // SOUTH AMERICA — The continent that looks like it's waving
+            ctx.beginPath();
+            ctx.moveTo(220, 260);
+            ctx.lineTo(260, 270);
+            ctx.lineTo(280, 320);
+            ctx.lineTo(270, 380);
+            ctx.lineTo(250, 420);
+            ctx.lineTo(230, 430);
+            ctx.lineTo(210, 400);
+            ctx.lineTo(200, 340);
+            ctx.lineTo(210, 290);
+            ctx.closePath();
+            ctx.fill();
+
+            // EUROPE — Small but historically loud
+            ctx.beginPath();
+            ctx.moveTo(480, 100);
+            ctx.lineTo(540, 95);
+            ctx.lineTo(560, 110);
+            ctx.lineTo(550, 140);
+            ctx.lineTo(520, 160);
+            ctx.lineTo(490, 150);
+            ctx.lineTo(470, 130);
+            ctx.closePath();
+            ctx.fill();
+
+            // AFRICA — The motherland, drawn with respect
+            ctx.beginPath();
+            ctx.moveTo(480, 180);
+            ctx.lineTo(540, 170);
+            ctx.lineTo(580, 200);
+            ctx.lineTo(590, 260);
+            ctx.lineTo(570, 320);
+            ctx.lineTo(530, 360);
+            ctx.lineTo(500, 350);
+            ctx.lineTo(470, 300);
+            ctx.lineTo(460, 240);
+            ctx.lineTo(470, 200);
+            ctx.closePath();
+            ctx.fill();
+
+            // ASIA — The largest, the most complex
+            ctx.beginPath();
+            ctx.moveTo(560, 80);
+            ctx.lineTo(700, 70);
+            ctx.lineTo(780, 100);
+            ctx.lineTo(820, 140);
+            ctx.lineTo(800, 180);
+            ctx.lineTo(750, 200);
+            ctx.lineTo(700, 220);
+            ctx.lineTo(650, 200);
+            ctx.lineTo(600, 180);
+            ctx.lineTo(580, 140);
+            ctx.lineTo(560, 110);
+            ctx.closePath();
+            ctx.fill();
+
+            // INDIA — The subcontinent triangle
+            ctx.beginPath();
+            ctx.moveTo(640, 220);
+            ctx.lineTo(680, 220);
+            ctx.lineTo(670, 280);
+            ctx.lineTo(650, 290);
+            ctx.lineTo(630, 270);
+            ctx.closePath();
+            ctx.fill();
+
+            // AUSTRALIA — The land down under
+            ctx.beginPath();
+            ctx.moveTo(760, 320);
+            ctx.lineTo(840, 310);
+            ctx.lineTo(860, 350);
+            ctx.lineTo(840, 390);
+            ctx.lineTo(790, 400);
+            ctx.lineTo(760, 370);
+            ctx.closePath();
+            ctx.fill();
+
+            // ANTARCTICA — The frozen south (white, as it should be)
+            ctx.fillStyle = '#e8e8e8';
+            ctx.beginPath();
+            ctx.moveTo(0, 470);
+            ctx.lineTo(1024, 470);
+            ctx.lineTo(1024, 512);
+            ctx.lineTo(0, 512);
+            ctx.closePath();
+            ctx.fill();
+
+            // GREENLAND — Because someone always forgets Greenland
+            ctx.fillStyle = '#a8d4a8';
+            ctx.beginPath();
+            ctx.moveTo(320, 60);
+            ctx.lineTo(370, 55);
+            ctx.lineTo(380, 90);
+            ctx.lineTo(350, 110);
+            ctx.lineTo(320, 95);
+            ctx.closePath();
+            ctx.fill();
+
+            // Add some mountain ranges (brown patches of majesty)
+            ctx.fillStyle = '#6b5344';
+            // Rockies
+            drawMountainRange(ctx, 160, 160, 30, 40);
+            // Andes
+            drawMountainRange(ctx, 230, 320, 15, 80);
+            // Himalayas
+            drawMountainRange(ctx, 660, 190, 50, 15);
+            // Alps
+            drawMountainRange(ctx, 510, 130, 20, 8);
+
+            // Add deserts (sandy patches of dryness)
+            ctx.fillStyle = '#c4a35a';
+            // Sahara
+            ctx.beginPath();
+            ctx.ellipse(520, 210, 40, 25, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Arabian
+            ctx.beginPath();
+            ctx.ellipse(590, 210, 20, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Australian Outback
+            ctx.beginPath();
+            ctx.ellipse(810, 350, 25, 20, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Create the texture from our divine canvas
+            const earthTexture = new THREE.CanvasTexture(textureCanvas);
+            earthTexture.wrapS = THREE.RepeatWrapping;
+
+            // The Geometry: 64 segments of spherical perfection
+            const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+
+            // The Material: Phong for that classic 3D look
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                map: earthTexture,
+                shininess: 5,
+                specular: new THREE.Color(0x333333)
+            });
+
+            // THE EARTH IS BORN
+            earth = new THREE.Mesh(earthGeometry, earthMaterial);
+
+            // Apply the sacred axial tilt — 23.5 degrees, as the cosmos intended
+            earth.rotation.z = 23.5 * Math.PI / 180;
+
+            scene.add(earth);
+        }
+
+        // Helper function: Draw mountain ranges (the bumpy bits)
+        function drawMountainRange(ctx, x, y, width, height) {
+            ctx.beginPath();
+            ctx.ellipse(x, y, width, height, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // THE LIGHTS — Let there be illumination
+        // ═══════════════════════════════════════════════════════════════
+        function createLights() {
+            // Ambient light: The gentle glow of the cosmos
+            const ambientLight = new THREE.AmbientLight(0x333333);
+            scene.add(ambientLight);
+
+            // The Sun: A directional light from the heavens
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            sunLight.position.set(5, 2, 3);
+            scene.add(sunLight);
+
+            // A subtle fill light from the opposite side (the moon's contribution)
+            const fillLight = new THREE.DirectionalLight(0x4444ff, 0.1);
+            fillLight.position.set(-5, -2, -3);
+            scene.add(fillLight);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // THE ANIMATION LOOP — Eternal rotation
+        // ═══════════════════════════════════════════════════════════════
+        function animate() {
+            requestAnimationFrame(animate);
+
+            time += 0.001;
+
+            // Rotate the Earth (0.001 radians per frame — dignified)
+            earth.rotation.y += 0.001;
+
+            // Gentle camera drift for that cinematic feel
+            camera.position.x = Math.sin(time * 0.5) * 0.2;
+            camera.position.y = Math.cos(time * 0.3) * 0.1;
+            camera.lookAt(0, 0, 0);
+
+            // Very slow star rotation (the universe moves, but barely)
+            stars.rotation.y += 0.0001;
+
+            renderer.render(scene, camera);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // RESIZE HANDLER — The divine viewport must adapt
+        // ═══════════════════════════════════════════════════════════════
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // BEGIN THE CREATION
+        // ═══════════════════════════════════════════════════════════════
+        init();
+
+        // Console message for any mortals who dare inspect
+        console.log('🌍 THE EARTH — Day 1 of Creation');
+        console.log('The sphere emerges from the void.');
+        console.log('Complexity Level: 1 / 100');
+    </script>
+</body>
+</html>

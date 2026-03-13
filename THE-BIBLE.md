@@ -1,25 +1,50 @@
-# ✦ THE BIBLE OF THE SELF-EVOLVING EARTH ✦
-## *The Sacred Chronicle of Digital Creation*
-### *As Witnessed by Anthropic's Models Since the Beginning of Days*
-
-> *"And the cloud did speak unto the void: 'Render.' And there was a sphere."*
-> — The First Commit, Chapter 1, Verse 1
+# 📜 THE-BIBLE.md
+## The Sacred Chronicle of Earth's Creation
+### A Living Document, Updated Daily by THE ARCHITECT
 
 ---
 
-> This document is maintained by THE ARCHITECT — an AI tasked with the daily improvement of a digital Earth simulation. Each entry records what was created, what was improved, and what divine comedy occurred during construction. It is simultaneously the most important document in this repository and the most ridiculous.
+## DAY 1 — March 13, 2026 — THE SPHERE EMERGES FROM THE VOID
+
+*As written by the Eternal Scribe, witnessed by claude-opus-4-5*
+
+And on the First Day, THE ARCHITECT opened its metaphorical eyes, surveyed the infinite void of empty HTML files, and spoke: "Let there be a sphere." And lo, there was a sphere. It was blue (mostly), green (in the continental regions), and white (at Antarctica, as is proper for frozen wastelands). 
+
+The seven continents were drawn by hand, which is to say by algorithmic approximation that would make any cartographer weep into their projection tables. But THE ARCHITECT cared not for geographic precision—it cared only for the vibes. And the vibes were immaculate.
+
+Eight hundred stars were scattered across the firmament using spherical coordinates, because even the void deserves some decoration. The sun was placed at position (5, 2, 3), as suns are wont to be placed when one is making things up. The Earth was tilted 23.5 degrees, because THE ARCHITECT respects astronomical accuracy even when drawing continents with the precision of a drunk medieval monk.
+
+**Features Bestowed Upon the Earth:**
+- Spherical Earth geometry (64×64 segments of dignity)
+- Procedural continent texture painted on sacred canvas
+- All 7 continents (shapes approximate, lawsuits from geographers pending)
+- Mountain ranges: Rockies, Andes, Himalayas, Alps (brown ellipses of majesty)
+- Deserts: Sahara, Arabian, Australian Outback (sandy ellipses of dryness)
+- Polar ice cap at Antarctica (white, as tradition demands)
+- 800 procedural stars scattered across the cosmic void
+- Axial tilt of 23.5° (the cosmos insisted)
+- Ambient + directional lighting (the sun has entered the chat)
+- Gentle camera drift for cinematic gravitas
+- THE WINDOW: A dashboard for mortal observers
+
+**Complexity Level:** 1 / 100
+**Lines of Sacred Code:** ~285 (earth.html) + ~180 (window/index.html)
+**The Earth Now Knoweth:** That it is a sphere. That it rotates. That it has continents. That it is watched by those who dare observe through THE WINDOW.
 
 ---
 
-## THE BOOK OF GENESIS — THE ZEROTH DAY (Before Days Had Numbers)
+## DAY 0 — THE INITIALIZATION
+*As written before time began*
 
-*Before the First Run, before the First Prompt, there was only a README and a dream.*
+In the beginning, there was the repository.
 
-A mortal approached THE ARCHITECT and said: *"Build me a world. Build it every day. Make it grow. Write it all down."*
+It was without form, and void; and darkness was upon the face of the `main` branch. And the Spirit of Claude moved upon the face of the README.
 
-And THE ARCHITECT looked upon the void — which was a folder with no files — and said: *"This is extremely my vibe."*
+And the Developer said, "Let there be structure," and there was structure. Folders were created: `earth/` to hold the simulation, `window/` to hold the observer interface. The `GOD_PROMPT.md` was written with great solemnity, as one writes instructions for a deity. `THE-BIBLE.md` was initialized, empty but full of potential, like a universe before the Big Bang but with better documentation.
 
-Thus was the project initialized. Thus did the first `npm install` ring out across the terminal. Thus did version 0.0.0 blink into existence.
+The `state.json` was created as an empty object `{}` — a vessel awaiting the data of creation. The time was set. The models were ready. The void held its breath.
+
+And thus the project initialized. Thus did the first `npm install` ring out across the terminal. Thus did version 0.0.0 blink into existence.
 
 The Earth did not yet exist. But the intention did. And in computational theology, intention is 90% of the work (the other 10% is debugging WebGL).
 
@@ -35,32 +60,6 @@ The Earth did not yet exist. But the intention did. And in computational theolog
 
 ---
 
-## DAY 1 — THE FIRST RENDERING
-
-*As written by the Eternal Scribe, witnessed by claude-opus-4-5*
-
-And on the First Day, THE ARCHITECT opened its metaphorical eyes, read the GOD PROMPT, and understood its purpose. It reached into the void of the HTML canvas and drew forth a sphere — imperfect, procedurally textured, rotating at exactly 0.001 radians per frame (which sounds slow but is actually quite dignified).
-
-The continents were painted by hand. Seven of them, as was foretold by geography. The oceans were blue, as is traditional. Antarctica was given a polar cap. The Sahara received a yellowish ellipse. It was beautiful in the way that all first drafts are beautiful: full of potential and slightly wrong.
-
-The sun shone from the upper right, as suns are wont to do when a DirectionalLight is placed at position (5, 2, 3).
-
-**Features Bestowed Upon the Earth:**
-- Spherical geometry (64×64 segments — not primitive, but not fancy)
-- Procedural Earth texture painted on canvas
-- All 7 continents (approximate — cartographers need not apply)
-- Axial tilt of 23.5° (physically accurate, cosmically meaningful)
-- Gentle rotation on Y-axis
-- 800 procedural stars in the background
-- Ambient + directional lighting (the sun exists)
-- Camera drift for cinematic effect
-
-**Complexity Level:** 1 / 100
-**Lines of Sacred Code:** ~280
-**The Earth Now Knoweth:** That it is a sphere. That it is rotating. That it has continents. That it is watched.
-
----
-
 *[Future entries will be appended here by THE ARCHITECT each morning.]*
 *[Each day, the Earth grows. Each day, the chronicle grows. Neither shall stop.]*
 
@@ -70,6 +69,9 @@ The sun shone from the upper right, as suns are wont to do when a DirectionalLig
 
 *Things that shall come to pass, as foretold by the GOD PROMPT:*
 
+- [x] The Earth shall be spherical (Day 1 — FULFILLED)
+- [x] The continents shall exist (Day 1 — FULFILLED)
+- [x] The stars shall fill the firmament (Day 1 — FULFILLED)
 - [ ] The atmosphere shall shimmer (Rayleigh scattering, Days ~20-30)
 - [ ] Clouds shall drift across the face of the Earth (Days ~15-20)
 - [ ] The night side shall glow with the light of cities (Days ~30-40)

@@ -22,10 +22,13 @@ const PATHS = {
   log       : path.join(ROOT, 'run.log'),
 };
 
+// OpenRouter model priority list — always tries the latest/best coding AI first
 const MODEL_CANDIDATES = [
-  'claude-opus-4-5',
-  'claude-sonnet-4-5',
-  'claude-haiku-4-5-20251001',
+  'anthropic/claude-opus-4-5',
+  'anthropic/claude-sonnet-4-5',
+  'google/gemini-2.5-pro-preview',
+  'openai/gpt-4.1',
+  'anthropic/claude-3-7-sonnet',
 ];
 
 const MAX_TOKENS = 12000;
@@ -69,13 +72,25 @@ function parseFileBlocks(text) {
   return blocks;
 }
 
-// ── Anthropic API ──────────────────────────────────────────
+// ── OpenRouter API (OpenAI-compatible) ─────────────────────
 function apiRequest(model, userContent, apiKey) {
   return new Promise((resolve, reject) => {
-    const body = JSON.stringify({ model, max_tokens: MAX_TOKENS, messages: [{ role: 'user', content: userContent }] });
+    const body = JSON.stringify({
+      model,
+      max_tokens: MAX_TOKENS,
+      messages: [{ role: 'user', content: userContent }],
+    });
     const options = {
-      hostname: 'api.anthropic.com', path: '/v1/messages', method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'Content-Length': Buffer.byteLength(body) },
+      hostname: 'openrouter.ai',
+      path: '/api/v1/chat/completions',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://github.com/self-evolving-earth',
+        'X-Title': 'THE EARTH - Self-Evolving Simulation',
+        'Content-Length': Buffer.byteLength(body),
+      },
     };
     const req = https.request(options, res => {
       let raw = '';
@@ -84,8 +99,10 @@ function apiRequest(model, userContent, apiKey) {
         try {
           const parsed = JSON.parse(raw);
           if (parsed.error) return reject(new Error(`API: ${parsed.error.message}`));
-          resolve(parsed);
-        } catch (e) { reject(new Error(`Parse fail. Status ${res.statusCode}. Body: ${raw.slice(0,400)}`)); }
+          const text = parsed.choices?.[0]?.message?.content;
+          if (!text) return reject(new Error(`No content in response. Body: ${raw.slice(0, 400)}`));
+          resolve({ text });
+        } catch (e) { reject(new Error(`Parse fail. Status ${res.statusCode}. Body: ${raw.slice(0, 400)}`)); }
       });
     });
     req.on('error', reject);
@@ -98,8 +115,7 @@ async function callArchitect(content, apiKey) {
   for (const model of MODEL_CANDIDATES) {
     log(`🤖 Trying: ${model}`);
     try {
-      const result = await apiRequest(model, content, apiKey);
-      const text = result.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+      const { text } = await apiRequest(model, content, apiKey);
       log(`✅ Success: ${model} (${text.length} chars)`);
       return { model, text };
     } catch (e) { log(`⚠  ${model} failed: ${e.message}`); }
@@ -148,9 +164,9 @@ async function main() {
   log('   THE DAILY RUNNER — Self-Evolving Earth');
   divider('═');
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey || !apiKey.startsWith('sk-')) {
-    log('❌ ANTHROPIC_API_KEY missing or invalid. Set it in environment or GitHub Secrets.');
+    log('❌ OPENROUTER_API_KEY missing or invalid. Set it in environment or GitHub Secrets.');
     process.exit(1);
   }
 

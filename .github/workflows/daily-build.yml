@@ -44,7 +44,7 @@ jobs:
       # ── 3. Run the Builder ──────────────────────────────────
       - name: ⚡ Summon THE ARCHITECT
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # Pass repo info so run.js can use it in state/bible
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
