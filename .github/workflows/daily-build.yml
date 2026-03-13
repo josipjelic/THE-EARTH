@@ -5,7 +5,7 @@ on:
     # 8:00 AM UTC every day — THE ARCHITECT awakens
     - cron: '0 8 * * *'
 
-  # Also allow manual trigger from GitHub UI ("Run workflow" button)
+  # Also allow manual trigger from GitHub UI ("Run workflow" button).
   workflow_dispatch:
     inputs:
       force_rebuild:
