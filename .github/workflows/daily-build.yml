@@ -83,7 +83,7 @@ jobs:
               "${DAY}" "${COMPLEXITY}" "${PHASE}" "${MODEL}" "${GITHUB_RUN_NUMBER}")
             git commit -m "${COMMIT_MSG}"
 
-            git pull --rebase origin main
+            git pull --rebase -X theirs origin main
             git push origin HEAD:main
             echo "✅ Day ${DAY} committed to the eternal repository."
           fi
