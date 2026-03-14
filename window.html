@@ -235,7 +235,7 @@
         </div>
 
         <div class="earth-link">
-            <a href="/THE-EARTH/earth.html">👁 OBSERVE THE EARTH 👁</a>
+            <a href="earth.html">👁 OBSERVE THE EARTH 👁</a>
         </div>
 
         <div class="phase-banner">
@@ -294,20 +294,37 @@
     </div>
     <script>
     (function() {
+        function getPhaseDetails(phase, complexity) {
+            if (complexity >= 100 || phase === 'Age of Gods') {
+                return 'Days 101+: planetary simulation reaches mythic scale';
+            }
+            if (complexity >= 60 || phase === 'Age of Data') {
+                return 'Days 61–100: live systems and global data awaken';
+            }
+            if (complexity >= 30 || phase === 'Age of Detail') {
+                return 'Days 31–60: textures, cities, and surface detail deepen';
+            }
+            if (complexity >= 10 || phase === 'Living World') {
+                return 'Days 11–30: weather, lights, and life begin to move';
+            }
+            return 'Days 1–10: the foundations of Earth are still forming';
+        }
+
         fetch('earth/state.json').then(r => r.json()).then(s => {
             const day = s.earth?.day ?? s.day ?? 0;
             const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 0;
             const features = s.features ?? [];
             const loc = s.linesOfCode ?? 0;
             const phase = s.phase ?? 'Genesis';
+            const featureCount = features.length || s.totalFeatures || 0;
 
             document.getElementById('metric-day').textContent = day;
             document.getElementById('metric-complexity').textContent = complexity;
-            document.getElementById('metric-features').textContent = features.length || s.totalFeatures ?? 0;
+            document.getElementById('metric-features').textContent = featureCount;
             document.getElementById('metric-loc').textContent = loc ? '~' + loc : '—';
 
             document.getElementById('phase-name').textContent = phase + ' Phase';
-            document.getElementById('phase-days').textContent = 'Days ' + Math.max(1, day - 9) + '–' + (day + 1) + ': The foundations are laid';
+            document.getElementById('phase-days').textContent = getPhaseDetails(phase, complexity);
 
             document.getElementById('progress-fill').style.width = complexity + '%';
             document.getElementById('progress-label').textContent = complexity + ' / 100';
@@ -320,7 +337,7 @@
             if (s.camera?.fov) specs.push('Camera Field of View: ' + s.camera.fov + '°');
             specs.push('Rendering Engine: Three.js r128');
             specs.push('Texture Resolution: 1024×512');
-            specs.push('Star Count: 800');
+            specs.push('Star Count: 2000');
             document.getElementById('tech-specs-list').innerHTML = specs.map(x => '<li>' + x + '</li>').join('');
 
             // Changelog
