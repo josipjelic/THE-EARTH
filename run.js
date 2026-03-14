@@ -26,11 +26,11 @@ const PATHS = {
 const MODEL_CANDIDATES = [
   'openai/gpt-4o-mini',
   'anthropic/claude-3.5-haiku',
-  'google/gemini-2.0-flash',
+  'google/gemini-2.0-flash-001',
   'anthropic/claude-3.5-sonnet',
 ];
 
-const MAX_TOKENS = 12000;
+const MAX_TOKENS = 10000;
 
 // ── Logging ────────────────────────────────────────────────
 function log(msg) {
