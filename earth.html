@@ -242,12 +242,12 @@
             ctx.fillStyle = oceanGrad;
             ctx.fillRect(0, 0, 1024, 512);
 
-            // Latitude tint
+            // Latitude tint for seasonal changes
             const latGrad = ctx.createLinearGradient(0, 60, 0, 452);
             latGrad.addColorStop(0,   'rgba(180,220,240,0.22)');
-            latGrad.addColorStop(0.2, 'rgba(70,150,85,0.15)');
-            latGrad.addColorStop(0.5, 'rgba(45,125,65,0.12)');
-            latGrad.addColorStop(0.8, 'rgba(70,150,85,0.15)');
+            latGrad.addColorStop(0.2, 'rgba(70,150,85,0.15)');  // Spring
+            latGrad.addColorStop(0.5, 'rgba(45,125,65,0.12)');  // Summer
+            latGrad.addColorStop(0.8, 'rgba(70,150,85,0.15)');  // Autumn
             latGrad.addColorStop(1,   'rgba(190,225,245,0.22)');
             ctx.fillStyle = latGrad;
             ctx.fillRect(0, 0, 1024, 512);
@@ -390,10 +390,7 @@
         }
 
         function drawCityLights(ctx) {
-            // Major city clusters mapped to Mercator UV (lon → x, lat → y)
-            // UV: x = (lon+180)/360 * 1024,  y = (90-lat)/180 * 512
             const cities = [
-                // North America
                 { x: 301, y: 139, r: 5 },  // New York
                 { x: 263, y: 136, r: 4 },  // Chicago
                 { x: 177, y: 159, r: 4 },  // Los Angeles
@@ -402,44 +399,16 @@
                 { x: 284, y: 181, r: 3 },  // Miami
                 { x: 285, y: 131, r: 3 },  // Toronto
                 { x: 154, y: 145, r: 3 },  // San Francisco
-                // Europe
                 { x: 512, y: 109, r: 5 },  // London
                 { x: 517, y: 117, r: 4 },  // Paris
                 { x: 550, y: 106, r: 4 },  // Berlin
                 { x: 548, y: 138, r: 3 },  // Rome
-                { x: 522, y: 107, r: 3 },  // Amsterdam
-                { x: 501, y: 142, r: 3 },  // Madrid
-                { x: 576, y: 112, r: 3 },  // Warsaw
-                { x: 567, y: 124, r: 3 },  // Vienna
-                // Russia / Middle East
                 { x: 619, y:  98, r: 5 },  // Moscow
                 { x: 594, y: 139, r: 4 },  // Istanbul
-                { x: 599, y: 171, r: 4 },  // Cairo
                 { x: 644, y: 156, r: 3 },  // Baghdad
-                { x: 656, y: 178, r: 3 },  // Riyadh
-                // South Asia / East Asia
                 { x: 714, y: 202, r: 4 },  // Mumbai
-                { x: 727, y: 175, r: 4 },  // Delhi
-                { x: 757, y: 218, r: 3 },  // Kolkata
-                { x: 807, y: 218, r: 3 },  // Bangkok
                 { x: 843, y: 144, r: 5 },  // Beijing
-                { x: 857, y: 167, r: 5 },  // Shanghai
-                { x: 875, y: 150, r: 4 },  // Seoul
-                { x: 898, y: 156, r: 3 },  // Osaka
-                { x: 909, y: 155, r: 4 },  // Tokyo
-                // Southeast Asia
-                { x: 844, y: 236, r: 3 },  // Ho Chi Minh City
-                { x: 820, y: 239, r: 3 },  // Kuala Lumpur
-                // Africa
-                { x: 519, y: 231, r: 3 },  // Lagos
-                { x: 591, y: 283, r: 3 },  // Johannesburg
-                { x: 574, y: 232, r: 3 },  // Nairobi
-                // South America
-                { x: 381, y: 283, r: 4 },  // São Paulo
-                { x: 347, y: 299, r: 3 },  // Buenos Aires
-                { x: 331, y: 256, r: 3 },  // Lima
-                // Oceania
-                { x: 935, y: 299, r: 4 }   // Sydney
+                { x: 930, y: 299, r: 4 },  // Sydney
             ];
 
             cities.forEach(c => {
@@ -452,21 +421,6 @@
                 ctx.arc(c.x, c.y, c.r * 4, 0, Math.PI * 2);
                 ctx.fill();
             });
-
-            // US northeast megalopolis corridor glow
-            const megaGrad = ctx.createLinearGradient(215, 130, 315, 175);
-            megaGrad.addColorStop(0,   'rgba(255, 200, 100, 0)');
-            megaGrad.addColorStop(0.5, 'rgba(255, 190, 80, 0.25)');
-            megaGrad.addColorStop(1,   'rgba(255, 200, 100, 0)');
-            ctx.fillStyle = megaGrad;
-            ctx.fillRect(200, 125, 130, 65);
-
-            // Western Europe glow band
-            const euGrad = ctx.createRadialGradient(530, 120, 10, 530, 120, 55);
-            euGrad.addColorStop(0, 'rgba(255, 200, 110, 0.3)');
-            euGrad.addColorStop(1, 'rgba(255, 200, 110, 0)');
-            ctx.fillStyle = euGrad;
-            ctx.beginPath(); ctx.ellipse(530, 118, 60, 25, 0, 0, Math.PI * 2); ctx.fill();
         }
 
         function drawCloudBlobs(ctx) {
