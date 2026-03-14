@@ -202,6 +202,26 @@
             font-size: 0.85em;
             margin-top: 20px;
         }
+        .changelog-entry {
+            border-left: 2px solid rgba(100, 150, 255, 0.3);
+            padding: 12px 0 12px 16px;
+            margin-bottom: 10px;
+        }
+        .changelog-entry:last-child { margin-bottom: 0; }
+        .changelog-day {
+            font-size: 0.8em;
+            letter-spacing: 2px;
+            color: #6ab0ff;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .changelog-changes {
+            list-style: none;
+            color: #aaa;
+            font-size: 0.88em;
+            line-height: 1.6;
+        }
+        .changelog-changes li::before { content: '— '; color: #555; }
     </style>
 </head>
 <body>
@@ -260,6 +280,11 @@
             <ul class="feature-list" id="tech-specs-list"></ul>
         </div>
 
+        <div class="features-section" id="changelog-section">
+            <h2>Chronicle of Creation</h2>
+            <div id="changelog-list"></div>
+        </div>
+
         <p class="last-update" id="last-update">Loading…</p>
 
         <footer>
@@ -297,6 +322,19 @@
             specs.push('Texture Resolution: 1024×512');
             specs.push('Star Count: 800');
             document.getElementById('tech-specs-list').innerHTML = specs.map(x => '<li>' + x + '</li>').join('');
+
+            // Changelog
+            const changelog = s.changelog ?? [];
+            const clEl = document.getElementById('changelog-list');
+            if (changelog.length) {
+                clEl.innerHTML = [...changelog].reverse().slice(0, 8).map(entry => `
+                    <div class="changelog-entry">
+                        <div class="changelog-day">Day ${entry.day}</div>
+                        <ul class="changelog-changes">${(entry.changes || []).map(c => `<li>${c}</li>`).join('')}</ul>
+                    </div>`).join('');
+            } else {
+                clEl.innerHTML = '<p style="color:#555;font-size:0.9em;">No entries yet.</p>';
+            }
 
             const updated = s.earth?.last_updated ? new Date(s.earth.last_updated) : new Date();
             document.getElementById('last-update').textContent = 'Last Updated: ' + updated.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ' — Day ' + day + ' of Creation';
