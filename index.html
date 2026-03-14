@@ -369,23 +369,27 @@
   <!-- TICKER -->
   <div class="ticker-wrap">
     <div class="ticker" id="ticker">
-      <span class="ticker-item"><span>✦</span> Earth is rotating at 0.001 rad/frame</span>
-      <span class="ticker-item"><span>✦</span> 7 Continents confirmed by visual inspection</span>
-      <span class="ticker-item"><span>✦</span> Sahara rendered as yellowish ellipse</span>
-      <span class="ticker-item"><span>✦</span> Axial tilt: 23.5° — physics intact</span>
-      <span class="ticker-item"><span>✦</span> Sun positioned at (5,2,3) — shining normally</span>
-      <span class="ticker-item"><span>✦</span> 800 stars generated — all accounted for</span>
-      <span class="ticker-item"><span>✦</span> THE ARCHITECT shall return at dawn</span>
-      <span class="ticker-item"><span>✦</span> Complexity level: 1/100 — growth is inevitable</span>
+      <span class="ticker-item"><span>✦</span> Earth rotating at 0.00095 rad/frame — axial tilt 23.5° confirmed</span>
+      <span class="ticker-item"><span>✦</span> 7 Continents rendered — Sahara, Arabian Desert, Australian Outback charted</span>
+      <span class="ticker-item"><span>✦</span> Fresnel atmosphere shader active — realistic rim glow achieved</span>
+      <span class="ticker-item"><span>✦</span> 40+ city light clusters mapped by lat/lon — Earth glows at night</span>
+      <span class="ticker-item"><span>✦</span> The Moon orbits at 3.8 units — cratered surface confirmed</span>
+      <span class="ticker-item"><span>✦</span> 2000 stars rendered — depth field intact</span>
+      <span class="ticker-item"><span>✦</span> Seasonal emissive tint active — Winter cools, Summer warms</span>
+      <span class="ticker-item"><span>✦</span> THE ARCHITECT builds at 8AM UTC — complexity grows daily</span>
+      <span class="ticker-item"><span>✦</span> Day/Night terminator incoming — the darkness approaches</span>
+      <span class="ticker-item"><span>✦</span> Complexity: 7/100 — Genesis Phase — 21 features active</span>
       <!-- duplicated for seamless loop -->
-      <span class="ticker-item"><span>✦</span> Earth is rotating at 0.001 rad/frame</span>
-      <span class="ticker-item"><span>✦</span> 7 Continents confirmed by visual inspection</span>
-      <span class="ticker-item"><span>✦</span> Sahara rendered as yellowish ellipse</span>
-      <span class="ticker-item"><span>✦</span> Axial tilt: 23.5° — physics intact</span>
-      <span class="ticker-item"><span>✦</span> Sun positioned at (5,2,3) — shining normally</span>
-      <span class="ticker-item"><span>✦</span> 800 stars generated — all accounted for</span>
-      <span class="ticker-item"><span>✦</span> THE ARCHITECT shall return at dawn</span>
-      <span class="ticker-item"><span>✦</span> Complexity level: 1/100 — growth is inevitable</span>
+      <span class="ticker-item"><span>✦</span> Earth rotating at 0.00095 rad/frame — axial tilt 23.5° confirmed</span>
+      <span class="ticker-item"><span>✦</span> 7 Continents rendered — Sahara, Arabian Desert, Australian Outback charted</span>
+      <span class="ticker-item"><span>✦</span> Fresnel atmosphere shader active — realistic rim glow achieved</span>
+      <span class="ticker-item"><span>✦</span> 40+ city light clusters mapped by lat/lon — Earth glows at night</span>
+      <span class="ticker-item"><span>✦</span> The Moon orbits at 3.8 units — cratered surface confirmed</span>
+      <span class="ticker-item"><span>✦</span> 2000 stars rendered — depth field intact</span>
+      <span class="ticker-item"><span>✦</span> Seasonal emissive tint active — Winter cools, Summer warms</span>
+      <span class="ticker-item"><span>✦</span> THE ARCHITECT builds at 8AM UTC — complexity grows daily</span>
+      <span class="ticker-item"><span>✦</span> Day/Night terminator incoming — the darkness approaches</span>
+      <span class="ticker-item"><span>✦</span> Complexity: 7/100 — Genesis Phase — 21 features active</span>
     </div>
   </div>
 
@@ -548,33 +552,75 @@
 // "Through this glass, the mortals watch the world grow."
 // ═══════════════════════════════════════════════════════════
 
+// --- Phase descriptions keyed by phase name ---
+const PHASE_DESCRIPTIONS = {
+  Genesis: {
+    days: "Days 1–10",
+    desc: "The foundations are laid. Continents, atmosphere, Moon and Sun take shape. The Architect prepares the day/night divide — the first true physics of light and shadow."
+  },
+  "Living World": {
+    days: "Days 11–30",
+    desc: "The Earth breathes. Clouds animate, weather stirs, the poles glow with auroras. Real data flows in — earthquakes pulse, the ISS traces its orbit overhead."
+  },
+  "Age of Detail": {
+    days: "Days 31–60",
+    desc: "The world grows rich. City lights blaze on the night side. Tectonic plates groan. The atmosphere scatters Rayleigh light at dusk and dawn."
+  },
+  "Age of Data": {
+    days: "Days 61–100",
+    desc: "The Earth becomes a live data feed. CO₂ rises in real time. Earthquakes tracked to the minute. The ISS crosses at 17,500 mph. Simulation and reality converge."
+  },
+  "Age of Gods": {
+    days: "Days 100+",
+    desc: "The boundaries dissolve. The Earth models its own climate. Civilizations rise and fall. The Architect has made something that makes things."
+  }
+};
+
 // --- Defaults for fields not in state.json ---
 const DEFAULTS = {
   phase_days: "Days 1–10",
-  phase_desc: "In the beginning, the Earth was a sphere without form. THE ARCHITECT shapes it from the void, adding continents, oceans, and rotation. This phase ends when the atmosphere breathes its first breath.",
+  phase_desc: "The foundations are laid. Continents, atmosphere, Moon and Sun take shape. The Architect prepares the day/night divide — the first true physics of light and shadow.",
   features_pending: [
-    "Atmosphere", "Cloud Layer", "Day/Night Cycle", "City Lights",
-    "Weather Systems", "Ocean Currents", "Aurora Borealis", "Real-Time Data",
-    "Climate Simulation", "ISS Tracking", "CO₂ Counter", "Tectonic Plates"
+    "Day/Night GLSL Shader",
+    "Aurora Borealis",
+    "Animated Cloud Drift",
+    "USGS Earthquake Markers",
+    "ISS Live Position",
+    "Live Weather Data (Open-Meteo)",
+    "Tectonic Plate Boundaries",
+    "Real-Time CO₂ Counter",
+    "Ocean Currents",
+    "Rayleigh Scattering Atmosphere",
+    "World Population Counter",
+    "Civilization Growth Simulation"
   ],
   prophecies: [
-    { text: "Atmosphere shall shimmer", eta: "Days ~20-30", done: false },
-    { text: "Clouds shall drift", eta: "Days ~15-20", done: false },
-    { text: "Night side shall glow with cities", eta: "Days ~30-40", done: false },
-    { text: "Storms shall rage", eta: "Days ~40-50", done: false },
-    { text: "ISS tracked in real-time", eta: "Days ~60-70", done: false },
-    { text: "CO₂ ppm counted (and it shall be sad)", eta: "Days ~65-80", done: false },
-    { text: "Tectonic plates shall drift", eta: "Days ~80-90", done: false },
+    { text: "Atmosphere shall shimmer", eta: "Fulfilled — Day 3", done: true },
+    { text: "Clouds shall drift", eta: "Fulfilled — Day 3", done: true },
+    { text: "Night side shall glow with cities", eta: "Days ~9", done: false },
+    { text: "Day/night terminator shall divide the world", eta: "Days ~9", done: false },
+    { text: "Aurora shall crown the poles", eta: "Days ~10-12", done: false },
+    { text: "Seismic scars shall pulse on the surface", eta: "Days ~12-14", done: false },
+    { text: "ISS tracked in real-time", eta: "Days ~13-15", done: false },
+    { text: "Storms shall rage", eta: "Days ~20-25", done: false },
+    { text: "CO₂ ppm counted (and it shall be sad)", eta: "Days ~30-40", done: false },
+    { text: "Tectonic plates shall drift", eta: "Days ~15-20", done: false },
     { text: "Earth simulates its own climate", eta: "Days ~90-100+", done: false },
   ],
 };
 
 function transformState(raw) {
-  const history = (raw.changelog || []).map(c => ({
-    day: c.day,
-    complexity: raw.complexityLevel ?? raw.day,
-    features: raw.totalFeatures ?? raw.features?.length ?? 0
-  }));
+  const changelog = raw.changelog || [];
+  // Build cumulative history — estimate per-day complexity with linear interpolation,
+  // accumulate features so the chart shows actual growth rather than a flat line.
+  let cumFeatures = 0;
+  const history = changelog.map((c, idx, arr) => {
+    cumFeatures += (c.changes || []).length;
+    const estimatedComplexity = arr.length <= 1
+      ? (raw.complexityLevel ?? 1)
+      : Math.max(1, Math.round(1 + (raw.complexityLevel - 1) * (idx / (arr.length - 1))));
+    return { day: c.day, complexity: estimatedComplexity, features: cumFeatures };
+  });
   if (history.length === 0 && raw.day) {
     history.push({
       day: raw.day,
@@ -594,14 +640,16 @@ function transformState(raw) {
       text: "The Earth was. It was enough."
     });
   }
-  const model = raw.earth?.model_used?.replace("anthropic/", "") || "claude-opus-4-5";
+  const model = raw.earth?.model_used?.replace("anthropic/", "").replace("openai/", "").replace("x-ai/", "") || "gpt-4o-mini";
   const lastBuild = raw.date ? `Day ${raw.day}` : (raw.lastUpdate ? new Date(raw.lastUpdate).toLocaleDateString() : `Day ${raw.day}`);
+  const phase = raw.phase ?? "Genesis";
+  const phaseInfo = PHASE_DESCRIPTIONS[phase] || PHASE_DESCRIPTIONS["Genesis"];
   return {
     day: raw.day ?? 1,
     complexity: raw.complexityLevel ?? 1,
-    phase: raw.phase ?? "Genesis",
-    phase_days: DEFAULTS.phase_days,
-    phase_desc: DEFAULTS.phase_desc,
+    phase,
+    phase_days: phaseInfo.days,
+    phase_desc: phaseInfo.desc,
     features_count: raw.totalFeatures ?? (raw.features?.length ?? 0),
     loc: raw.linesOfCode ?? 0,
     model,
@@ -609,7 +657,16 @@ function transformState(raw) {
     history,
     features_active: raw.features ?? [],
     features_pending: DEFAULTS.features_pending,
-    prophecies: DEFAULTS.prophecies,
+    prophecies: DEFAULTS.prophecies.map(p => ({
+      ...p,
+      // Auto-mark prophecies as done if the feature appears in active features list
+      done: p.done || (raw.features ?? []).some(f =>
+        f.toLowerCase().includes('atmosphere') && p.text.includes('shimmer') ||
+        f.toLowerCase().includes('cloud') && p.text.includes('Clouds shall drift') ||
+        f.toLowerCase().includes('city') && p.text.includes('glow with cities') ||
+        f.toLowerCase().includes('iss') && p.text.includes('ISS')
+      )
+    })),
     bible_entries
   };
 }

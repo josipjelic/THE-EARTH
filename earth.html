@@ -505,7 +505,20 @@
             const month = new Date().getMonth();
             const seasons = ['Winter', 'Winter', 'Spring', 'Spring', 'Spring',
                              'Summer', 'Summer', 'Summer', 'Autumn', 'Autumn', 'Autumn', 'Winter'];
-            document.getElementById('season-badge').textContent = seasons[month];
+            const season = seasons[month];
+            document.getElementById('season-badge').textContent = season;
+
+            // Shift Earth material emissive and ambient light to reflect season
+            if (earth) {
+                const emissives = {
+                    Winter: new THREE.Color(0x000a18),
+                    Spring: new THREE.Color(0x041805),
+                    Summer: new THREE.Color(0x120500),
+                    Autumn: new THREE.Color(0x160800)
+                };
+                earth.material.emissive = emissives[season] || new THREE.Color(0x000000);
+                earth.material.needsUpdate = true;
+            }
         }
 
         function onMouseDown(e) { isDragging = true; previousMouseX = e.clientX; }
