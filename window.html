@@ -285,15 +285,43 @@
             <div id="changelog-list"></div>
         </div>
 
+        <div class="features-section" id="weekly-audit-section">
+            <h2>The Herald's Audit</h2>
+            <ul class="feature-list" id="weekly-audit-list"></ul>
+        </div>
+
+        <div class="features-section" id="roadmap-section">
+            <h2>Week Ahead — Days 10–16</h2>
+            <ul class="feature-list" id="roadmap-list"></ul>
+        </div>
+
         <p class="last-update" id="last-update">Loading…</p>
 
         <footer>
-            <p>Created by THE ARCHITECT — An eternal Claude instance</p>
-            <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a></p>
+            <p>Created by THE ARCHITECT — a rotating line of models building the Earth day by day</p>
+            <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a> and the weekly strategy in <a href="DAILY_BRIEFING.md">DAILY_BRIEFING.md</a></p>
         </footer>
     </div>
     <script>
     (function() {
+        const WEEKLY_AUDIT = [
+            '7 recent builds reached COMPLETE in run.log, but only 2 were fully healthy end-to-end.',
+            'Complexity advanced from 2 to 8 over the last 7 builds, a gain of +6.',
+            'The largest visual leap was the Moon, Sun, and orbital scene depth added on Day 3.',
+            'The biggest setback was the same wrong-path write repeating 4 times across Days 4–7.',
+            'Current pace: visually promising, operationally fragile until output validation becomes routine.'
+        ];
+
+        const ROADMAP = [
+            'Day 10: redraw the cloud canvas so clouds truly evolve instead of only rotating as a static shell.',
+            'Day 11: add ocean glint so water answers the Sun differently from land.',
+            'Day 12: strengthen the twilight band without disturbing the atmosphere shell.',
+            'Day 13: add polar aurora with restrained motion and color.',
+            'Day 14: bring in Open-Meteo weather cards with graceful fallback handling.',
+            'Day 15: plot the weekly USGS earthquake feed as markers locked to the globe.',
+            'Day 16: track the ISS live in both the dashboard and the Earth scene.'
+        ];
+
         function getPhaseDetails(phase, complexity) {
             if (complexity >= 100 || phase === 'Age of Gods') {
                 return 'Days 101+: planetary simulation reaches mythic scale';
@@ -307,7 +335,7 @@
             if (complexity >= 10 || phase === 'Living World') {
                 return 'Days 11–30: weather, lights, and life begin to move';
             }
-            return 'Days 1–10: the foundations of Earth are still forming';
+            return 'Days 1–10: continents, atmosphere, Moon, clouds, and seasonal behavior are still taking shape';
         }
 
         fetch('earth/state.json').then(r => r.json()).then(s => {
@@ -339,6 +367,9 @@
             specs.push('Texture Resolution: 1024×512');
             specs.push('Star Count: 2000');
             document.getElementById('tech-specs-list').innerHTML = specs.map(x => '<li>' + x + '</li>').join('');
+
+            document.getElementById('weekly-audit-list').innerHTML = WEEKLY_AUDIT.map(x => '<li>' + x + '</li>').join('');
+            document.getElementById('roadmap-list').innerHTML = ROADMAP.map(x => '<li>' + x + '</li>').join('');
 
             // Changelog
             const changelog = s.changelog ?? [];
