@@ -277,13 +277,15 @@
             ctx.fillStyle = oceanGrad;
             ctx.fillRect(0, 0, 1024, 512);
 
-            // Latitude tint for seasonal changes
+            // Latitude tint for seasonal changes; updated for more realistic temperature gradient
             const latGrad = ctx.createLinearGradient(0, 60, 0, 452);
-            latGrad.addColorStop(0,   'rgba(180,220,240,0.22)');
+            latGrad.addColorStop(0,   'rgba(255,255,255,0.35)'); // arctic ice
+            latGrad.addColorStop(0.1, 'rgba(180,220,240,0.22)');
             latGrad.addColorStop(0.2, 'rgba(70,150,85,0.15)');  // Spring
             latGrad.addColorStop(0.5, 'rgba(45,125,65,0.12)');  // Summer
             latGrad.addColorStop(0.8, 'rgba(70,150,85,0.15)');  // Autumn
-            latGrad.addColorStop(1,   'rgba(190,225,245,0.22)');
+            latGrad.addColorStop(0.9,   'rgba(240,200,90,0.18)'); // Deserts
+            latGrad.addColorStop(1,   'rgba(255,255,255,0.35)'); // antarctic ice
             ctx.fillStyle = latGrad;
             ctx.fillRect(0, 0, 1024, 512);
 
@@ -347,10 +349,30 @@
                 ctx.beginPath(); ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2); ctx.fill();
             });
 
-            // Deserts
+            // Deserts - Make them yellower
             ctx.fillStyle = '#d4b46a';
             [[505, 225, 48, 26, 0], [610, 208, 32, 19, 0.3], [825, 355, 29, 19, 0]].forEach(([x, y, rx, ry, rot]) => {
                 ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2); ctx.fill();
+            });
+
+           // Rivers!
+            ctx.strokeStyle = '#163b5d';
+            ctx.lineWidth = 2;
+
+            const rivers = [
+                [ [160,150], [150,170], [130,190], [90,210] ], // Rockies to Mississippi
+                [ [220,300], [230,320], [240,350], [245,380] ], // Andes to Amazon
+                [ [700,120], [680,140], [650,160], [600,170] ], // Himalayas to Ganges
+                [ [480,100], [500,120], [520,140], [540,150] ]  // Alps to Danube
+            ];
+
+            rivers.forEach(river => {
+                ctx.beginPath();
+                ctx.moveTo(river[0][0], river[0][1]);
+                for (let i = 1; i < river.length; i++) {
+                    ctx.lineTo(river[i][0], river[i][1]);
+                }
+                ctx.stroke();
             });
 
             const earthTexture = new THREE.CanvasTexture(textureCanvas);

@@ -117,7 +117,7 @@
   "earth": {
     "day": 9,
     "complexity_level": 8,
-    "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-03-14T15:18:34.320Z"
+    "model_used": "google/gemini-2.0-flash-001",
+    "last_updated": "2026-03-15T08:28:54.362Z"
   }
 }
