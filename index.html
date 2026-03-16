@@ -271,6 +271,16 @@
     .feature-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
     .feature-dot.active { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
     .feature-dot.pending { background: transparent; border: 1px solid var(--muted); }
+    .roadmap-list {
+      margin-top: 10px;
+      padding-left: 18px;
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 11px;
+    }
+    .roadmap-list li {
+      margin-bottom: 6px;
+    }
 
     /* ── BIBLE FEED ── */
     .bible-entry {
@@ -528,12 +538,31 @@
     </div>
   </div>
 
+  <!-- ROW 5: Weekly Audit + Roadmap -->
+  <div class="grid" style="margin-top: 16px;">
+    <div class="panel col-6">
+      <div class="panel-label">✦ The Herald's Audit</div>
+      <ul class="feature-list" id="weekly-audit-summary">
+        <li class="active"><div class="feature-dot active"></div>Loading weekly audit...</li>
+      </ul>
+    </div>
+    <div class="panel col-6">
+      <div class="panel-label">✦ The Next 7 Days</div>
+      <ol class="roadmap-list" id="weekly-roadmap">
+        <li>Loading roadmap...</li>
+      </ol>
+      <div style="font-size: 10px; color: var(--muted); margin-top: 12px;">
+        Full briefing: <a href="DAILY_BRIEFING.md" style="color: var(--accent); text-decoration: none;">DAILY_BRIEFING.md</a>
+      </div>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <footer>
     <div class="footer-text">
       THE WINDOW · Self-Evolving Earth Observatory<br>
-      Built daily by THE ARCHITECT · Powered by Anthropic Claude<br>
-      <a href="earth.html" style="color:var(--accent)">🌍 Earth</a> &nbsp;·&nbsp; <a href="window.html" style="color:var(--accent)">Window</a><br>
+      Built daily by THE ARCHITECT · Guided weekly by THE HERALD<br>
+      <a href="earth.html" style="color:var(--accent)">🌍 Earth</a> &nbsp;·&nbsp; <a href="window.html" style="color:var(--accent)">Window</a> &nbsp;·&nbsp; <a href="DAILY_BRIEFING.md" style="color:var(--accent)">Briefing</a><br>
       <span style="color:var(--muted); font-size:9px;">
         "The Earth is patient. The models improve. Creation continues."
       </span>
@@ -548,211 +577,332 @@
 // "Through this glass, the mortals watch the world grow."
 // ═══════════════════════════════════════════════════════════
 
-// --- Defaults for fields not in state.json ---
-const DEFAULTS = {
-  phase_days: "Days 1–10",
-  phase_desc: "In the beginning, the Earth was a sphere without form. THE ARCHITECT shapes it from the void, adding continents, oceans, and rotation. This phase ends when the atmosphere breathes its first breath.",
-  features_pending: [
-    "Atmosphere", "Cloud Layer", "Day/Night Cycle", "City Lights",
-    "Weather Systems", "Ocean Currents", "Aurora Borealis", "Real-Time Data",
-    "Climate Simulation", "ISS Tracking", "CO₂ Counter", "Tectonic Plates"
+const HERALD_BRIEFING = {
+  audit: [
+    '7/7 weekly builds reached COMPLETE, but only 2/7 were fully healthy end-to-end.',
+    'Complexity rose from 2 to 8 this week, keeping the Earth in Genesis while visuals advanced meaningfully.',
+    'The biggest visible leap was the Moon with crater texture, orbit, and drag-aware interaction.',
+    'The largest setback was a four-build wrong-path regression that wrote to earth/earth.html and window/index.html.'
   ],
-  prophecies: [
-    { text: "Atmosphere shall shimmer", eta: "Days ~20-30", done: false },
-    { text: "Clouds shall drift", eta: "Days ~15-20", done: false },
-    { text: "Night side shall glow with cities", eta: "Days ~30-40", done: false },
-    { text: "Storms shall rage", eta: "Days ~40-50", done: false },
-    { text: "ISS tracked in real-time", eta: "Days ~60-70", done: false },
-    { text: "CO₂ ppm counted (and it shall be sad)", eta: "Days ~65-80", done: false },
-    { text: "Tectonic plates shall drift", eta: "Days ~80-90", done: false },
-    { text: "Earth simulates its own climate", eta: "Days ~90-100+", done: false },
-  ],
+  roadmap: [
+    'Day 10: add water-only specular sheen so oceans answer the sun more clearly.',
+    'Day 11: refine the twilight band at the terminator without disturbing the atmosphere shell.',
+    'Day 12: introduce subtle polar aurora in both hemispheres.',
+    'Day 13: show live weather cards from Open-Meteo with graceful browser fetch fallbacks.',
+    'Day 14: project weekly USGS earthquakes as pulsing globe markers.',
+    'Day 15: add secure HTTPS ISS tracking to the Earth and dashboard.',
+    'Day 16: harden output discipline so root files and THE-BIBLE always update together.'
+  ]
 };
 
-function transformState(raw) {
-  const history = (raw.changelog || []).map(c => ({
-    day: c.day,
-    complexity: raw.complexityLevel ?? raw.day,
-    features: raw.totalFeatures ?? raw.features?.length ?? 0
-  }));
-  if (history.length === 0 && raw.day) {
-    history.push({
-      day: raw.day,
-      complexity: raw.complexityLevel ?? 1,
-      features: raw.totalFeatures ?? (raw.features?.length ?? 0)
-    });
+const KNOWN_COMPLEXITY_BY_DAY = {
+  1: 1,
+  2: 2,
+  3: 3,
+  4: 4,
+  5: 4,
+  6: 5,
+  7: 6,
+  8: 7,
+  9: 8,
+};
+
+function hasFeature(raw, matcher) {
+  const haystack = [
+    ...(raw.features || []),
+    ...((raw.changelog || []).flatMap(entry => entry.changes || [])),
+  ].join(' ');
+  return matcher.test(haystack);
+}
+
+function getPhaseMeta(phase, complexity) {
+  if (complexity >= 100 || phase === 'Age of Gods') {
+    return {
+      days: 'Days 101+',
+      desc: 'Mythic-scale simulation: planetary systems, data swarms, and civilization logic begin to overlap.'
+    };
   }
-  const bible_entries = (raw.changelog || []).map(c => ({
-    day: `DAY ${c.day} — ${(raw.phase || "Genesis").toUpperCase()}`,
-    title: c.changes?.[0] || "Update",
-    text: (c.changes || []).join(" ")
-  }));
-  if (bible_entries.length === 0) {
-    bible_entries.push({
-      day: `DAY ${raw.day} — GENESIS`,
-      title: "The First Rendering",
-      text: "The Earth was. It was enough."
-    });
+  if (complexity >= 60 || phase === 'Age of Data') {
+    return {
+      days: 'Days 61–100',
+      desc: 'Reality intrudes: live APIs, observability, and global feeds begin to orbit the Earth itself.'
+    };
   }
-  const model = raw.earth?.model_used?.replace("anthropic/", "") || "claude-opus-4-5";
-  const lastBuild = raw.date ? `Day ${raw.day}` : (raw.lastUpdate ? new Date(raw.lastUpdate).toLocaleDateString() : `Day ${raw.day}`);
+  if (complexity >= 30 || phase === 'Age of Detail') {
+    return {
+      days: 'Days 31–60',
+      desc: 'Surface richness deepens with textures, bloom, storms, city lights, and denser atmospheric craft.'
+    };
+  }
+  if (complexity >= 10 || phase === 'Living World') {
+    return {
+      days: 'Days 11–30',
+      desc: 'The Earth starts to behave like a system: clouds move, weather arrives, and live observers matter.'
+    };
+  }
   return {
-    day: raw.day ?? 1,
-    complexity: raw.complexityLevel ?? 1,
-    phase: raw.phase ?? "Genesis",
-    phase_days: DEFAULTS.phase_days,
-    phase_desc: DEFAULTS.phase_desc,
-    features_count: raw.totalFeatures ?? (raw.features?.length ?? 0),
-    loc: raw.linesOfCode ?? 0,
-    model,
-    last_build: lastBuild,
-    history,
-    features_active: raw.features ?? [],
-    features_pending: DEFAULTS.features_pending,
-    prophecies: DEFAULTS.prophecies,
-    bible_entries
+    days: 'Days 1–10',
+    desc: 'Genesis remains active: the sphere is stable, the sky breathes, and the simulation is learning how to become a world.'
   };
 }
 
-// --- Clock ---
+function buildHistory(raw) {
+  if (Array.isArray(raw.history) && raw.history.length) {
+    return raw.history;
+  }
+
+  const changelog = [...(raw.changelog || [])].sort((a, b) => a.day - b.day);
+  if (!changelog.length) {
+    return [{
+      day: raw.day ?? 1,
+      complexity: raw.complexityLevel ?? 1,
+      features: raw.totalFeatures ?? (raw.features?.length ?? 0),
+    }];
+  }
+
+  const totalChanges = changelog.reduce((sum, entry) => sum + (entry.changes?.length || 0), 0) || 1;
+  let cumulativeChanges = 0;
+
+  return changelog.map((entry, index) => {
+    cumulativeChanges += entry.changes?.length || 0;
+    const fallbackComplexity = Math.min(raw.complexityLevel ?? (index + 1), index + 1);
+    return {
+      day: entry.day,
+      complexity: KNOWN_COMPLEXITY_BY_DAY[entry.day] ?? fallbackComplexity,
+      features: raw.totalFeatures
+        ? Math.max(1, Math.round((cumulativeChanges / totalChanges) * raw.totalFeatures))
+        : cumulativeChanges,
+    };
+  });
+}
+
+function buildPendingFeatures(raw) {
+  const candidates = [
+    'Ocean-only specular lighting',
+    'Sharper twilight terminator band',
+    'Polar aurora ribbons',
+    'Live weather dashboard',
+    'USGS earthquake markers',
+    'ISS live tracking',
+    'CO2 counter',
+    'Tectonic plate simulation',
+  ];
+
+  return candidates.filter(item => !hasFeature(raw, new RegExp(item.split(' ')[0], 'i')));
+}
+
+function buildProphecies(raw) {
+  return [
+    { text: 'Atmosphere shall shimmer', eta: 'Fulfilled on Day 2', done: hasFeature(raw, /Atmospheric glow|glow sphere/i) },
+    { text: 'Clouds shall drift across the face of the Earth', eta: 'Fulfilled by Day 9', done: hasFeature(raw, /cloud/i) },
+    { text: 'The night side shall glow with the light of cities', eta: 'Days ~10-20', done: hasFeature(raw, /city light/i) },
+    { text: 'Storms shall rage; hurricanes shall spin', eta: 'Days ~20-35', done: hasFeature(raw, /hurricane|storm/i) },
+    { text: 'The ISS shall be tracked in real-time', eta: 'Days ~15-25', done: hasFeature(raw, /iss/i) },
+    { text: 'CO2 concentration shall be counted', eta: 'Days ~20-30', done: hasFeature(raw, /co2|CO₂/i) },
+    { text: 'Tectonic plates shall drift', eta: 'Days ~25-35', done: hasFeature(raw, /tectonic/i) },
+    { text: 'The Earth shall simulate its own climate', eta: 'Days ~30-40+', done: hasFeature(raw, /climate/i) },
+  ];
+}
+
+function buildTickerItems(state) {
+  const latestEntry = [...state.bible_entries].reverse()[0];
+  const latestTitle = latestEntry ? latestEntry.title : 'Creation continues';
+
+  return [
+    `Complexity ${state.complexity}/100 — ${state.phase} phase remains active`,
+    `Features active: ${state.features_count} and growing`,
+    `Earth rotation is ${state.rotationSpeed} rad/frame`,
+    `Current model: ${state.model}`,
+    `Latest visible leap: ${latestTitle}`,
+    'Weekly warnings: 2 credit-limit fallbacks, 0 fatals',
+    'The Herald has published the roadmap for Days 10–16',
+  ];
+}
+
+function transformState(raw) {
+  const phaseMeta = getPhaseMeta(raw.phase ?? 'Genesis', raw.complexityLevel ?? 1);
+  const history = buildHistory(raw);
+  const bibleEntries = (raw.changelog || []).map(entry => ({
+    day: `DAY ${entry.day} — ${(raw.phase || 'Genesis').toUpperCase()}`,
+    title: entry.changes?.[0] || 'Update',
+    text: (entry.changes || []).join(' '),
+  }));
+
+  if (!bibleEntries.length) {
+    bibleEntries.push({
+      day: `DAY ${raw.day ?? 1} — GENESIS`,
+      title: 'The First Rendering',
+      text: 'The Earth was. It was enough.',
+    });
+  }
+
+  return {
+    day: raw.day ?? 1,
+    complexity: raw.complexityLevel ?? 1,
+    phase: raw.phase ?? 'Genesis',
+    phase_days: phaseMeta.days,
+    phase_desc: phaseMeta.desc,
+    features_count: raw.totalFeatures ?? (raw.features?.length ?? 0),
+    loc: raw.linesOfCode ?? 0,
+    model: raw.earth?.model_used || 'unknown',
+    last_build: `Day ${raw.earth?.day ?? raw.day ?? 1}`,
+    rotationSpeed: raw.earthRotation?.speed ?? '0.00095',
+    history,
+    features_active: raw.features ?? [],
+    features_pending: buildPendingFeatures(raw),
+    prophecies: buildProphecies(raw),
+    bible_entries: bibleEntries,
+    ticker_items: [],
+    audit_summary: HERALD_BRIEFING.audit,
+    roadmap: HERALD_BRIEFING.roadmap,
+  };
+}
+
 function updateClock() {
   const now = new Date();
-  document.getElementById('live-clock').textContent =
-    now.toUTCString().split(' ')[4];
+  document.getElementById('live-clock').textContent = now.toUTCString().split(' ')[4];
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// --- Populate from state ---
-function populateFromState(s) {
-  document.getElementById('day-number').textContent = s.day;
-  document.getElementById('complexity-val').textContent = s.complexity;
-  document.getElementById('complexity-bar').style.width = s.complexity + '%';
-  document.getElementById('phase-name').textContent = s.phase;
-  document.getElementById('phase-days').textContent = s.phase_days;
-  document.getElementById('phase-desc').textContent = s.phase_desc;
-  document.getElementById('features-count').textContent = s.features_count;
-  document.getElementById('loc-count').textContent = s.loc.toLocaleString();
-  document.getElementById('model-display').textContent = s.model;
-  document.getElementById('last-build').textContent = s.last_build;
+function populateTicker(items) {
+  const ticker = document.getElementById('ticker');
+  const doubled = [...items, ...items];
+  ticker.innerHTML = doubled.map(item => `<span class="ticker-item"><span>✦</span>${item}</span>`).join('');
+}
 
-  // Features
+function populateFromState(state) {
+  document.getElementById('day-number').textContent = state.day;
+  document.getElementById('complexity-val').textContent = state.complexity;
+  document.getElementById('complexity-bar').style.width = state.complexity + '%';
+  document.getElementById('phase-name').textContent = state.phase;
+  document.getElementById('phase-days').textContent = state.phase_days;
+  document.getElementById('phase-desc').textContent = state.phase_desc;
+  document.getElementById('features-count').textContent = state.features_count;
+  document.getElementById('loc-count').textContent = state.loc.toLocaleString();
+  document.getElementById('model-display').textContent = state.model;
+  document.getElementById('last-build').textContent = state.last_build;
+
+  state.ticker_items = buildTickerItems(state);
+  populateTicker(state.ticker_items);
+
   const activeList = document.getElementById('feature-list-active');
-  activeList.innerHTML = s.features_active.map(f =>
-    `<li class="active"><div class="feature-dot active"></div>${f}</li>`
-  ).join('');
-  
-  const pendingList = document.getElementById('feature-list-pending');
-  pendingList.innerHTML = s.features_pending.map(f =>
-    `<li><div class="feature-dot pending"></div>${f}</li>`
+  activeList.innerHTML = state.features_active.map(feature =>
+    `<li class="active"><div class="feature-dot active"></div>${feature}</li>`
   ).join('');
 
-  // Bible
+  const pendingList = document.getElementById('feature-list-pending');
+  pendingList.innerHTML = state.features_pending.map(feature =>
+    `<li><div class="feature-dot pending"></div>${feature}</li>`
+  ).join('');
+
   const bibleFeed = document.getElementById('bible-feed');
-  bibleFeed.innerHTML = [...s.bible_entries].reverse().slice(0, 4).map(e =>
+  bibleFeed.innerHTML = [...state.bible_entries].reverse().slice(0, 4).map(entry =>
     `<div class="bible-entry">
-      <div class="bible-entry-day">${e.day}</div>
-      <div class="bible-entry-title">${e.title}</div>
-      <div class="bible-entry-text">${e.text}</div>
+      <div class="bible-entry-day">${entry.day}</div>
+      <div class="bible-entry-title">${entry.title}</div>
+      <div class="bible-entry-text">${entry.text}</div>
     </div>`
   ).join('');
 
-  // Prophecies
   const propContainer = document.getElementById('prophecies-container');
   propContainer.style.display = 'grid';
   propContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(240px, 1fr))';
   propContainer.style.gap = '12px';
-  propContainer.innerHTML = s.prophecies.map(p => `
-    <div style="padding:12px 14px; background: rgba(255,255,255,0.02); border-radius:4px; border-left: 2px solid ${p.done ? 'var(--accent2)' : 'var(--muted)'};">
-      <div style="font-size:10px; color:${p.done ? 'var(--accent2)' : 'var(--muted)'}; letter-spacing:2px; margin-bottom:4px;">
-        ${p.done ? '✓ FULFILLED' : '◌ ' + p.eta}
+  propContainer.innerHTML = state.prophecies.map(prophecy => `
+    <div style="padding:12px 14px; background: rgba(255,255,255,0.02); border-radius:4px; border-left: 2px solid ${prophecy.done ? 'var(--accent2)' : 'var(--muted)'};">
+      <div style="font-size:10px; color:${prophecy.done ? 'var(--accent2)' : 'var(--muted)'}; letter-spacing:2px; margin-bottom:4px;">
+        ${prophecy.done ? '✓ FULFILLED' : '◌ ' + prophecy.eta}
       </div>
-      <div style="font-size:12px; color:${p.done ? '#fff' : 'var(--muted)'};">${p.text}</div>
+      <div style="font-size:12px; color:${prophecy.done ? '#fff' : 'var(--muted)'};">${prophecy.text}</div>
     </div>
   `).join('');
 
-  // Chart
-  drawGrowthChart(s.history);
+  document.getElementById('weekly-audit-summary').innerHTML = state.audit_summary.map(item =>
+    `<li class="active"><div class="feature-dot active"></div>${item}</li>`
+  ).join('');
+  document.getElementById('weekly-roadmap').innerHTML = state.roadmap.map(item => `<li>${item}</li>`).join('');
+
+  drawGrowthChart(state.history);
 }
 
-// --- Growth Chart (canvas) ---
 function drawGrowthChart(history) {
   const canvas = document.getElementById('growth-chart');
   canvas.width = canvas.parentElement.offsetWidth;
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
+  const width = canvas.width;
+  const height = canvas.height;
+  ctx.clearRect(0, 0, width, height);
 
   if (history.length < 2) {
-    // Single point — just draw a dot
     ctx.fillStyle = 'rgba(77,166,255,0.5)';
     ctx.beginPath();
-    ctx.arc(W * 0.1, H * 0.9, 4, 0, Math.PI*2);
+    ctx.arc(width * 0.1, height * 0.9, 4, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = 'rgba(74,96,128,0.5)';
+    ctx.fillStyle = 'rgba(74,96,128,0.6)';
     ctx.font = '10px Space Mono, monospace';
-    ctx.fillText('Chart grows as days accumulate...', W/2 - 100, H/2);
+    ctx.fillText('Chart grows as days accumulate...', width / 2 - 100, height / 2);
     return;
   }
 
-  const maxC = Math.max(...history.map(h => h.complexity), 10);
-  const maxF = Math.max(...history.map(h => h.features), 10);
   const pad = 20;
+  const maxComplexity = Math.max(...history.map(point => point.complexity), 10);
+  const maxFeatures = Math.max(...history.map(point => point.features), 10);
 
-  function xPos(i) { return pad + (i / (history.length - 1)) * (W - pad*2); }
-  function yPosC(v) { return H - pad - (v / maxC) * (H - pad*2); }
-  function yPosF(v) { return H - pad - (v / maxF) * (H - pad*2); }
+  function xPos(index) {
+    return pad + (index / (history.length - 1)) * (width - pad * 2);
+  }
 
-  // Complexity line
+  function yPos(value, maxValue) {
+    return height - pad - (value / maxValue) * (height - pad * 2);
+  }
+
   ctx.beginPath();
   ctx.strokeStyle = '#4da6ff';
   ctx.lineWidth = 2;
-  history.forEach((h, i) => {
-    if (i === 0) ctx.moveTo(xPos(i), yPosC(h.complexity));
-    else ctx.lineTo(xPos(i), yPosC(h.complexity));
+  history.forEach((point, index) => {
+    const x = xPos(index);
+    const y = yPos(point.complexity, maxComplexity);
+    if (index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
   });
   ctx.stroke();
 
-  // Features line
   ctx.beginPath();
   ctx.strokeStyle = '#00ffcc';
   ctx.lineWidth = 2;
-  history.forEach((h, i) => {
-    if (i === 0) ctx.moveTo(xPos(i), yPosF(h.features));
-    else ctx.lineTo(xPos(i), yPosF(h.features));
+  history.forEach((point, index) => {
+    const x = xPos(index);
+    const y = yPos(point.features, maxFeatures);
+    if (index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
   });
   ctx.stroke();
 
-  // Dots
-  history.forEach((h, i) => {
+  history.forEach((point, index) => {
     ctx.beginPath();
     ctx.fillStyle = '#4da6ff';
-    ctx.arc(xPos(i), yPosC(h.complexity), 3, 0, Math.PI*2);
+    ctx.arc(xPos(index), yPos(point.complexity, maxComplexity), 3, 0, Math.PI * 2);
     ctx.fill();
   });
 }
 
-// --- Ticker (dynamically grows with facts) ---
-// The ticker can be extended by state.ticker_facts in future versions
-
-// --- Init ---
 let loadedState = null;
 fetch('earth/state.json')
-  .then(r => r.json())
+  .then(response => response.json())
   .then(raw => {
     loadedState = transformState(raw);
     populateFromState(loadedState);
   })
   .catch(() => {
-    // Fallback when state.json missing (e.g. file:// or network error)
     loadedState = transformState({
       day: 1,
       complexityLevel: 1,
       totalFeatures: 0,
       linesOfCode: 0,
       features: [],
-      phase: "Genesis",
-      changelog: [{ day: 1, changes: ["Loading..."] }]
+      phase: 'Genesis',
+      changelog: [{ day: 1, changes: ['Loading...'] }],
     });
     populateFromState(loadedState);
   });

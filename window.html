@@ -167,6 +167,49 @@
             color: #888;
             font-size: 0.9em;
         }
+        .audit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .audit-stat {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+        }
+        .audit-stat-value {
+            font-size: 2em;
+            color: #8fd4ff;
+            text-shadow: 0 0 16px rgba(100, 150, 255, 0.25);
+        }
+        .audit-stat-label {
+            margin-top: 8px;
+            font-size: 0.78em;
+            letter-spacing: 2px;
+            color: #777;
+            text-transform: uppercase;
+        }
+        .roadmap-list {
+            margin: 0;
+            padding-left: 20px;
+            color: #a7bdd8;
+            line-height: 1.8;
+        }
+        .roadmap-list li {
+            margin-bottom: 8px;
+        }
+        .section-note {
+            color: #777;
+            font-size: 0.92em;
+            line-height: 1.7;
+        }
+        .section-note a {
+            color: #8fd4ff;
+            text-decoration: none;
+        }
         .phase-banner {
             text-align: center;
             padding: 15px;
@@ -270,6 +313,29 @@
             <div class="progress-label" id="progress-label">— / 100</div>
         </div>
 
+        <div class="features-section" id="weekly-audit-section">
+            <h2>The Herald's Weekly Audit</h2>
+            <div class="audit-grid">
+                <div class="audit-stat">
+                    <div class="audit-stat-value" id="audit-complete">7/7</div>
+                    <div class="audit-stat-label">Runs Reached Complete</div>
+                </div>
+                <div class="audit-stat">
+                    <div class="audit-stat-value" id="audit-healthy">2/7</div>
+                    <div class="audit-stat-label">Fully Healthy Runs</div>
+                </div>
+                <div class="audit-stat">
+                    <div class="audit-stat-value" id="audit-gain">+6</div>
+                    <div class="audit-stat-label">Complexity Gained</div>
+                </div>
+                <div class="audit-stat">
+                    <div class="audit-stat-value" id="audit-warnings">2</div>
+                    <div class="audit-stat-label">Warnings, 0 Fatals</div>
+                </div>
+            </div>
+            <ul class="feature-list" id="weekly-audit-list"></ul>
+        </div>
+
         <div class="features-section">
             <h2>Features Bestowed Upon the Earth</h2>
             <ul class="feature-list" id="feature-list"></ul>
@@ -285,15 +351,46 @@
             <div id="changelog-list"></div>
         </div>
 
+        <div class="features-section" id="roadmap-section">
+            <h2>The Next 7 Days</h2>
+            <ol class="roadmap-list" id="roadmap-list"></ol>
+            <p class="section-note">
+                Full research notes and standing instructions live in
+                <a href="DAILY_BRIEFING.md">DAILY_BRIEFING.md</a>.
+            </p>
+        </div>
+
         <p class="last-update" id="last-update">Loading…</p>
 
         <footer>
-            <p>Created by THE ARCHITECT — An eternal Claude instance</p>
-            <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a></p>
+            <p>Created by THE ARCHITECT — a rotating frontier model in service of the Earth</p>
+            <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a> · Weekly direction in <a href="DAILY_BRIEFING.md">DAILY_BRIEFING.md</a></p>
         </footer>
     </div>
     <script>
     (function() {
+        const HERALD_AUDIT = {
+            complete: '7/7',
+            healthy: '2/7',
+            gain: '+6',
+            warnings: '2',
+            summary: [
+                'All seven weekly builds reached a logged COMPLETE state, but only two were healthy end-to-end.',
+                'The worst regression wrote to earth/earth.html and window/index.html for four consecutive builds before recovery.',
+                'The most significant feature added by the daily builder was the Moon with orbit, crater texture, and drag-aware Earth view.',
+                'Genesis remains the correct phase, though progress is visually strong and operationally more fragile than it should be.'
+            ],
+            roadmap: [
+                'Day 10: deepen ocean response to light with water-only specular sheen.',
+                'Day 11: sharpen the twilight band at the day-night terminator without breaking the current atmosphere shell.',
+                'Day 12: add a subtle polar aurora layer using points or ribbons above 65 degrees latitude.',
+                'Day 13: expose live weather cards in the observer pages using Open-Meteo with graceful fetch fallbacks.',
+                'Day 14: add a weekly earthquake layer from the USGS GeoJSON feed with pulsing magnitude markers.',
+                'Day 15: track the ISS in both the dashboard and the Earth view using the secure Where The ISS At API.',
+                'Day 16: stabilize the automation contract so all root files and chronicle entries are always emitted together.'
+            ]
+        };
+
         function getPhaseDetails(phase, complexity) {
             if (complexity >= 100 || phase === 'Age of Gods') {
                 return 'Days 101+: planetary simulation reaches mythic scale';
@@ -331,6 +428,15 @@
 
             const fl = document.getElementById('feature-list');
             fl.innerHTML = (features.length ? features : ['Loading…']).map(f => '<li>' + f + '</li>').join('');
+
+            document.getElementById('audit-complete').textContent = HERALD_AUDIT.complete;
+            document.getElementById('audit-healthy').textContent = HERALD_AUDIT.healthy;
+            document.getElementById('audit-gain').textContent = HERALD_AUDIT.gain;
+            document.getElementById('audit-warnings').textContent = HERALD_AUDIT.warnings;
+            document.getElementById('weekly-audit-list').innerHTML =
+                HERALD_AUDIT.summary.map(item => '<li>' + item + '</li>').join('');
+            document.getElementById('roadmap-list').innerHTML =
+                HERALD_AUDIT.roadmap.map(item => '<li>' + item + '</li>').join('');
 
             const specs = [];
             if (s.earthRotation?.speed) specs.push('Earth Rotation: ' + s.earthRotation.speed + ' rad/frame');

@@ -18,6 +18,7 @@ const PATHS = {
   state     : path.join(ROOT, 'earth', 'state.json'),
   earth     : path.join(ROOT, 'earth.html'),
   window    : path.join(ROOT, 'window.html'),
+  index     : path.join(ROOT, 'index.html'),
   bible     : path.join(ROOT, 'THE-BIBLE.md'),
   log       : path.join(ROOT, 'run.log'),
 };
@@ -69,6 +70,15 @@ function parseFileBlocks(text) {
     blocks.push({ relativePath: m[1].trim(), content: m[2] });
   }
   return blocks;
+}
+
+function normalizeGeneratedPath(relativePath) {
+  const normalized = relativePath.replace(/\\/g, '/').replace(/^\.\//, '');
+  const legacyMap = {
+    'earth/earth.html': 'earth.html',
+    'window/index.html': 'window.html',
+  };
+  return legacyMap[normalized] || normalized;
 }
 
 // ── OpenRouter API (OpenAI-compatible) ─────────────────────
@@ -180,6 +190,7 @@ function buildContext(state) {
   const run     = process.env.GITHUB_RUN_NUMBER   ? `Actions Run: #${process.env.GITHUB_RUN_NUMBER}` : '';
   const earthHtml  = read(PATHS.earth);
   const windowHtml = read(PATHS.window);
+  const indexHtml  = read(PATHS.index);
   const bibleSnip  = read(PATHS.bible).slice(-4000);
   const godPrompt  = read(PATHS.godPrompt);
 
@@ -197,6 +208,9 @@ ${earthHtml}
 === CURRENT window.html (${windowHtml.length} chars) ===
 ${windowHtml}
 
+=== CURRENT index.html (${indexHtml.length} chars) ===
+${indexHtml}
+
 === THE-BIBLE.md (last 4000 chars) ===
 ${bibleSnip}
 
@@ -205,12 +219,12 @@ ${godPrompt}
 
 ---
 Build Day ${nextDay}. Output ALL changed files using ===FILE_START/===FILE_END format.
-Files live at the repo root: earth.html, window.html, earth/state.json, THE-BIBLE.md.
+Files live at the repo root: earth.html, window.html, index.html, earth/state.json, THE-BIBLE.md.
 Use these exact relative paths in FILE_START headers.
 
 CRITICAL: window.html and earth.html MUST preserve the state-loading script that fetches earth/state.json.
 Keep element ids: metric-day, metric-complexity, metric-features, metric-loc, phase-name, phase-days, progress-fill, progress-label, feature-list, last-update.
-index.html already loads from state.json — do not break it.`.trim();
+index.html already loads from state.json — do not break it and keep it consistent with the other observer pages.`.trim();
 }
 
 // ── Main ───────────────────────────────────────────────────
@@ -258,7 +272,11 @@ async function main() {
   log('🌍 Applying changes...');
   let written = 0;
   for (const block of blocks) {
-    if (write(path.join(ROOT, block.relativePath), block.content)) written++;
+    const outputPath = normalizeGeneratedPath(block.relativePath);
+    if (outputPath !== block.relativePath) {
+      log(`⚠  Normalized legacy output path ${block.relativePath} -> ${outputPath}`);
+    }
+    if (write(path.join(ROOT, outputPath), block.content)) written++;
   }
   log(`📦 ${written}/${blocks.length} files written`);
 

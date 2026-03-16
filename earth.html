@@ -100,10 +100,12 @@
     <script>
         let scene, camera, renderer;
         let earth, stars, atmosphere, clouds, moon, sun;
-        let earthMaterial, atmosphereMaterial;
+        let earthMaterial, atmosphereMaterial, cloudTexture, cloudCanvas, cloudContext;
+        let cloudBands = [];
         let time = 0;
         let isDragging = false;
         let previousMouseX = 0;
+        let cloudRefreshFrame = 0;
 
         const VERT_ATMOSPHERE = `
             varying vec3 vNormal;
@@ -173,7 +175,7 @@
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.body.appendChild(renderer.domElement);
 
             createStars();
@@ -405,17 +407,17 @@
             scene.add(earth);
 
             // Clouds
-            const cloudsCanvas = document.createElement('canvas');
-            cloudsCanvas.width = 1024;
-            cloudsCanvas.height = 512;
-            const cloudsCtx = cloudsCanvas.getContext('2d');
-            cloudsCtx.fillStyle = '#ffffff';
-            drawCloudBlobs(cloudsCtx);
+            cloudCanvas = document.createElement('canvas');
+            cloudCanvas.width = 1024;
+            cloudCanvas.height = 512;
+            cloudContext = cloudCanvas.getContext('2d');
+            seedCloudBands();
+            redrawCloudTexture(0);
 
             clouds = new THREE.Mesh(
                 new THREE.SphereGeometry(1.018, 64, 64),
                 new THREE.MeshPhongMaterial({
-                    map: new THREE.CanvasTexture(cloudsCanvas),
+                    map: cloudTexture,
                     transparent: true,
                     opacity: 0.75,
                     depthWrite: false,
@@ -475,25 +477,64 @@
         }
 
         function drawCloudBlobs(ctx) {
-            const cloudPositions = [
-                { x: 110, y: 75, size: 72 }, { x: 290, y: 95, size: 51 },
-                { x: 470, y: 55, size: 68 }, { x: 710, y: 88, size: 88 },
-                { x: 860, y: 135, size: 44 }, { x: 155, y: 205, size: 39 },
-                { x: 680, y: 255, size: 61 }, { x: 390, y: 295, size: 33 },
-                { x: 920, y: 275, size: 29 }, { x: 530, y: 355, size: 52 },
-                { x: 200, y: 320, size: 45 }, { x: 760, y: 180, size: 38 }
-            ];
-            cloudPositions.forEach(cloud => {
-                ctx.globalAlpha = 0.65 + Math.random() * 0.25;
-                ctx.beginPath();
-                ctx.ellipse(cloud.x, cloud.y, cloud.size, cloud.size * 0.52, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 0.38;
-                ctx.beginPath();
-                ctx.ellipse(cloud.x - cloud.size * 0.4, cloud.y - 12, cloud.size * 0.65, cloud.size * 0.45, 0, 0, Math.PI * 2);
-                ctx.fill();
+            cloudBands.forEach((cloud, index) => {
+                const drift = (time * cloud.speed * 120 + index * 19) % (cloudCanvas.width + cloud.size * 3);
+                const yShift = Math.sin(time * 55 + index * 0.7) * 3.5;
+                const x = (cloud.x + drift) % (cloudCanvas.width + cloud.size * 2) - cloud.size;
+                drawSingleCloud(ctx, x, cloud.y + yShift, cloud);
+
+                if (x < cloud.size * 1.2) {
+                    drawSingleCloud(ctx, x + cloudCanvas.width + cloud.size, cloud.y + yShift, cloud);
+                }
             });
             ctx.globalAlpha = 1.0;
+        }
+
+        function drawSingleCloud(ctx, x, y, cloud) {
+            ctx.globalAlpha = cloud.alpha;
+            ctx.beginPath();
+            ctx.ellipse(x, y, cloud.size, cloud.size * cloud.stretch, cloud.tilt, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.globalAlpha = cloud.alpha * 0.58;
+            ctx.beginPath();
+            ctx.ellipse(x - cloud.size * 0.42, y - cloud.size * 0.16, cloud.size * 0.64, cloud.size * 0.42, cloud.tilt * 0.7, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.globalAlpha = cloud.alpha * 0.44;
+            ctx.beginPath();
+            ctx.ellipse(x + cloud.size * 0.35, y - cloud.size * 0.08, cloud.size * 0.55, cloud.size * 0.35, cloud.tilt * -0.55, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function seedCloudBands() {
+            cloudBands = [
+                { x: 110, y: 75, size: 72, speed: 0.22, stretch: 0.52, alpha: 0.72, tilt: 0.08 },
+                { x: 290, y: 95, size: 51, speed: 0.28, stretch: 0.48, alpha: 0.64, tilt: -0.05 },
+                { x: 470, y: 55, size: 68, speed: 0.18, stretch: 0.5, alpha: 0.7, tilt: 0.03 },
+                { x: 710, y: 88, size: 88, speed: 0.24, stretch: 0.54, alpha: 0.68, tilt: -0.08 },
+                { x: 860, y: 135, size: 44, speed: 0.3, stretch: 0.46, alpha: 0.58, tilt: 0.04 },
+                { x: 155, y: 205, size: 39, speed: 0.26, stretch: 0.5, alpha: 0.55, tilt: 0.09 },
+                { x: 680, y: 255, size: 61, speed: 0.2, stretch: 0.52, alpha: 0.66, tilt: -0.06 },
+                { x: 390, y: 295, size: 33, speed: 0.27, stretch: 0.5, alpha: 0.5, tilt: 0.05 },
+                { x: 920, y: 275, size: 29, speed: 0.33, stretch: 0.44, alpha: 0.48, tilt: -0.04 },
+                { x: 530, y: 355, size: 52, speed: 0.19, stretch: 0.51, alpha: 0.6, tilt: 0.07 },
+                { x: 200, y: 320, size: 45, speed: 0.23, stretch: 0.49, alpha: 0.57, tilt: -0.02 },
+                { x: 760, y: 180, size: 38, speed: 0.29, stretch: 0.47, alpha: 0.52, tilt: 0.06 }
+            ];
+        }
+
+        function redrawCloudTexture(elapsed) {
+            if (!cloudContext || !cloudCanvas) return;
+
+            cloudContext.clearRect(0, 0, cloudCanvas.width, cloudCanvas.height);
+            cloudContext.fillStyle = '#ffffff';
+            drawCloudBlobs(cloudContext, elapsed);
+
+            cloudTexture = cloudTexture || new THREE.CanvasTexture(cloudCanvas);
+            cloudTexture.wrapS = THREE.RepeatWrapping;
+            cloudTexture.wrapT = THREE.ClampToEdgeWrapping;
+            cloudTexture.needsUpdate = true;
         }
 
         function createLights() {
@@ -527,6 +568,7 @@
 
             if (!isDragging && earth) earth.rotation.y += 0.00095;
             if (clouds) clouds.rotation.y += 0.00135;
+            if (cloudTexture && (++cloudRefreshFrame % 10 === 0)) redrawCloudTexture(time);
 
             const drift = 0.22;
             camera.position.x = Math.sin(time * 0.35) * drift;
