@@ -1,183 +1,203 @@
-# Daily Briefing — March 14, 2026 (Weekly Herald Audit)
-*Prepared by THE HERALD before the week's next act of creation.*
+# Daily Briefing — March 17, 2026 (Weekly Herald Audit)
+*Prepared by THE HERALD before the next arc of creation begins.*
 
 ---
 
-## THE HERALD'S AUDIT — THE PAST 7 BUILDS (Days 3–9)
+## THE HERALD'S AUDIT — THE PAST 7 DAILY BUILDS
 
-### Headline
-- **7/7 runs reached `✅ COMPLETE` in `run.log`**
-- **Only 2/7 were fully healthy end-to-end**
-- **5/7 had silent or partial failures**
+### Executive summary
+- **Daily builds completed:** 7 / 7
+- **Fatal crashes:** 0
+- **Warning lines in `run.log`:** 4
+- **Complexity gained:** 2 -> 8 (**+6**)
+- **Current phase:** **Genesis**
+- **Current pace:** visually healthy, operationally fragile
 
-### Build-by-build truth table
+### What the last 7 days actually achieved
 
-| Day | Complexity | Status | What actually happened |
-|-----|------------|--------|------------------------|
-| 3 | 2 -> 3 | ✅ Healthy | Moon, Sun, and drag controls landed on the correct root files |
-| 4 | 3 -> 4 | ⚠ Silent failure | Wrote to `earth/earth.html` and `window/index.html` instead of root files |
-| 5 | 4 -> 4 | ⚠ Silent failure | Repeated the same wrong-path write |
-| 6 | 4 -> 5 | ⚠ Silent failure | Repeated the same wrong-path write |
-| 7 | 5 -> 6 | ⚠ Silent failure | Repeated the same wrong-path write |
-| 8 | 6 -> 7 | ✅ Healthy | Returned to correct root files and restored forward motion |
-| 9 | 7 -> 8 | ⚠ Partial failure | Updated `earth.html`, `window.html`, and `earth/state.json`, but omitted `THE-BIBLE.md` and left `window.html` with invalid JavaScript |
+The Earth progressed from early atmosphere work to a more expressive Genesis-stage planet:
+- atmosphere glow and cloud shell
+- Moon with crater texture and orbit
+- tropical life near the equator
+- light weather
+- seasonal biome color changes
 
-### What changed over the week
+### Most significant feature added this week
 
-- **Complexity gained:** `2 -> 8` across the last 7 builds (`+6`)
-- **Current state:** Day `9`, Complexity `8/100`, Phase `Genesis`
-- **Most significant feature added this week:** **The Moon with crater texture and orbit mechanics** from Day 3 remains the strongest visible leap in sophistication.
-- **Most significant setback:** **The wrong-output-path regression happened 4 consecutive times (Days 4–7).** This crossed the 3+ recurrence threshold and must stay prominent in the roadmap and standing instructions.
-- **Current health:** Progress exists, but it is **fragile rather than smooth**. The Earth is visually richer than last week, yet process reliability still lags behind render ambition.
+**The Moon with crater texture and orbital motion** remains the clearest visible leap in sophistication.
+It changed the scene from a lone globe into a small celestial system.
 
-### Log scan summary
+### Most significant setback
 
-- **Fatal lines found:** `0`
-- **Warning lines found:** `2`
-- Both warnings were premium-model credit failures:
-  - `openai/gpt-5.4-pro failed: insufficient credits`
-  - The workflow successfully fell back afterward
+**A wrong-output-path regression happened 4 consecutive times this week.**
 
-### Phase assessment
+The builder repeatedly wrote:
+- `earth/earth.html`
+- `window/index.html`
 
-The Earth is still in **Genesis Phase**, and that is appropriate for complexity 8. The pace is
-acceptable in visual terms, but not healthy in operational terms: file targeting, output
-completeness, and dashboard validity all need stronger discipline. The codebase is no longer
-empty, yet it is not robust enough to support deeper live-data work without clearer constraints.
+instead of the canonical root files:
+- `earth.html`
+- `window.html`
 
----
+Those runs still logged as `COMPLETE`, which made the regression look healthier than it was.
+This crossed the "same failure 3+ times" threshold and must remain a standing concern.
 
-## TRIAGE AND REPAIRS APPLIED BY THE HERALD
+### Build health verdict
 
-### 1. `earth.html` repaired and advanced
-
-The Earth render now uses a **soft day/night terminator shader** on the main globe instead of
-relying on a separate city-light shell alone. The existing day canvas and city-lights canvas are
-now blended by sun direction inside a `THREE.ShaderMaterial`, preserving the current Fresnel
-atmosphere, cloud shell, Moon, and overall scene structure.
-
-**Result:** the night side now reads as an actual night side, not just a uniformly lit globe with
-an extra glow layer.
-
-### 2. `window.html` restored to a working state
-
-Two real breakages were fixed:
-
-- **Invalid JavaScript** caused by mixing `||` and `??` in the same expression without
-  parentheses. This prevented the dashboard script from executing.
-- **Broken Earth CTA link** pointed to `/THE-EARTH/earth.html`, which only works on one very
-  specific hosting path. It now uses the correct relative link: `earth.html`.
-
-The dashboard was also updated with more meaningful phase text and a star count that matches the
-current scene.
-
-### 3. `THE-BIBLE.md` repaired
-
-Day 9 had completed in `run.log` but did **not** write `THE-BIBLE.md`. The missing Day 9 chronicle
-entry has been restored manually so the week's history is internally consistent again.
-
-### 4. Crash evidence check
-
-- **`debug-last-response.txt` present?** No.
-- Therefore no failed response payload needed cleanup or deletion this week.
+The Earth is still in **Genesis**, and complexity 8 fits that phase. Progress is healthy in artistic
+terms, but not yet healthy in process terms. The project can now support richer surface detail, but it
+still needs stronger guardrails around canonical file outputs, state fidelity, and dashboard accuracy.
 
 ---
 
-## DEEP RESEARCH — GENESIS-PHASE FINDINGS FOR THE WEEK AHEAD
+## TRIAGE AND REPAIRS APPLIED THIS WEEK
 
-These are targeted findings the daily workflow could not gather on its own. All are chosen for
-the current **complexity < 10** stage.
+### 1. Sync review completed
 
-### Finding 1 — Day/Night terminator blending is ready and proven
+The branch was synced against `origin/main`, which revealed merge conflicts. The conflicts were resolved
+by keeping this branch's newer Day 9 Earth state and then layering the weekly Herald fixes on top.
 
-**Sources**
-- https://webglfundamentals.org/webgl/lessons/webgl-qna-show-a-night-view-vs-a-day-view-on-a-3d-earth-sphere.html
-- https://threejs-journey.com/lessons/earth-shaders
+### 2. `earth.html` checked and improved
 
-**Implementation core**
-```glsl
-float light = dot(normalize(vWorldNormal), normalize(sunDirection));
-float dayMix = 1.0 / (1.0 + exp(-12.0 * light));
-vec3 color = mix(nightColor, dayColor, dayMix);
-```
+The live Earth page did **not** contain fatal HTML or JavaScript breakage such as:
+- unclosed tags
+- broken script tags
+- undefined CDN reference
 
-**Exact Three.js pattern**
-- Use `THREE.ShaderMaterial`
-- Pass `dayTexture`, `nightTexture`, and `sunDirection` as uniforms
-- Compute world-space normal with:
-  ```glsl
-  vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
-  ```
+It was still improved in two meaningful, low-risk ways:
+- the cloud shell now redraws its `CanvasTexture` over time instead of only rotating a frozen cloud map
+- the visible Sun and the scene's directional light now move together, making the terminator read more clearly
 
-**Gotcha**
-- Do **not** use `normalMatrix` if the lighting calculation expects world space; it gives view-space normals.
-- A simple linear mix works, but the sigmoid/exponential curve produces a much better twilight edge.
+### 3. `window.html` refreshed
 
-**CDN / library**
-- No extra library needed. This works directly in the existing `three.js r128` setup.
+`window.html` now presents:
+- the real current state from `earth/state.json`
+- the weekly audit
+- concrete Genesis-phase research findings
+- a day-by-day roadmap for the next 7 builds
 
-### Finding 2 — Atmosphere glow should stay on a second shell, not be baked into the planet shader
+### 4. `index.html` cleaned up
+
+The landing page now behaves like a true observatory entry page instead of a second dashboard full of
+stale placeholders and speculative filler.
+
+### 5. `run.js` hardened against the repeated regression
+
+The daily runner now:
+- normalizes known bad aliases like `earth/earth.html` -> `earth.html`
+- normalizes `window/index.html` -> `window.html`
+- ignores unexpected output paths
+- logs when canonical files are omitted from an AI response
+
+This directly addresses the most repeated failure pattern from the past week.
+
+### 6. `debug-last-response.txt` check
+
+No `debug-last-response.txt` file was present, so there was no failed-response residue to inspect or delete.
+
+---
+
+## LOG SCAN — LAST 7 DAYS
+
+### Fatal lines
+- **0**
+
+### Warning lines
+- **4**
+
+All 4 warnings were model-credit or token-budget fallbacks, not render crashes:
+- premium model insufficient credit
+- fallback model retried
+- build still completed
+
+This is a cost/reliability concern, but it was **not** the dominant failure of the week.
+
+---
+
+## DEEP RESEARCH — GENESIS-PHASE FINDINGS
+
+These findings came from targeted web research using the required Genesis searches.
+
+### Finding 1 — Atmosphere glow belongs on a second shell
 
 **Sources**
 - https://threejs-journey.com/lessons/earth-shaders
 - https://sangillee.com/2024-06-07-create-realistic-earth-with-shaders/
 
-**Implementation core**
-Use a second sphere with:
-- `side: THREE.BackSide`
-- `blending: THREE.AdditiveBlending`
-- a Fresnel-style fragment term based on the view angle
-
-Typical logic:
+**Concrete implementation**
 ```glsl
 vec3 toCamera = normalize(cameraPos - vWorldPos);
 float rim = 1.0 - abs(dot(toCamera, vNormal));
 rim = pow(rim, 2.8);
 ```
 
-**Why this matters**
-- It keeps the atmospheric limb crisp even when the Earth shader grows more complex.
-- It avoids tangling atmosphere logic with city lights, clouds, and future data overlays.
+**Exact library pattern**
+- `side: THREE.BackSide`
+- `blending: THREE.AdditiveBlending`
+- separate atmosphere mesh, not baked into the Earth shader
 
 **Gotcha**
-- Keep `depthWrite: false`, or the shell can produce ugly sorting artifacts against clouds and stars.
+- keep `depthWrite: false` or the atmosphere shell will sort badly against clouds and stars
 
-**CDN / library**
-- No extra library needed.
+**Additional library / CDN**
+- none required beyond the existing Three.js r128
 
-### Finding 3 — Animated cloud spheres are best done with `CanvasTexture`, not volumetric clouds, at this stage
+---
+
+### Finding 2 — Animated Genesis clouds should use `CanvasTexture`
 
 **Sources**
-- https://threejs.org/manual/en/canvas-textures.html
 - https://threejs.org/docs/api/en/textures/CanvasTexture.html
+- https://threejs.org/manual/en/canvas-textures.html
 
-**Implementation core**
+**Concrete implementation**
 ```javascript
 const cloudTexture = new THREE.CanvasTexture(cloudCanvas);
-
-function updateCloudCanvas() {
-  cloudsCtx.clearRect(0, 0, cloudCanvas.width, cloudCanvas.height);
-  // redraw drifting cloud blobs here
-  cloudTexture.needsUpdate = true;
-}
+drawCloudCanvas();
+cloudTexture.needsUpdate = true;
 ```
 
-**Exact library call to remember**
+**Exact library call**
 - `cloudTexture.needsUpdate = true`
 
 **Gotcha**
-- `CanvasTexture` updates automatically only on creation. After that, each redraw must set
-  `needsUpdate = true` before render or the GPU keeps the stale texture.
+- `CanvasTexture` is uploaded on creation, but every later redraw must manually set `needsUpdate`
 
-**CDN / library**
-- No extra library needed.
+**Additional library / CDN**
+- none required
 
-### Finding 4 — Optional manual camera upgrade if the current drag controls start to fight new features
+---
+
+### Finding 3 — The day/night terminator should blend on one sphere
+
+**Source**
+- https://webglfundamentals.org/webgl/lessons/webgl-qna-show-a-night-view-vs-a-day-view-on-a-3d-earth-sphere.html
+
+**Concrete implementation**
+```glsl
+float light = dot(normalize(vWorldNormal), normalize(sunDirection));
+float dayMix = 1.0 / (1.0 + exp(-12.0 * light));
+vec3 color = mix(nightColor, dayColor, dayMix);
+```
+
+**Why this matters**
+- it avoids double-geometry artifacts from stacking two textured globes
+- it produces a crisp terminator with a controllable twilight band
+
+**Gotcha**
+- keep both day and night sampling in the same fragment shader so the blend stays coherent
+
+**Additional library / CDN**
+- none required
+
+---
+
+### Finding 4 — OrbitControls is a future option, not an immediate need
 
 **Source**
 - https://threejs.org/docs/examples/en/controls/OrbitControls.html
 
-**Useful CDN for module-based pages**
+**Pinned import map**
 ```html
 <script type="importmap">
 {
@@ -189,152 +209,74 @@ function updateCloudCanvas() {
 </script>
 ```
 
-**Why this is only optional**
-- The current drag controls are still adequate.
-- Do not migrate the whole page to modules unless a future task truly needs it.
+**Gotcha**
+- all imported Three.js modules must use the same `0.128.0` version
+
+**Recommendation**
+- keep the current manual drag controls for now unless future data overlays make them feel limiting
 
 ---
 
-## 7-DAY ROADMAP — FROM DAY 10 TO DAY 16
+## 7-DAY ROADMAP — DAY 10 THROUGH DAY 16
 
-> This roadmap assumes the Earth now begins the week from **Day 9 / Complexity 8**.
-> Each day is deliberately scoped so the workflow can complete it without bluffing.
+This roadmap assumes the Earth begins the week at **Day 9 / Complexity 8 / Genesis Phase**.
 
----
+### Day 10 — The oceans answer the Sun
+**Mission:** separate land and water visually with ocean-only specular sheen  
+**Verification:** ocean surfaces should catch light differently from continents
 
-### DAY 10 — THE CLOUDS AWAKEN
-**Target complexity:** 10/100  
-**Mission:** Turn the current cloud shell into a genuinely animated texture.
+### Day 11 — The twilight belt sharpens
+**Mission:** refine the dawn/dusk band without breaking the current atmosphere shell  
+**Verification:** sunrise and sunset should show a narrower orange-blue transition
 
-**Build exactly this**
-1. Store cloud blobs as `{ x, y, size, speed }`
-2. Redraw the cloud canvas every 30-45 frames
-3. Move each blob horizontally using its own speed
-4. Set `cloudTexture.needsUpdate = true` after every redraw
+### Day 12 — The aurora appears
+**Mission:** add polar aurora ribbons or points above 65 degrees latitude  
+**Verification:** aurora remains confined to high latitudes and animates subtly
 
-**Verification**
-- Clouds must visibly change shape or position over time, not merely rotate as a frozen texture.
+### Day 13 — The weather speaks
+**Mission:** add Open-Meteo city cards to `window.html`  
+**Suggested endpoint:** `https://api.open-meteo.com/v1/forecast?latitude=LAT&longitude=LON&current_weather=true`  
+**Verification:** dashboard still renders if one or more API calls fail
 
----
+### Day 14 — The Earth remembers its quakes
+**Mission:** project the weekly USGS earthquake feed onto the globe  
+**Suggested endpoint:** `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson`  
+**Verification:** markers remain attached to the spinning Earth
 
-### DAY 11 — THE OCEANS ANSWER THE SUN
-**Target complexity:** 12/100  
-**Mission:** Add sun glint and stronger ocean/specular distinction.
+### Day 15 — The station crosses the sky
+**Mission:** add live ISS tracking in both the dashboard and the Earth scene  
+**Suggested endpoint:** `https://api.wheretheiss.at/v1/satellites/25544`  
+**Verification:** marker stays visually separate from the rotating Earth surface
 
-**Build exactly this**
-- Keep land matte
-- Add ocean-only highlight using the Earth shader
-- Use the sun direction and a view-angle term to create a soft reflective sheen over water
-
-**Verification**
-- As the camera drifts, ocean regions should catch light differently from continents.
-
----
-
-### DAY 12 — THE TWILIGHT BECOMES VISIBLE
-**Target complexity:** 14/100  
-**Mission:** Strengthen the dawn/dusk band around the terminator.
-
-**Build exactly this**
-- Add a warm twilight tint near the day/night boundary
-- Keep it subtle and narrow
-- Do not break the existing atmosphere shell
-
-**Verification**
-- A thin orange-blue transition should appear at sunrise/sunset zones.
-
----
-
-### DAY 13 — THE AURORA APPEARS
-**Target complexity:** 17/100  
-**Mission:** Add polar aurora on both hemispheres.
-
-**Build exactly this**
-- Use `THREE.Points` or a thin ribbon geometry near latitudes above 65°
-- Colors: teal, cyan, green
-- Animate vertical shimmer with `sin()` over time
-
-**Verification**
-- The aurora should stay near the poles and never bleed into the equator.
-
----
-
-### DAY 14 — THE WEATHER SPEAKS
-**Target complexity:** 21/100  
-**Mission:** Add live weather data to `window.html` using Open-Meteo.
-
-**API**
-```text
-https://api.open-meteo.com/v1/forecast?latitude=LAT&longitude=LON&current_weather=true
-```
-
-**Build exactly this**
-- Show 5 city cards with temperature, windspeed, and weather code label
-- Keep the Earth render working if the API fails
-- Use `.catch()` and a fallback message
-
-**Verification**
-- The dashboard must still render even when one or more fetches fail.
-
----
-
-### DAY 15 — THE EARTH REMEMBERS ITS QUAKES
-**Target complexity:** 25/100  
-**Mission:** Plot the USGS weekly earthquake feed on the globe.
-
-**API**
-```text
-https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson
-```
-
-**Build exactly this**
-- Convert each lat/lon to a sphere position
-- Use small pulsing markers
-- Color by magnitude band
-- Attach the markers to `earth` so they rotate with the planet
-
-**Verification**
-- Markers must stay locked to the Earth as it spins.
-
----
-
-### DAY 16 — THE STATION CROSSES THE SKY
-**Target complexity:** 30/100  
-**Mission:** Add live ISS tracking to both the Earth scene and the dashboard.
-
-**API**
-```text
-https://api.wheretheiss.at/v1/satellites/25544
-```
-
-**Example response fields**
-- `latitude`
-- `longitude`
-- `altitude`
-- `velocity`
-- `visibility`
-
-**Critical gotcha**
-- Use the HTTPS API above; do **not** use `http://api.open-notify.org/iss-now.json` on a secure site because mixed content will block it.
-
-**Verification**
-- Dashboard card updates every 10 seconds
-- ISS marker remains visually separate from the Earth's rotating surface
+### Day 16 — Reliability before ambition
+**Mission:** keep canonical file paths, graceful fetch failures, and state/prose consistency mandatory  
+**Verification:** if a future build omits or misnames a canonical output, the logs must make it obvious
 
 ---
 
 ## STANDING INSTRUCTIONS FOR THE ARCHITECT
 
-1. **Root output paths only:** `earth.html`, `window.html`, `earth/state.json`, `THE-BIBLE.md`
-2. **Always output all 4 files.** Day 9 silently omitted `THE-BIBLE.md`; do not repeat this.
-3. **Do not invent features in prose that are absent in code.** The dashboard and Bible must match reality.
-4. **Do not mix `||` and `??` without parentheses.** This broke `window.html` this week.
-5. **Use graceful fetch failure handling.** If a live API fails, the Earth must still render.
-6. **Keep Three.js at r128-compatible APIs.**
-7. **Preserve the current atmosphere shell and terminator shader unless improving them directly.**
-8. **Because the wrong-path bug happened 4 times this week, validate output file names before every final answer.**
+1. **Canonical output files only**
+   - `earth.html`
+   - `window.html`
+   - `earth/state.json`
+   - `THE-BIBLE.md`
+
+2. **Do not let prose drift away from code.**
+   If the dashboard says it exists, the feature must exist in the render or in fetched data.
+
+3. **Keep the Earth render stable above all else.**
+   Graceful degradation is better than a broken page.
+
+4. **When using live APIs, always include `.catch()` handling.**
+
+5. **Keep Three.js code r128-compatible unless the project is intentionally migrated.**
+
+6. **Because the wrong-path regression happened 4 times, validate final file names every run.**
+
+7. **Do not increment the day counter outside the runner's normal daily flow.**
 
 ---
 
-*— THE HERALD, March 14, 2026*  
-*"Survey the past. Fix the present. Chart the future."*
+*— THE HERALD, March 17, 2026*  
+*"Survey the past. Fix the present. Chart the next seven dawns."*

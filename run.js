@@ -22,6 +22,22 @@ const PATHS = {
   log       : path.join(ROOT, 'run.log'),
 };
 
+const CANONICAL_OUTPUTS = new Set([
+  'earth.html',
+  'window.html',
+  'earth/state.json',
+  'THE-BIBLE.md',
+]);
+
+const OUTPUT_ALIASES = {
+  './earth.html': 'earth.html',
+  './window.html': 'window.html',
+  './earth/state.json': 'earth/state.json',
+  './THE-BIBLE.md': 'THE-BIBLE.md',
+  'earth/earth.html': 'earth.html',
+  'window/index.html': 'window.html',
+};
+
 // Cheap models — tried in order. GPT 4o mini first for cost efficiency.
 const MODEL_CANDIDATES = [
   'openai/gpt-4o-mini',
@@ -69,6 +85,17 @@ function parseFileBlocks(text) {
     blocks.push({ relativePath: m[1].trim(), content: m[2] });
   }
   return blocks;
+}
+
+function normalizeOutputPath(relativePath) {
+  const cleaned = relativePath.replace(/\\/g, '/').replace(/^\.\//, '').trim();
+  const normalized = OUTPUT_ALIASES[cleaned] ?? cleaned;
+
+  if (normalized !== cleaned) {
+    log(`⚠  Normalized AI output path ${cleaned} -> ${normalized}`);
+  }
+
+  return normalized;
 }
 
 // ── OpenRouter API (OpenAI-compatible) ─────────────────────
@@ -257,10 +284,23 @@ async function main() {
   divider();
   log('🌍 Applying changes...');
   let written = 0;
+  const seenPaths = new Set();
   for (const block of blocks) {
-    if (write(path.join(ROOT, block.relativePath), block.content)) written++;
+    const relativePath = normalizeOutputPath(block.relativePath);
+    if (!CANONICAL_OUTPUTS.has(relativePath)) {
+      log(`⚠  Ignored unexpected output path: ${block.relativePath}`);
+      continue;
+    }
+
+    seenPaths.add(relativePath);
+    if (write(path.join(ROOT, relativePath), block.content)) written++;
   }
   log(`📦 ${written}/${blocks.length} files written`);
+
+  const missingOutputs = [...CANONICAL_OUTPUTS].filter(file => !seenPaths.has(file));
+  if (missingOutputs.length) {
+    log(`⚠  Response omitted canonical files: ${missingOutputs.join(', ')}`);
+  }
 
   // Stamp model & timestamp into state
   try {

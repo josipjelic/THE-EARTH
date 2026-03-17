@@ -99,9 +99,11 @@
 
     <script>
         let scene, camera, renderer;
-        let earth, stars, atmosphere, clouds, moon, sun;
-        let earthMaterial, atmosphereMaterial;
+        let earth, stars, atmosphere, clouds, moon, sun, sunLight;
+        let earthMaterial, atmosphereMaterial, cloudTexture, cloudsCtx;
+        let cloudBands = [];
         let time = 0;
+        let frameCount = 0;
         let isDragging = false;
         let previousMouseX = 0;
 
@@ -408,14 +410,16 @@
             const cloudsCanvas = document.createElement('canvas');
             cloudsCanvas.width = 1024;
             cloudsCanvas.height = 512;
-            const cloudsCtx = cloudsCanvas.getContext('2d');
-            cloudsCtx.fillStyle = '#ffffff';
-            drawCloudBlobs(cloudsCtx);
+            cloudsCtx = cloudsCanvas.getContext('2d');
+            cloudBands = createCloudBands();
+            drawCloudBlobs(cloudsCtx, cloudBands, 0);
+            cloudTexture = new THREE.CanvasTexture(cloudsCanvas);
+            cloudTexture.wrapS = THREE.RepeatWrapping;
 
             clouds = new THREE.Mesh(
                 new THREE.SphereGeometry(1.018, 64, 64),
                 new THREE.MeshPhongMaterial({
-                    map: new THREE.CanvasTexture(cloudsCanvas),
+                    map: cloudTexture,
                     transparent: true,
                     opacity: 0.75,
                     depthWrite: false,
@@ -474,31 +478,69 @@
             });
         }
 
-        function drawCloudBlobs(ctx) {
-            const cloudPositions = [
-                { x: 110, y: 75, size: 72 }, { x: 290, y: 95, size: 51 },
-                { x: 470, y: 55, size: 68 }, { x: 710, y: 88, size: 88 },
-                { x: 860, y: 135, size: 44 }, { x: 155, y: 205, size: 39 },
-                { x: 680, y: 255, size: 61 }, { x: 390, y: 295, size: 33 },
-                { x: 920, y: 275, size: 29 }, { x: 530, y: 355, size: 52 },
-                { x: 200, y: 320, size: 45 }, { x: 760, y: 180, size: 38 }
+        function createCloudBands() {
+            return [
+                { x: 110, y: 75, size: 72, speed: 1.2, squash: 0.52, alpha: 0.7 },
+                { x: 290, y: 95, size: 51, speed: 0.8, squash: 0.48, alpha: 0.64 },
+                { x: 470, y: 55, size: 68, speed: 1.4, squash: 0.5, alpha: 0.72 },
+                { x: 710, y: 88, size: 88, speed: 0.65, squash: 0.5, alpha: 0.66 },
+                { x: 860, y: 135, size: 44, speed: 1.1, squash: 0.55, alpha: 0.63 },
+                { x: 155, y: 205, size: 39, speed: 0.55, squash: 0.45, alpha: 0.6 },
+                { x: 680, y: 255, size: 61, speed: 0.9, squash: 0.5, alpha: 0.68 },
+                { x: 390, y: 295, size: 33, speed: 1.35, squash: 0.47, alpha: 0.58 },
+                { x: 920, y: 275, size: 29, speed: 1.55, squash: 0.5, alpha: 0.56 },
+                { x: 530, y: 355, size: 52, speed: 0.75, squash: 0.56, alpha: 0.61 },
+                { x: 200, y: 320, size: 45, speed: 1.05, squash: 0.48, alpha: 0.6 },
+                { x: 760, y: 180, size: 38, speed: 1.45, squash: 0.46, alpha: 0.57 }
             ];
+        }
+
+        function wrapTextureX(x, width) {
+            return ((x % width) + width) % width;
+        }
+
+        function paintCloud(ctx, x, y, size, squash, alpha) {
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            ctx.ellipse(x, y, size, size * squash, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.globalAlpha = alpha * 0.55;
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.4, y - 12, size * 0.65, size * 0.42, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawCloudBlobs(ctx, cloudPositions, drift) {
+            const width = ctx.canvas.width;
+            const height = ctx.canvas.height;
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+
             cloudPositions.forEach(cloud => {
-                ctx.globalAlpha = 0.65 + Math.random() * 0.25;
-                ctx.beginPath();
-                ctx.ellipse(cloud.x, cloud.y, cloud.size, cloud.size * 0.52, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 0.38;
-                ctx.beginPath();
-                ctx.ellipse(cloud.x - cloud.size * 0.4, cloud.y - 12, cloud.size * 0.65, cloud.size * 0.45, 0, 0, Math.PI * 2);
-                ctx.fill();
+                const x = wrapTextureX(cloud.x + drift * cloud.speed, width);
+                paintCloud(ctx, x, cloud.y, cloud.size, cloud.squash, cloud.alpha);
+
+                if (x < cloud.size * 1.4) {
+                    paintCloud(ctx, x + width, cloud.y, cloud.size, cloud.squash, cloud.alpha);
+                }
+                if (x > width - cloud.size * 1.4) {
+                    paintCloud(ctx, x - width, cloud.y, cloud.size, cloud.squash, cloud.alpha);
+                }
             });
+
+            const haze = ctx.createLinearGradient(0, 0, 0, height);
+            haze.addColorStop(0, 'rgba(255,255,255,0.06)');
+            haze.addColorStop(0.5, 'rgba(255,255,255,0)');
+            haze.addColorStop(1, 'rgba(255,255,255,0.08)');
             ctx.globalAlpha = 1.0;
+            ctx.fillStyle = haze;
+            ctx.fillRect(0, 0, width, height);
         }
 
         function createLights() {
             scene.add(new THREE.AmbientLight(0x334455, 0.5));
-            const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
             sunLight.position.set(8, 2, 7);
             scene.add(sunLight);
             const fillLight = new THREE.DirectionalLight(0x8899cc, 0.25);
@@ -524,9 +566,14 @@
         function animate() {
             requestAnimationFrame(animate);
             time += 0.0012;
+            frameCount++;
 
             if (!isDragging && earth) earth.rotation.y += 0.00095;
             if (clouds) clouds.rotation.y += 0.00135;
+            if (cloudTexture && cloudsCtx && cloudBands.length && frameCount % 3 === 0) {
+                drawCloudBlobs(cloudsCtx, cloudBands, frameCount * 0.32);
+                cloudTexture.needsUpdate = true;
+            }
 
             const drift = 0.22;
             camera.position.x = Math.sin(time * 0.35) * drift;
@@ -538,6 +585,14 @@
                 atmosphereMaterial.uniforms.cameraPos.value.copy(camera.position);
             }
             if (earthMaterial && sun) {
+                sun.position.set(
+                    Math.cos(time * 0.18) * 9.5,
+                    2.6 + Math.sin(time * 0.07) * 1.2,
+                    Math.sin(time * 0.18) * 8.5
+                );
+                if (sunLight) {
+                    sunLight.position.copy(sun.position);
+                }
                 earthMaterial.uniforms.sunDirection.value.copy(sun.position).normalize();
             }
 

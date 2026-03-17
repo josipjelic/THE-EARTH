@@ -3,362 +3,535 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE WINDOW — Observer Dashboard</title>
+    <title>THE WINDOW — Weekly Observatory</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #050914;
+            --panel: rgba(13, 24, 42, 0.88);
+            --panel-strong: rgba(18, 33, 58, 0.96);
+            --line: rgba(125, 180, 255, 0.18);
+            --line-strong: rgba(125, 180, 255, 0.4);
+            --text: #d8e8ff;
+            --muted: #8ea4c7;
+            --accent: #72b8ff;
+            --accent-2: #59f0d4;
+            --warn: #ffb366;
+            --danger: #ff7a7a;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
+            font-family: Georgia, serif;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(54, 98, 168, 0.18), transparent 32%),
+                radial-gradient(circle at 80% 0%, rgba(82, 180, 255, 0.12), transparent 30%),
+                linear-gradient(180deg, #040812 0%, #08111e 100%);
+            color: var(--text);
             min-height: 100vh;
-            color: #e0e0e0;
-            padding: 40px;
+            padding: 32px 18px 56px;
         }
+
         .container {
-            max-width: 1000px;
+            max-width: 1180px;
             margin: 0 auto;
         }
-        h1 {
-            text-align: center;
-            font-size: 2.5em;
-            letter-spacing: 12px;
-            color: #fff;
-            text-shadow: 0 0 30px rgba(100, 150, 255, 0.5);
+
+        .hero,
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+        }
+
+        .hero {
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .eyebrow {
+            color: var(--accent-2);
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
             margin-bottom: 10px;
         }
-        .subtitle {
-            text-align: center;
-            font-style: italic;
-            color: #888;
-            margin-bottom: 40px;
-            font-size: 1.1em;
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3.3rem);
+            letter-spacing: 0.18em;
+            margin-bottom: 10px;
         }
-        .earth-link {
-            display: block;
-            text-align: center;
-            margin-bottom: 40px;
+
+        .hero p,
+        .panel p,
+        li {
+            color: var(--muted);
+            line-height: 1.65;
         }
-        .earth-link a {
-            display: inline-block;
-            padding: 20px 60px;
-            background: linear-gradient(135deg, #1a4d7c 0%, #2d6a9f 100%);
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.3em;
-            letter-spacing: 4px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(30, 90, 150, 0.4);
-        }
-        .earth-link a:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(30, 90, 150, 0.6);
-        }
-        .nav-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .nav-links a {
-            color: #6ab0ff;
-            text-decoration: none;
-            font-size: 0.9em;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(100, 150, 255, 0.3);
-            padding-bottom: 2px;
-            transition: border-color 0.2s;
-        }
-        .nav-links a:hover {
-            border-color: #6ab0ff;
-        }
-        .metrics-grid {
+
+        .hero-meta,
+        .nav,
+        .metrics,
+        .two-col,
+        .grid-cards,
+        .roadmap {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
+            gap: 18px;
         }
-        .metric-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        .hero-meta {
+            grid-template-columns: 1.5fr 1fr;
+            align-items: start;
+            margin-top: 18px;
+        }
+
+        .nav {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .nav a,
+        .button {
+            display: inline-block;
+            text-decoration: none;
+            color: var(--text);
+            padding: 13px 16px;
             border-radius: 12px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
+            background: rgba(90, 138, 210, 0.13);
+            border: 1px solid var(--line);
+            transition: 0.2s ease;
         }
-        .metric-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(100, 150, 255, 0.3);
+
+        .nav a:hover,
+        .button:hover {
+            transform: translateY(-1px);
+            border-color: var(--line-strong);
+            background: rgba(90, 138, 210, 0.2);
         }
-        .metric-value {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #6ab0ff;
-            text-shadow: 0 0 20px rgba(100, 150, 255, 0.3);
+
+        .metrics {
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            margin-bottom: 24px;
         }
+
+        .metric {
+            padding: 22px;
+        }
+
         .metric-label {
-            font-size: 0.9em;
-            color: #888;
-            margin-top: 10px;
+            color: var(--muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 2.2rem;
+            color: #fff;
+        }
+
+        .phase {
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .phase-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .progress {
+            width: 100%;
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress > div {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        .two-col {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            margin-bottom: 24px;
+        }
+
+        .panel {
+            padding: 24px;
+        }
+
+        .panel h2 {
+            font-size: 1.05rem;
             letter-spacing: 2px;
             text-transform: uppercase;
+            margin-bottom: 16px;
         }
-        .features-section {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 40px;
-        }
-        .features-section h2 {
-            font-size: 1.3em;
-            letter-spacing: 4px;
-            color: #6ab0ff;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-        .feature-list {
+
+        .feature-list,
+        .stack-list {
             list-style: none;
         }
-        .feature-list li {
+
+        .feature-list li,
+        .stack-list li {
             padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
-        .feature-list li:last-child {
-            border-bottom: none;
+
+        .feature-list li:last-child,
+        .stack-list li:last-child {
+            border-bottom: 0;
         }
-        .feature-list li::before {
-            content: '✦';
-            color: #6ab0ff;
-            margin-right: 15px;
-            font-size: 0.8em;
+
+        .audit-banner {
+            border-left: 4px solid var(--danger);
+            padding-left: 14px;
+            margin: 12px 0 18px;
+            color: #ffd6d6;
         }
-        .progress-section {
-            margin-bottom: 40px;
+
+        .grid-cards {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         }
-        .progress-section h2 {
-            font-size: 1.1em;
-            letter-spacing: 4px;
-            color: #888;
-            margin-bottom: 15px;
-            text-transform: uppercase;
+
+        .card {
+            background: var(--panel-strong);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 18px;
         }
-        .progress-bar {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            height: 20px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #1a4d7c 0%, #6ab0ff 100%);
-            border-radius: 10px;
-            transition: width 1s ease;
-        }
-        .progress-label {
-            text-align: right;
-            margin-top: 10px;
-            color: #888;
-            font-size: 0.9em;
-        }
-        .phase-banner {
-            text-align: center;
-            padding: 15px;
-            background: linear-gradient(90deg, transparent 0%, rgba(100, 150, 255, 0.1) 50%, transparent 100%);
-            border-radius: 8px;
-            margin-bottom: 40px;
-        }
-        .phase-name {
-            font-size: 1.5em;
-            letter-spacing: 8px;
-            color: #6ab0ff;
-            text-transform: uppercase;
-        }
-        .phase-days {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-        footer {
-            text-align: center;
-            color: #444;
-            font-size: 0.9em;
-            padding-top: 40px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        footer a {
-            color: #6ab0ff;
-            text-decoration: none;
-        }
-        .last-update {
-            text-align: center;
-            color: #555;
-            font-size: 0.85em;
-            margin-top: 20px;
-        }
-        .changelog-entry {
-            border-left: 2px solid rgba(100, 150, 255, 0.3);
-            padding: 12px 0 12px 16px;
+
+        .card h3 {
+            font-size: 0.95rem;
             margin-bottom: 10px;
         }
-        .changelog-entry:last-child { margin-bottom: 0; }
-        .changelog-day {
-            font-size: 0.8em;
-            letter-spacing: 2px;
-            color: #6ab0ff;
-            text-transform: uppercase;
+
+        .card code,
+        .snippet {
+            display: block;
+            font-family: "Courier New", monospace;
+            font-size: 0.85rem;
+            color: #c9f5ff;
+            background: rgba(0, 0, 0, 0.22);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+
+        .card a {
+            color: var(--accent);
+        }
+
+        .roadmap {
+            margin-top: 16px;
+        }
+
+        .roadmap-step {
+            background: var(--panel-strong);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 16px 18px;
+        }
+
+        .roadmap-step strong {
+            display: block;
+            color: #fff;
             margin-bottom: 6px;
         }
-        .changelog-changes {
-            list-style: none;
-            color: #aaa;
-            font-size: 0.88em;
-            line-height: 1.6;
+
+        .muted-small {
+            font-size: 0.92rem;
+            color: var(--muted);
         }
-        .changelog-changes li::before { content: '— '; color: #555; }
+
+        .last-update {
+            margin-top: 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        @media (max-width: 740px) {
+            .hero,
+            .panel,
+            .metric,
+            .phase {
+                padding: 18px;
+            }
+
+            .hero-meta {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>THE WINDOW</h1>
-        <p class="subtitle">A dashboard through which mortals observe the creation</p>
+        <section class="hero">
+            <div class="eyebrow">The Herald's Monday View</div>
+            <h1>THE WINDOW</h1>
+            <p>
+                A weekly observatory for THE EARTH: current state, operational health, research that
+                the daily builder cannot do in a GitHub Action, and a 7-day course for the coming week.
+            </p>
 
-        <div class="nav-links">
-            <a href="index.html">⬅ Observatory</a>
-            <a href="earth.html">🌍 Earth</a>
-        </div>
-
-        <div class="earth-link">
-            <a href="earth.html">👁 OBSERVE THE EARTH 👁</a>
-        </div>
-
-        <div class="phase-banner">
-            <div class="phase-name" id="phase-name">Genesis Phase</div>
-            <div class="phase-days" id="phase-days">Days 1–10: The foundations are laid</div>
-        </div>
-
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-value" id="metric-day">—</div>
-                <div class="metric-label">Day of Creation</div>
+            <div class="hero-meta">
+                <div class="nav">
+                    <a href="earth.html">Observe the live Earth</a>
+                    <a href="index.html">Open the landing observatory</a>
+                    <a href="DAILY_BRIEFING.md">Read the full weekly briefing</a>
+                    <a href="THE-BIBLE.md">Read THE BIBLE</a>
+                </div>
+                <div class="card">
+                    <h3>Weekly verdict</h3>
+                    <p id="weekly-verdict">
+                        Progress is visually real, but the delivery process still needs guardrails.
+                    </p>
+                </div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value" id="metric-complexity">—</div>
-                <div class="metric-label">Complexity Level</div>
+        </section>
+
+        <section class="metrics">
+            <div class="panel metric">
+                <div class="metric-label">Day</div>
+                <div class="metric-value" id="metric-day">-</div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value" id="metric-features">—</div>
-                <div class="metric-label">Features Active</div>
+            <div class="panel metric">
+                <div class="metric-label">Complexity</div>
+                <div class="metric-value" id="metric-complexity">-</div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value" id="metric-loc">—</div>
+            <div class="panel metric">
+                <div class="metric-label">Features</div>
+                <div class="metric-value" id="metric-features">-</div>
+            </div>
+            <div class="panel metric">
                 <div class="metric-label">Lines of Code</div>
+                <div class="metric-value" id="metric-loc">-</div>
             </div>
-        </div>
+        </section>
 
-        <div class="progress-section">
-            <h2>Journey to Complexity</h2>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+        <section class="panel phase">
+            <div class="phase-line">
+                <h2 id="phase-name">Genesis Phase</h2>
+                <div id="phase-days" class="muted-small">Days 1-10: foundations and motion</div>
             </div>
-            <div class="progress-label" id="progress-label">— / 100</div>
-        </div>
+            <div class="progress"><div id="progress-fill"></div></div>
+            <div id="progress-label" class="muted-small">0 / 100</div>
+        </section>
 
-        <div class="features-section">
-            <h2>Features Bestowed Upon the Earth</h2>
-            <ul class="feature-list" id="feature-list"></ul>
-        </div>
+        <section class="two-col">
+            <div class="panel">
+                <h2>Features active now</h2>
+                <ul class="feature-list" id="feature-list"></ul>
+            </div>
 
-        <div class="features-section" id="tech-specs-section">
-            <h2>Technical Specifications</h2>
-            <ul class="feature-list" id="tech-specs-list"></ul>
-        </div>
+            <div class="panel">
+                <h2>Technical snapshot</h2>
+                <ul class="stack-list" id="tech-specs-list"></ul>
+            </div>
+        </section>
 
-        <div class="features-section" id="changelog-section">
-            <h2>Chronicle of Creation</h2>
-            <div id="changelog-list"></div>
-        </div>
+        <section class="two-col">
+            <div class="panel">
+                <h2>Chronicle of creation</h2>
+                <div id="changelog-list"></div>
+            </div>
 
-        <p class="last-update" id="last-update">Loading…</p>
+            <div class="panel">
+                <h2>Weekly audit</h2>
+                <p>7 of the last 7 runs reached <code>COMPLETE</code> with 0 fatal crashes.</p>
+                <div class="audit-banner">
+                    The same wrong-path regression happened 4 consecutive times this week:
+                    <code>earth/earth.html</code> and <code>window/index.html</code> were written instead
+                    of the canonical root files. The runner is now hardened against that drift.
+                </div>
+                <div class="grid-cards" id="audit-cards"></div>
+            </div>
+        </section>
 
-        <footer>
-            <p>Created by THE ARCHITECT — An eternal Claude instance</p>
-            <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a></p>
-        </footer>
+        <section class="panel" style="margin-bottom: 24px;">
+            <h2>Genesis research findings</h2>
+            <div class="grid-cards" id="research-findings"></div>
+        </section>
+
+        <section class="panel">
+            <h2>The next 7 days</h2>
+            <div class="roadmap" id="roadmap"></div>
+            <p class="last-update" id="last-update">Loading state...</p>
+        </section>
     </div>
+
     <script>
-    (function() {
-        function getPhaseDetails(phase, complexity) {
-            if (complexity >= 100 || phase === 'Age of Gods') {
-                return 'Days 101+: planetary simulation reaches mythic scale';
+        (function() {
+            const AUDIT = [
+                { title: 'Run outcomes', body: '7 completed / 0 fatal / 4 warning lines in run.log', tone: 'accent' },
+                { title: 'Complexity gained', body: '2 -> 8 over the last 7 daily builds (+6)', tone: 'accent' },
+                { title: 'Biggest feature', body: 'The Moon with crater texture and orbital motion remains the clearest leap.', tone: 'accent' },
+                { title: 'Biggest setback', body: 'Wrong-path writes repeated four times before recovery.', tone: 'danger' }
+            ];
+
+            const RESEARCH_FINDINGS = [
+                {
+                    title: 'Atmosphere shell',
+                    source: 'sangillee.com and Three.js Journey',
+                    url: 'https://sangillee.com/2024-06-07-create-realistic-earth-with-shaders/',
+                    detail: 'Keep atmosphere on a second sphere with BackSide rendering and additive blending.',
+                    code: 'float rim = 1.0 - abs(dot(toCamera, vNormal));\\nrim = pow(rim, 2.8);',
+                    gotcha: 'Leave depthWrite disabled or the shell will sort badly against clouds.'
+                },
+                {
+                    title: 'Animated cloud texture',
+                    source: 'threejs.org CanvasTexture docs',
+                    url: 'https://threejs.org/docs/api/en/textures/CanvasTexture.html',
+                    detail: 'Genesis-scale clouds are best redrawn on a 2D canvas and reused on a thin sphere.',
+                    code: 'const cloudTexture = new THREE.CanvasTexture(canvas);\\ncloudTexture.needsUpdate = true;',
+                    gotcha: 'CanvasTexture uploads once on creation; every redraw must set needsUpdate.'
+                },
+                {
+                    title: 'Day / night terminator',
+                    source: 'webglfundamentals.org',
+                    url: 'https://webglfundamentals.org/webgl/lessons/webgl-qna-show-a-night-view-vs-a-day-view-on-a-3d-earth-sphere.html',
+                    detail: 'Blend day and night textures in one shader instead of stacking duplicate globes.',
+                    code: 'float light = dot(normalize(vWorldNormal), normalize(sunDirection));\\nfloat dayMix = 1.0 / (1.0 + exp(-12.0 * light));\\nvec3 color = mix(nightColor, dayColor, dayMix);',
+                    gotcha: 'A single shaded sphere avoids overlapping-geometry artifacts and keeps the terminator crisp.'
+                },
+                {
+                    title: 'Optional controls upgrade',
+                    source: 'Three.js OrbitControls docs',
+                    url: 'https://threejs.org/docs/examples/en/controls/OrbitControls.html',
+                    detail: 'If manual drag becomes limiting, move to module-based OrbitControls with pinned versions.',
+                    code: '"three": "https://unpkg.com/three@0.128.0/build/three.module.js"\\n"three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"',
+                    gotcha: 'Every imported Three.js module must use the same 0.128.0 version.'
+                }
+            ];
+
+            const ROADMAP = [
+                { day: 'Day 10', title: 'Ocean glint and water separation', body: 'Add an ocean-only sheen in the Earth shader so seas answer the sun differently from land.' },
+                { day: 'Day 11', title: 'Sharper twilight belt', body: 'Refine the dawn/dusk band into a narrower orange-blue rim without breaking the current atmosphere shell.' },
+                { day: 'Day 12', title: 'Aurora at the poles', body: 'Introduce subtle cyan-green aurora ribbons above 65 degrees latitude.' },
+                { day: 'Day 13', title: 'Open-Meteo dashboard cards', body: 'Fetch current weather for a handful of cities and keep the dashboard resilient on API failure.' },
+                { day: 'Day 14', title: 'USGS earthquake markers', body: 'Plot live weekly quake points on the globe so real Earth events begin to surface.' },
+                { day: 'Day 15', title: 'ISS tracker', body: 'Render a live station marker above the planet and expose altitude, velocity, and visibility in the UI.' },
+                { day: 'Day 16', title: 'Reliability pass', body: 'Before deeper data work, keep canonical output paths, graceful fetch failures, and matching prose/code as non-negotiable constraints.' }
+            ];
+
+            function getPhaseDetails(phase, complexity) {
+                if (complexity >= 100 || phase === 'Age of Gods') return 'Days 101+: mythic simulation systems';
+                if (complexity >= 60 || phase === 'Age of Data') return 'Days 61-100: live data and planetary telemetry';
+                if (complexity >= 30 || phase === 'Age of Detail') return 'Days 31-60: lighting, cities, and texture depth';
+                if (complexity >= 10 || phase === 'Living World') return 'Days 11-30: animated weather and surface life';
+                return 'Days 1-10: foundations, clouds, atmosphere, and motion';
             }
-            if (complexity >= 60 || phase === 'Age of Data') {
-                return 'Days 61–100: live systems and global data awaken';
-            }
-            if (complexity >= 30 || phase === 'Age of Detail') {
-                return 'Days 31–60: textures, cities, and surface detail deepen';
-            }
-            if (complexity >= 10 || phase === 'Living World') {
-                return 'Days 11–30: weather, lights, and life begin to move';
-            }
-            return 'Days 1–10: the foundations of Earth are still forming';
-        }
 
-        fetch('earth/state.json').then(r => r.json()).then(s => {
-            const day = s.earth?.day ?? s.day ?? 0;
-            const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 0;
-            const features = s.features ?? [];
-            const loc = s.linesOfCode ?? 0;
-            const phase = s.phase ?? 'Genesis';
-            const featureCount = features.length || s.totalFeatures || 0;
-
-            document.getElementById('metric-day').textContent = day;
-            document.getElementById('metric-complexity').textContent = complexity;
-            document.getElementById('metric-features').textContent = featureCount;
-            document.getElementById('metric-loc').textContent = loc ? '~' + loc : '—';
-
-            document.getElementById('phase-name').textContent = phase + ' Phase';
-            document.getElementById('phase-days').textContent = getPhaseDetails(phase, complexity);
-
-            document.getElementById('progress-fill').style.width = complexity + '%';
-            document.getElementById('progress-label').textContent = complexity + ' / 100';
-
-            const fl = document.getElementById('feature-list');
-            fl.innerHTML = (features.length ? features : ['Loading…']).map(f => '<li>' + f + '</li>').join('');
-
-            const specs = [];
-            if (s.earthRotation?.speed) specs.push('Earth Rotation: ' + s.earthRotation.speed + ' rad/frame');
-            if (s.camera?.fov) specs.push('Camera Field of View: ' + s.camera.fov + '°');
-            specs.push('Rendering Engine: Three.js r128');
-            specs.push('Texture Resolution: 1024×512');
-            specs.push('Star Count: 2000');
-            document.getElementById('tech-specs-list').innerHTML = specs.map(x => '<li>' + x + '</li>').join('');
-
-            // Changelog
-            const changelog = s.changelog ?? [];
-            const clEl = document.getElementById('changelog-list');
-            if (changelog.length) {
-                clEl.innerHTML = [...changelog].reverse().slice(0, 8).map(entry => `
-                    <div class="changelog-entry">
-                        <div class="changelog-day">Day ${entry.day}</div>
-                        <ul class="changelog-changes">${(entry.changes || []).map(c => `<li>${c}</li>`).join('')}</ul>
-                    </div>`).join('');
-            } else {
-                clEl.innerHTML = '<p style="color:#555;font-size:0.9em;">No entries yet.</p>';
+            function renderAuditCards() {
+                document.getElementById('audit-cards').innerHTML = AUDIT.map(item => `
+                    <div class="card">
+                        <h3>${item.title}</h3>
+                        <p>${item.body}</p>
+                    </div>
+                `).join('');
             }
 
-            const updated = s.earth?.last_updated ? new Date(s.earth.last_updated) : new Date();
-            document.getElementById('last-update').textContent = 'Last Updated: ' + updated.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ' — Day ' + day + ' of Creation';
-        }).catch(() => {
-            document.getElementById('last-update').textContent = 'State unavailable';
-        });
-    })();
+            function renderResearch() {
+                document.getElementById('research-findings').innerHTML = RESEARCH_FINDINGS.map(item => `
+                    <article class="card">
+                        <h3>${item.title}</h3>
+                        <p><strong>Source:</strong> <a href="${item.url}">${item.source}</a></p>
+                        <p>${item.detail}</p>
+                        <span class="snippet">${item.code}</span>
+                        <p style="margin-top:10px;"><strong>Gotcha:</strong> ${item.gotcha}</p>
+                        <p style="margin-top:10px;"><strong>Additional CDN/library:</strong> none required for the first three findings.</p>
+                    </article>
+                `).join('');
+            }
+
+            function renderRoadmap() {
+                document.getElementById('roadmap').innerHTML = ROADMAP.map(item => `
+                    <div class="roadmap-step">
+                        <strong>${item.day} — ${item.title}</strong>
+                        <p>${item.body}</p>
+                    </div>
+                `).join('');
+            }
+
+            function renderChangelog(changelog) {
+                const target = document.getElementById('changelog-list');
+                if (!changelog.length) {
+                    target.innerHTML = '<p>No changelog entries yet.</p>';
+                    return;
+                }
+
+                target.innerHTML = changelog.slice().reverse().slice(0, 7).map(entry => `
+                    <div class="card" style="margin-bottom:12px;">
+                        <h3>Day ${entry.day}</h3>
+                        <ul class="stack-list">${(entry.changes || []).map(change => `<li>${change}</li>`).join('')}</ul>
+                    </div>
+                `).join('');
+            }
+
+            renderAuditCards();
+            renderResearch();
+            renderRoadmap();
+
+            fetch('earth/state.json')
+                .then(response => response.json())
+                .then(state => {
+                    const day = state.earth?.day ?? state.day ?? 0;
+                    const complexity = state.earth?.complexity_level ?? state.complexityLevel ?? 0;
+                    const features = state.features ?? [];
+                    const featureCount = features.length || state.totalFeatures || 0;
+                    const phase = state.phase ?? 'Genesis';
+                    const updated = state.earth?.last_updated ? new Date(state.earth.last_updated) : null;
+
+                    document.getElementById('metric-day').textContent = day;
+                    document.getElementById('metric-complexity').textContent = complexity + ' / 100';
+                    document.getElementById('metric-features').textContent = featureCount;
+                    document.getElementById('metric-loc').textContent = state.linesOfCode ? '~' + state.linesOfCode : '-';
+                    document.getElementById('phase-name').textContent = phase + ' Phase';
+                    document.getElementById('phase-days').textContent = getPhaseDetails(phase, complexity);
+                    document.getElementById('progress-fill').style.width = complexity + '%';
+                    document.getElementById('progress-label').textContent = complexity + ' / 100';
+                    document.getElementById('feature-list').innerHTML = features.map(feature => `<li>${feature}</li>`).join('');
+
+                    const techSpecs = [
+                        'Rendering engine: Three.js r128',
+                        'Star field: 2000 visible stars',
+                        'Texture resolution: 1024 x 512 canvas',
+                        'Earth rotation speed: ' + (state.earthRotation?.speed ?? '0.00095') + ' rad/frame',
+                        'Camera FOV: ' + (state.camera?.fov ?? 45) + ' degrees',
+                        'Cloud texture: animated CanvasTexture with redraws',
+                        'Atmosphere: back-side Fresnel shell with additive blending'
+                    ];
+                    document.getElementById('tech-specs-list').innerHTML = techSpecs.map(item => `<li>${item}</li>`).join('');
+
+                    renderChangelog(state.changelog ?? []);
+
+                    document.getElementById('weekly-verdict').textContent =
+                        complexity < 10
+                            ? 'Genesis is progressing at a healthy visual pace, but delivery discipline still needs reinforcement.'
+                            : 'The Earth has exited its earliest stage and now needs tighter data discipline.';
+
+                    document.getElementById('last-update').textContent = updated
+                        ? 'Last builder update: ' + updated.toISOString() + ' — weekly audit prepared by THE HERALD'
+                        : 'Weekly audit prepared by THE HERALD';
+                })
+                .catch(() => {
+                    document.getElementById('last-update').textContent = 'earth/state.json could not be loaded.';
+                    document.getElementById('feature-list').innerHTML = '<li>State unavailable</li>';
+                    document.getElementById('tech-specs-list').innerHTML = '<li>State unavailable</li>';
+                    document.getElementById('changelog-list').innerHTML = '<p>Chronicle unavailable.</p>';
+                });
+        })();
     </script>
 </body>
 </html>
