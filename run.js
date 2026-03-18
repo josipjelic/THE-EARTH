@@ -22,15 +22,15 @@ const PATHS = {
   log       : path.join(ROOT, 'run.log'),
 };
 
-// Cheap models — tried in order. GPT 4o mini first for cost efficiency.
+// Prefer reliable, lower-cost models first to reduce credit-exhaustion churn.
 const MODEL_CANDIDATES = [
+  'google/gemini-2.0-flash-001',
   'openai/gpt-4o-mini',
   'anthropic/claude-3.5-haiku',
-  'google/gemini-2.0-flash-001',
   'anthropic/claude-3.5-sonnet',
 ];
 
-const MAX_TOKENS = 10000;
+const MAX_TOKENS = 8000;
 
 // ── Logging ────────────────────────────────────────────────
 function log(msg) {

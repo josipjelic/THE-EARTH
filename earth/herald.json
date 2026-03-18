@@ -1,0 +1,142 @@
+{
+  "title": "THE HERALD - Weekly Audit",
+  "generatedAt": "2026-03-18T07:02:11.169Z",
+  "weekRange": "2026-03-12 to 2026-03-18",
+  "dailyBuilds": {
+    "succeeded": 7,
+    "failed": 0,
+    "warnings": 4,
+    "fatal": 0,
+    "summary": "Seven recorded daily builds completed. No fatal crashes were logged, but model-credit exhaustion caused four recoverable fallback warnings."
+  },
+  "complexity": {
+    "start": 2,
+    "current": 8,
+    "gain": 6
+  },
+  "highlights": {
+    "mostSignificantFeature": "The Earth crossed from a static globe into a time-aware world: atmosphere, moon, weather, moving clouds, and seasonal biome shifts now make the planet feel alive.",
+    "mostSignificantSetback": "The same credit-related model failure pattern appeared four times this week, forcing fallbacks and making the daily builder less predictable.",
+    "phase": "Genesis",
+    "health": "Healthy visual momentum, but nearing the top of Genesis. The next week should focus on richer shader quality, clearer day-night contrast, and more readable atmospheric motion so complexity 10 feels earned."
+  },
+  "recurringIssues": [
+    {
+      "title": "Repeated model credit exhaustion",
+      "count": 4,
+      "severity": "high",
+      "note": "This happened 3+ times this week and should stay prominent until the daily runner prefers lower-cost models or trims token demand."
+    }
+  ],
+  "research": [
+    {
+      "title": "Sun-aware atmosphere glow",
+      "source": "https://sangillee.com/2024-06-07-create-realistic-earth-with-shaders/",
+      "details": "Use a separate atmosphere shell with ShaderMaterial, THREE.BackSide, and THREE.AdditiveBlending. Fresnel glow is strongest at the rim and should be mixed with a sun-direction term so the sunlit edge stays blue while the terminator warms toward orange.",
+      "snippet": "float rim = 1.0 - abs(dot(toCamera, vNormal)); rim = pow(rim, 2.8); float sunMix = clamp(dot(normalize(vNormal), normalize(sunDirection)) * 0.5 + 0.5, 0.0, 1.0);",
+      "gotchas": [
+        "Compute normals and sun direction in the same space.",
+        "Use a slightly larger sphere for the atmosphere shell.",
+        "Keep the atmosphere transparent with depthWrite disabled to avoid halo artifacts."
+      ]
+    },
+    {
+      "title": "Animated cloud shell on a second sphere",
+      "source": "https://tympanus.net/codrops/2024/07/09/creating-an-animated-displaced-sphere-with-a-custom-three-js-material/",
+      "details": "The most practical Genesis-phase upgrade is still a second sphere for clouds. A CanvasTexture or alpha map on SphereGeometry(1.01+) with independent rotation is cheap and convincing; later it can evolve into displaced or shader-driven cloud motion.",
+      "snippet": "const clouds = new THREE.Mesh(new THREE.SphereGeometry(1.018, 64, 64), new THREE.MeshPhongMaterial({ map: cloudTexture, transparent: true, opacity: 0.6, depthWrite: false })); clouds.rotation.y += 0.0012;",
+      "gotchas": [
+        "Set depthWrite to false so cloud transparency does not cut into the Earth.",
+        "Keep the cloud sphere only slightly larger than the Earth to avoid visible separation.",
+        "Use soft alpha edges or banded streaks so the shell does not look like pasted blobs."
+      ]
+    },
+    {
+      "title": "Soft terminator and city-light blending",
+      "source": "https://webglfundamentals.org/webgl/lessons/webgl-qna-show-a-night-view-vs-a-day-view-on-a-3d-earth-sphere.html",
+      "details": "Blend day and night textures from the sun-normal dot product. A logistic curve produces a more natural terminator than a hard clamp and leaves room for twilight tinting and light bloom on the dark side.",
+      "snippet": "float light = dot(normalize(vWorldNormal), normalize(sunDirection)); float mixAmount = 1.0 / (1.0 + exp(-20.0 * light)); vec3 color = mix(nightColor, dayColor, mixAmount);",
+      "gotchas": [
+        "Normalize the sun vector every frame before writing the uniform.",
+        "If remote night textures are added later, load them with crossOrigin='anonymous'.",
+        "Keep twilight color separate from the night texture so the boundary stays readable."
+      ]
+    },
+    {
+      "title": "Texture and library path for the next phase",
+      "source": "https://academo.solarsystemscope.com/textures",
+      "details": "Solar System Scope hosts day, night, cloud, normal, and specular Earth textures under CC-BY 4.0. When the project graduates from purely procedural maps, these can seed a more detailed Living World pass.",
+      "snippet": "Core CDN: https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js | Matching extras: https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js and https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js",
+      "gotchas": [
+        "Match any examples or postprocessing scripts to the same Three.js revision as the core build.",
+        "EffectComposer requires its dependent passes in order: RenderPass, ShaderPass, then UnrealBloomPass.",
+        "External images should be mirrored locally or loaded with permissive CORS headers."
+      ]
+    }
+  ],
+  "roadmap": [
+    {
+      "day": "Day 10",
+      "focus": "Sharpen atmosphere",
+      "deliverables": [
+        "Sun-tinted Fresnel atmosphere on the limb",
+        "Cleaner on-screen telemetry for day, complexity, and phase",
+        "No regressions in drag rotation or moon orbit"
+      ]
+    },
+    {
+      "day": "Day 11",
+      "focus": "Upgrade cloud motion",
+      "deliverables": [
+        "Replace static cloud blobs with softer streaks and bands",
+        "Keep cloud shell rotating independently from surface land",
+        "Tune transparency so cloud cover reads at a glance"
+      ]
+    },
+    {
+      "day": "Day 12",
+      "focus": "Make the terminator obvious",
+      "deliverables": [
+        "Refine day-night shader transition",
+        "Strengthen city-light readability on the dark hemisphere",
+        "Add a subtle twilight band instead of a flat edge"
+      ]
+    },
+    {
+      "day": "Day 13",
+      "focus": "Finish Genesis cleanly",
+      "deliverables": [
+        "Improve ocean glints and night-side contrast",
+        "Stabilize HUD and observatory copy",
+        "Prepare the codebase for complexity 10 transition"
+      ]
+    },
+    {
+      "day": "Day 14",
+      "focus": "Begin the Living World",
+      "deliverables": [
+        "Prototype real weather overlays from Open-Meteo or equivalent free data",
+        "Define how external data is cached or gracefully skipped",
+        "Preserve render speed while adding live information"
+      ]
+    },
+    {
+      "day": "Day 15",
+      "focus": "Bring in richer textures",
+      "deliverables": [
+        "Test a normal or specular map path",
+        "Evaluate CC-BY Earth texture sources for quality and CORS behavior",
+        "Keep a procedural fallback so builds never depend on one external host"
+      ]
+    },
+    {
+      "day": "Day 16",
+      "focus": "Stabilize the builder",
+      "deliverables": [
+        "Reduce repeated credit-exhaustion warnings in the daily runner",
+        "Prefer reliable low-cost model paths at this complexity level",
+        "Document the transition from Genesis to Living World in the observatory"
+      ]
+    }
+  ]
+}
