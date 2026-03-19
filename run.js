@@ -22,6 +22,13 @@ const PATHS = {
   log       : path.join(ROOT, 'run.log'),
 };
 
+const ALLOWED_OUTPUTS = new Set([
+  'earth.html',
+  'window.html',
+  'earth/state.json',
+  'THE-BIBLE.md',
+]);
+
 // Cheap models — tried in order. GPT 4o mini first for cost efficiency.
 const MODEL_CANDIDATES = [
   'openai/gpt-4o-mini',
@@ -69,6 +76,28 @@ function parseFileBlocks(text) {
     blocks.push({ relativePath: m[1].trim(), content: m[2] });
   }
   return blocks;
+}
+
+function normalizeRelativePath(relativePath) {
+  return path.normalize(relativePath).replace(/\\/g, '/').replace(/^\.\//, '');
+}
+
+function validateFileBlocks(blocks) {
+  const normalizedBlocks = blocks.map(block => ({
+    ...block,
+    relativePath: normalizeRelativePath(block.relativePath),
+  }));
+  const invalid = normalizedBlocks.filter(block => !ALLOWED_OUTPUTS.has(block.relativePath));
+  const counts = new Map();
+  normalizedBlocks.forEach(block => {
+    counts.set(block.relativePath, (counts.get(block.relativePath) || 0) + 1);
+  });
+  const duplicates = [...counts.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([filePath]) => filePath);
+  const present = new Set(normalizedBlocks.map(block => block.relativePath));
+  const missing = [...ALLOWED_OUTPUTS].filter(filePath => !present.has(filePath));
+  return { normalizedBlocks, invalid, duplicates, missing };
 }
 
 // ── OpenRouter API (OpenAI-compatible) ─────────────────────
@@ -254,10 +283,26 @@ async function main() {
     process.exit(1);
   }
 
+  const { normalizedBlocks, invalid, duplicates, missing } = validateFileBlocks(blocks);
+  if (invalid.length || duplicates.length || missing.length) {
+    if (invalid.length) {
+      log(`⚠  Invalid output paths: ${invalid.map(block => block.relativePath).join(', ')}`);
+    }
+    if (duplicates.length) {
+      log(`⚠  Duplicate output paths: ${duplicates.join(', ')}`);
+    }
+    if (missing.length) {
+      log(`⚠  Missing required outputs: ${missing.join(', ')}`);
+    }
+    log('⚠  Refusing to apply partial or off-target output. Writing debug file.');
+    write(path.join(ROOT, 'debug-last-response.txt'), response);
+    process.exit(1);
+  }
+
   divider();
   log('🌍 Applying changes...');
   let written = 0;
-  for (const block of blocks) {
+  for (const block of normalizedBlocks) {
     if (write(path.join(ROOT, block.relativePath), block.content)) written++;
   }
   log(`📦 ${written}/${blocks.length} files written`);
