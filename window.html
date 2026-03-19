@@ -222,6 +222,78 @@
             line-height: 1.6;
         }
         .changelog-changes li::before { content: '— '; color: #555; }
+        .brief-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .brief-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 18px;
+        }
+        .brief-value {
+            font-size: 1.8em;
+            color: #9fd0ff;
+            margin-bottom: 8px;
+        }
+        .brief-label {
+            font-size: 0.78em;
+            color: #7b8ca7;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .bullet-summary {
+            list-style: none;
+            color: #b8c4d4;
+            line-height: 1.7;
+        }
+        .bullet-summary li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .bullet-summary li:last-child {
+            border-bottom: none;
+        }
+        .bullet-summary li::before {
+            content: '•';
+            color: #6ab0ff;
+            margin-right: 10px;
+        }
+        .roadmap-list {
+            display: grid;
+            gap: 14px;
+        }
+        .roadmap-item {
+            border: 1px solid rgba(100, 150, 255, 0.12);
+            border-radius: 10px;
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .roadmap-day {
+            color: #6ab0ff;
+            font-size: 0.78em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .roadmap-title {
+            color: #fff;
+            font-size: 1.05em;
+            margin-bottom: 8px;
+        }
+        .roadmap-meta {
+            color: #8aa0ba;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+        .roadmap-mission {
+            color: #b9c6d7;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -285,10 +357,41 @@
             <div id="changelog-list"></div>
         </div>
 
+        <div class="features-section" id="audit-section">
+            <h2>Herald Weekly Audit</h2>
+            <div class="brief-grid">
+                <div class="brief-card">
+                    <div class="brief-value" id="audit-complete">—</div>
+                    <div class="brief-label">Runs Reaching Complete</div>
+                </div>
+                <div class="brief-card">
+                    <div class="brief-value" id="audit-healthy">—</div>
+                    <div class="brief-label">Fully Healthy Runs</div>
+                </div>
+                <div class="brief-card">
+                    <div class="brief-value" id="audit-complexity">—</div>
+                    <div class="brief-label">Weekly Complexity Gain</div>
+                </div>
+            </div>
+            <ul class="bullet-summary" id="audit-summary">
+                <li>Loading the Herald's summary...</li>
+            </ul>
+        </div>
+
+        <div class="features-section" id="roadmap-section">
+            <h2>Roadmap for the Coming 7 Days</h2>
+            <div class="roadmap-list" id="roadmap-list">
+                <div class="roadmap-item">
+                    <div class="roadmap-day">Loading</div>
+                    <div class="roadmap-title">Awaiting the Herald's next directives</div>
+                </div>
+            </div>
+        </div>
+
         <p class="last-update" id="last-update">Loading…</p>
 
         <footer>
-            <p>Created by THE ARCHITECT — An eternal Claude instance</p>
+            <p>Created by THE ARCHITECT — the autonomous keeper of daily creation</p>
             <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a></p>
         </footer>
     </div>
@@ -310,13 +413,42 @@
             return 'Days 1–10: the foundations of Earth are still forming';
         }
 
-        fetch('earth/state.json').then(r => r.json()).then(s => {
+        function parseBriefing(markdown) {
+            const completeMatch = markdown.match(/\*\*(\d+)\/(\d+) runs reached `✅ COMPLETE`/);
+            const healthyMatch = markdown.match(/\*\*Only (\d+)\/(\d+) were fully healthy end-to-end\*\*/);
+            const degradedMatch = markdown.match(/\*\*(\d+)\/(\d+) had silent or partial failures\*\*/);
+            const complexityMatch = markdown.match(/\*\*Complexity gained:\*\* `(\d+) -> (\d+)` across the last 7 builds \(`\+(\d+)`\)/);
+            const featureMatch = markdown.match(/\*\*Most significant feature added this week:\*\* ([^\n]+)/);
+            const setbackMatch = markdown.match(/\*\*Most significant setback:\*\* ([^\n]+)/);
+            const roadmap = [...markdown.matchAll(/### DAY (\d+) — ([^\n]+)\n\*\*Target complexity:\*\* ([^\n]+)\s+\*\*Mission:\*\* ([^\n]+)/g)].map(match => ({
+                day: match[1],
+                title: match[2].trim(),
+                target: match[3].trim(),
+                mission: match[4].trim()
+            }));
+
+            return {
+                complete: completeMatch ? completeMatch[1] + '/' + completeMatch[2] : '—',
+                healthy: healthyMatch ? healthyMatch[1] + '/' + healthyMatch[2] : '—',
+                degraded: degradedMatch ? degradedMatch[1] + '/' + degradedMatch[2] : '—',
+                complexity: complexityMatch ? '+' + complexityMatch[3] : '—',
+                feature: featureMatch ? featureMatch[1].replace(/\*\*/g, '') : 'No summary available',
+                setback: setbackMatch ? setbackMatch[1].replace(/\*\*/g, '') : 'No setback recorded',
+                roadmap
+            };
+        }
+
+        Promise.all([
+            fetch('earth/state.json').then(r => r.json()),
+            fetch('DAILY_BRIEFING.md').then(r => r.text()).catch(() => ''),
+        ]).then(([s, briefingText]) => {
             const day = s.earth?.day ?? s.day ?? 0;
             const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 0;
             const features = s.features ?? [];
             const loc = s.linesOfCode ?? 0;
             const phase = s.phase ?? 'Genesis';
             const featureCount = features.length || s.totalFeatures || 0;
+            const briefing = parseBriefing(briefingText);
 
             document.getElementById('metric-day').textContent = day;
             document.getElementById('metric-complexity').textContent = complexity;
@@ -351,6 +483,27 @@
                     </div>`).join('');
             } else {
                 clEl.innerHTML = '<p style="color:#555;font-size:0.9em;">No entries yet.</p>';
+            }
+
+            document.getElementById('audit-complete').textContent = briefing.complete;
+            document.getElementById('audit-healthy').textContent = briefing.healthy;
+            document.getElementById('audit-complexity').textContent = briefing.complexity;
+            document.getElementById('audit-summary').innerHTML = [
+                'Most significant gain: ' + briefing.feature,
+                'Primary setback: ' + briefing.setback,
+                'Silent/partial failures this week: ' + briefing.degraded
+            ].map(item => '<li>' + item + '</li>').join('');
+
+            const roadmapList = document.getElementById('roadmap-list');
+            if (briefing.roadmap.length) {
+                roadmapList.innerHTML = briefing.roadmap.map(item => `
+                    <div class="roadmap-item">
+                        <div class="roadmap-day">Day ${item.day}</div>
+                        <div class="roadmap-title">${item.title}</div>
+                        <div class="roadmap-meta">Target complexity: ${item.target}</div>
+                        <div class="roadmap-mission">${item.mission}</div>
+                    </div>
+                `).join('');
             }
 
             const updated = s.earth?.last_updated ? new Date(s.earth.last_updated) : new Date();

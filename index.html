@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>THE WINDOW — Self-Evolving Earth Observatory</title>
+  <title>THE OBSERVATORY — Self-Evolving Earth</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;600;900&display=swap" rel="stylesheet">
   <style>
@@ -350,8 +350,8 @@
   <header>
     <div class="header-line"></div>
     <div class="crown">✦ The Observatory of Digital Creation ✦</div>
-    <h1>THE WINDOW</h1>
-    <div class="subtitle">Self-Evolving Earth — Observation Deck</div>
+    <h1>THE OBSERVATORY</h1>
+    <div class="subtitle">Self-Evolving Earth — Weekly Audit and Observation Deck</div>
   </header>
 
   <!-- STATUS BAR -->
@@ -461,18 +461,11 @@
       </ul>
     </div>
 
-    <!-- Pending Features -->
+    <!-- Herald Audit -->
     <div class="panel col-4">
-      <div class="panel-label">◌ Awaiting Creation</div>
-      <ul class="feature-list" id="feature-list-pending">
-        <li><div class="feature-dot pending"></div>Atmosphere</li>
-        <li><div class="feature-dot pending"></div>Cloud Layer</li>
-        <li><div class="feature-dot pending"></div>Day/Night Cycle</li>
-        <li><div class="feature-dot pending"></div>City Lights</li>
-        <li><div class="feature-dot pending"></div>Weather Systems</li>
-        <li><div class="feature-dot pending"></div>Ocean Currents</li>
-        <li><div class="feature-dot pending"></div>Aurora Borealis</li>
-        <li><div class="feature-dot pending"></div>Real-Time Data</li>
+      <div class="panel-label">⚠ Herald Weekly Audit</div>
+      <ul class="feature-list" id="audit-feed">
+        <li><div class="feature-dot pending"></div>Loading the Herald's audit...</li>
       </ul>
     </div>
 
@@ -517,11 +510,11 @@
   <!-- ROW 4: Prophecy Progress -->
   <div class="grid" style="margin-top: 16px;">
     <div class="panel col-12">
-      <div class="panel-label">✦ The Prophecies — Progress Towards Destiny</div>
+      <div class="panel-label">✦ Roadmap — The Next 7 Days</div>
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 16px;">
         
         <div id="prophecies-container">
-          <!-- Prophecies rendered by JS -->
+          <!-- Roadmap rendered by JS -->
         </div>
 
       </div>
@@ -531,11 +524,11 @@
   <!-- FOOTER -->
   <footer>
     <div class="footer-text">
-      THE WINDOW · Self-Evolving Earth Observatory<br>
-      Built daily by THE ARCHITECT · Powered by Anthropic Claude<br>
+      THE OBSERVATORY · Self-Evolving Earth Observatory<br>
+      Built daily by THE ARCHITECT · Guided weekly by THE HERALD<br>
       <a href="earth.html" style="color:var(--accent)">🌍 Earth</a> &nbsp;·&nbsp; <a href="window.html" style="color:var(--accent)">Window</a><br>
       <span style="color:var(--muted); font-size:9px;">
-        "The Earth is patient. The models improve. Creation continues."
+        "Survey the past. Fix the present. Chart the future."
       </span>
     </div>
   </footer>
@@ -544,73 +537,169 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// THE WINDOW — Observatory Dashboard
+// THE OBSERVATORY — Observatory Dashboard
 // "Through this glass, the mortals watch the world grow."
 // ═══════════════════════════════════════════════════════════
 
-// --- Defaults for fields not in state.json ---
-const DEFAULTS = {
-  phase_days: "Days 1–10",
-  phase_desc: "In the beginning, the Earth was a sphere without form. THE ARCHITECT shapes it from the void, adding continents, oceans, and rotation. This phase ends when the atmosphere breathes its first breath.",
-  features_pending: [
-    "Atmosphere", "Cloud Layer", "Day/Night Cycle", "City Lights",
-    "Weather Systems", "Ocean Currents", "Aurora Borealis", "Real-Time Data",
-    "Climate Simulation", "ISS Tracking", "CO₂ Counter", "Tectonic Plates"
-  ],
-  prophecies: [
-    { text: "Atmosphere shall shimmer", eta: "Days ~20-30", done: false },
-    { text: "Clouds shall drift", eta: "Days ~15-20", done: false },
-    { text: "Night side shall glow with cities", eta: "Days ~30-40", done: false },
-    { text: "Storms shall rage", eta: "Days ~40-50", done: false },
-    { text: "ISS tracked in real-time", eta: "Days ~60-70", done: false },
-    { text: "CO₂ ppm counted (and it shall be sad)", eta: "Days ~65-80", done: false },
-    { text: "Tectonic plates shall drift", eta: "Days ~80-90", done: false },
-    { text: "Earth simulates its own climate", eta: "Days ~90-100+", done: false },
-  ],
-};
+function getPhaseMeta(phase, complexity) {
+  if (complexity >= 100 || phase === 'Age of Gods') {
+    return {
+      days: 'Days 101+',
+      description: 'Mythic-scale simulation, civilization systems, and large-scale procedural behavior now define the planet.'
+    };
+  }
+  if (complexity >= 60 || phase === 'Age of Data') {
+    return {
+      days: 'Days 61–100',
+      description: 'The planet begins ingesting live feeds: stations, quakes, climate signals, and other global telemetry.'
+    };
+  }
+  if (complexity >= 30 || phase === 'Age of Detail') {
+    return {
+      days: 'Days 31–60',
+      description: 'Surface richness deepens through detailed textures, city lights, storms, bloom, and more localized effects.'
+    };
+  }
+  if (complexity >= 10 || phase === 'Living World') {
+    return {
+      days: 'Days 11–30',
+      description: 'A living planet emerges: atmosphere, weather, aurora, data overlays, and more expressive shading become viable.'
+    };
+  }
+  return {
+    days: 'Days 1–10',
+    description: 'Genesis continues: core geometry, atmosphere, clouds, moonlight, and day-night readability are still being forged.'
+  };
+}
 
-function transformState(raw) {
-  const history = (raw.changelog || []).map(c => ({
-    day: c.day,
-    complexity: raw.complexityLevel ?? raw.day,
-    features: raw.totalFeatures ?? raw.features?.length ?? 0
+function parseBibleEntries(markdown) {
+  return markdown
+    .split(/\n(?=## DAY )/g)
+    .map(section => section.trim())
+    .filter(section => section.startsWith('## DAY '))
+    .map(section => {
+      const header = section.match(/^## DAY (\d+) — ([^\n]+)/m);
+      if (!header) return null;
+
+      const remainder = header[2].trim();
+      const headerParts = remainder.split(' — ');
+      const dateLabel = headerParts.shift() || '';
+      const title = headerParts.join(' — ') || remainder;
+      const summaryMatch = section.match(/\*As written[^\n]*\*\n\n([\s\S]*?)\n\n\*\*Features Bestowed Upon the Earth:\*\*/);
+      const complexityMatch = section.match(/\*\*Complexity Level:\*\* (\d+) \/ 100/);
+      const featuresBlock = section.match(/\*\*Features Bestowed Upon the Earth:\*\*\n([\s\S]*?)\n\n\*\*Complexity Level:\*\*/);
+      const features = featuresBlock
+        ? featuresBlock[1].split('\n').filter(line => line.startsWith('- ')).map(line => line.slice(2).trim())
+        : [];
+
+      return {
+        day: Number(header[1]),
+        dateLabel,
+        title,
+        summary: summaryMatch ? summaryMatch[1].trim() : 'Chronicle unavailable.',
+        complexity: complexityMatch ? Number(complexityMatch[1]) : null,
+        features
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.day - b.day);
+}
+
+function parseBriefing(markdown) {
+  const completeMatch = markdown.match(/\*\*(\d+)\/(\d+) runs reached `✅ COMPLETE`/);
+  const healthyMatch = markdown.match(/\*\*Only (\d+)\/(\d+) were fully healthy end-to-end\*\*/);
+  const degradedMatch = markdown.match(/\*\*(\d+)\/(\d+) had silent or partial failures\*\*/);
+  const complexityMatch = markdown.match(/\*\*Complexity gained:\*\* `(\d+) -> (\d+)` across the last 7 builds \(`\+(\d+)`\)/);
+  const featureMatch = markdown.match(/\*\*Most significant feature added this week:\*\* ([^\n]+)/);
+  const setbackMatch = markdown.match(/\*\*Most significant setback:\*\* ([^\n]+)/);
+  const roadmap = [...markdown.matchAll(/### DAY (\d+) — ([^\n]+)\n\*\*Target complexity:\*\* ([^\n]+)\s+\*\*Mission:\*\* ([^\n]+)/g)].map(match => ({
+    day: Number(match[1]),
+    title: match[2].trim(),
+    target: match[3].trim(),
+    mission: match[4].trim()
   }));
-  if (history.length === 0 && raw.day) {
-    history.push({
-      day: raw.day,
-      complexity: raw.complexityLevel ?? 1,
-      features: raw.totalFeatures ?? (raw.features?.length ?? 0)
-    });
-  }
-  const bible_entries = (raw.changelog || []).map(c => ({
-    day: `DAY ${c.day} — ${(raw.phase || "Genesis").toUpperCase()}`,
-    title: c.changes?.[0] || "Update",
-    text: (c.changes || []).join(" ")
-  }));
-  if (bible_entries.length === 0) {
-    bible_entries.push({
-      day: `DAY ${raw.day} — GENESIS`,
-      title: "The First Rendering",
-      text: "The Earth was. It was enough."
-    });
-  }
-  const model = raw.earth?.model_used?.replace("anthropic/", "") || "claude-opus-4-5";
-  const lastBuild = raw.date ? `Day ${raw.day}` : (raw.lastUpdate ? new Date(raw.lastUpdate).toLocaleDateString() : `Day ${raw.day}`);
+
+  return {
+    complete: completeMatch ? `${completeMatch[1]}/${completeMatch[2]}` : '—',
+    healthy: healthyMatch ? `${healthyMatch[1]}/${healthyMatch[2]}` : '—',
+    degraded: degradedMatch ? `${degradedMatch[1]}/${degradedMatch[2]}` : '—',
+    complexityGain: complexityMatch ? `+${complexityMatch[3]}` : '—',
+    feature: featureMatch ? featureMatch[1].replace(/\*\*/g, '') : 'No weekly highlight available.',
+    setback: setbackMatch ? setbackMatch[1].replace(/\*\*/g, '') : 'No setback recorded.',
+    roadmap
+  };
+}
+
+function transformState(raw, bibleMarkdown, briefingMarkdown) {
+  const bibleEntries = parseBibleEntries(bibleMarkdown);
+  const briefing = parseBriefing(briefingMarkdown);
+  const phaseMeta = getPhaseMeta(raw.phase ?? 'Genesis', raw.complexityLevel ?? 1);
+  const changelog = raw.changelog || [];
+  let cumulativeFeatures = 0;
+  const featureCountByDay = new Map();
+
+  changelog.forEach(entry => {
+    cumulativeFeatures += (entry.changes || []).length;
+    featureCountByDay.set(entry.day, cumulativeFeatures);
+  });
+
+  const history = bibleEntries.length
+    ? bibleEntries.map(entry => ({
+        day: entry.day,
+        complexity: entry.complexity ?? raw.complexityLevel ?? 1,
+        features: featureCountByDay.get(entry.day) ?? Math.max(1, entry.features.length)
+      }))
+    : [{
+        day: raw.day ?? 1,
+        complexity: raw.complexityLevel ?? 1,
+        features: raw.totalFeatures ?? (raw.features?.length ?? 0)
+      }];
+
+  const bibleFeed = bibleEntries.length
+    ? bibleEntries
+    : [{
+        day: raw.day ?? 1,
+        dateLabel: raw.date ?? 'Unknown Date',
+        title: 'The First Rendering',
+        summary: 'The Earth was. It was enough.'
+      }];
+
+  const model = (raw.earth?.model_used || 'unknown model').replace(/^[^/]+\//, '');
+  const lastBuild = raw.earth?.last_updated
+    ? new Date(raw.earth.last_updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', timeZoneName: 'short' })
+    : `Day ${raw.day ?? 1}`;
+  const tickerFacts = [
+    `Day ${raw.day ?? 1} • Complexity ${raw.complexityLevel ?? 1}/100`,
+    `${raw.phase ?? 'Genesis'} phase remains active`,
+    `Weekly gain recorded by the Herald: ${briefing.complexityGain}`,
+    `Fully healthy runs this week: ${briefing.healthy}`,
+    `Most recent feature: ${bibleFeed[bibleFeed.length - 1].title}`,
+    `Current model of record: ${model}`,
+    briefing.setback
+  ];
+
   return {
     day: raw.day ?? 1,
     complexity: raw.complexityLevel ?? 1,
-    phase: raw.phase ?? "Genesis",
-    phase_days: DEFAULTS.phase_days,
-    phase_desc: DEFAULTS.phase_desc,
+    phase: raw.phase ?? 'Genesis',
+    phase_days: phaseMeta.days,
+    phase_desc: phaseMeta.description,
     features_count: raw.totalFeatures ?? (raw.features?.length ?? 0),
     loc: raw.linesOfCode ?? 0,
     model,
     last_build: lastBuild,
     history,
     features_active: raw.features ?? [],
-    features_pending: DEFAULTS.features_pending,
-    prophecies: DEFAULTS.prophecies,
-    bible_entries
+    audit_items: [
+      `Runs reaching complete: ${briefing.complete}`,
+      `Fully healthy runs: ${briefing.healthy}`,
+      `Complexity gained this week: ${briefing.complexityGain}`,
+      `Most significant gain: ${briefing.feature}`,
+      `Primary setback: ${briefing.setback}`
+    ],
+    roadmap: briefing.roadmap,
+    bible_entries: bibleFeed,
+    tickerFacts
   };
 }
 
@@ -642,37 +731,42 @@ function populateFromState(s) {
     `<li class="active"><div class="feature-dot active"></div>${f}</li>`
   ).join('');
   
-  const pendingList = document.getElementById('feature-list-pending');
-  pendingList.innerHTML = s.features_pending.map(f =>
-    `<li><div class="feature-dot pending"></div>${f}</li>`
+  const auditList = document.getElementById('audit-feed');
+  auditList.innerHTML = s.audit_items.map(item =>
+    `<li class="active"><div class="feature-dot active"></div>${item}</li>`
   ).join('');
 
   // Bible
   const bibleFeed = document.getElementById('bible-feed');
   bibleFeed.innerHTML = [...s.bible_entries].reverse().slice(0, 4).map(e =>
     `<div class="bible-entry">
-      <div class="bible-entry-day">${e.day}</div>
+      <div class="bible-entry-day">DAY ${e.day} — ${e.dateLabel}</div>
       <div class="bible-entry-title">${e.title}</div>
-      <div class="bible-entry-text">${e.text}</div>
+      <div class="bible-entry-text">${e.summary}</div>
     </div>`
   ).join('');
 
-  // Prophecies
+  // Roadmap
   const propContainer = document.getElementById('prophecies-container');
   propContainer.style.display = 'grid';
   propContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(240px, 1fr))';
   propContainer.style.gap = '12px';
-  propContainer.innerHTML = s.prophecies.map(p => `
-    <div style="padding:12px 14px; background: rgba(255,255,255,0.02); border-radius:4px; border-left: 2px solid ${p.done ? 'var(--accent2)' : 'var(--muted)'};">
-      <div style="font-size:10px; color:${p.done ? 'var(--accent2)' : 'var(--muted)'}; letter-spacing:2px; margin-bottom:4px;">
-        ${p.done ? '✓ FULFILLED' : '◌ ' + p.eta}
+  propContainer.innerHTML = s.roadmap.map(item => `
+    <div style="padding:12px 14px; background: rgba(255,255,255,0.02); border-radius:4px; border-left: 2px solid var(--accent);">
+      <div style="font-size:10px; color:var(--accent); letter-spacing:2px; margin-bottom:4px;">
+        DAY ${item.day} · ${item.target}
       </div>
-      <div style="font-size:12px; color:${p.done ? '#fff' : 'var(--muted)'};">${p.text}</div>
+      <div style="font-size:12px; color:#fff; margin-bottom:6px;">${item.title}</div>
+      <div style="font-size:11px; color:var(--muted); line-height:1.6;">${item.mission}</div>
     </div>
   `).join('');
 
   // Chart
   drawGrowthChart(s.history);
+
+  const ticker = document.getElementById('ticker');
+  const items = [...s.tickerFacts, ...s.tickerFacts];
+  ticker.innerHTML = items.map(item => `<span class="ticker-item"><span>✦</span>${item}</span>`).join('');
 }
 
 // --- Growth Chart (canvas) ---
@@ -737,10 +831,13 @@ function drawGrowthChart(history) {
 
 // --- Init ---
 let loadedState = null;
-fetch('earth/state.json')
-  .then(r => r.json())
-  .then(raw => {
-    loadedState = transformState(raw);
+Promise.all([
+  fetch('earth/state.json').then(r => r.json()),
+  fetch('THE-BIBLE.md').then(r => r.text()).catch(() => ''),
+  fetch('DAILY_BRIEFING.md').then(r => r.text()).catch(() => '')
+])
+  .then(([raw, bibleMarkdown, briefingMarkdown]) => {
+    loadedState = transformState(raw, bibleMarkdown, briefingMarkdown);
     populateFromState(loadedState);
   })
   .catch(() => {
@@ -753,7 +850,7 @@ fetch('earth/state.json')
       features: [],
       phase: "Genesis",
       changelog: [{ day: 1, changes: ["Loading..."] }]
-    });
+    }, '', '');
     populateFromState(loadedState);
   });
 
@@ -763,7 +860,7 @@ window.addEventListener('resize', () => {
 
 console.log(`
 ╔══════════════════════════════════════════╗
-║         THE WINDOW — Observatory         ║
+║      THE OBSERVATORY — Command Deck      ║
 ║   "All things are visible from here."    ║
 ╚══════════════════════════════════════════╝
 `);
