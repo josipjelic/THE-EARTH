@@ -31,6 +31,11 @@ const MODEL_CANDIDATES = [
 ];
 
 const MAX_TOKENS = 10000;
+const EXPECTED_OUTPUTS = new Set(['earth.html', 'window.html', 'earth/state.json', 'THE-BIBLE.md']);
+const OUTPUT_PATH_ALIASES = new Map([
+  ['earth/earth.html', 'earth.html'],
+  ['window/index.html', 'window.html'],
+]);
 
 // ── Logging ────────────────────────────────────────────────
 function log(msg) {
@@ -69,6 +74,11 @@ function parseFileBlocks(text) {
     blocks.push({ relativePath: m[1].trim(), content: m[2] });
   }
   return blocks;
+}
+
+function normalizeOutputPath(relativePath) {
+  const normalized = path.posix.normalize(relativePath.replace(/\\/g, '/')).replace(/^\.\//, '');
+  return OUTPUT_PATH_ALIASES.get(normalized) || normalized;
 }
 
 // ── OpenRouter API (OpenAI-compatible) ─────────────────────
@@ -257,10 +267,28 @@ async function main() {
   divider();
   log('🌍 Applying changes...');
   let written = 0;
+  const writtenPaths = new Set();
   for (const block of blocks) {
-    if (write(path.join(ROOT, block.relativePath), block.content)) written++;
+    const normalizedPath = normalizeOutputPath(block.relativePath);
+    if (normalizedPath !== block.relativePath) {
+      log(`⚠  Normalized output path: ${block.relativePath} -> ${normalizedPath}`);
+    }
+    if (!EXPECTED_OUTPUTS.has(normalizedPath)) {
+      log(`⚠  Ignoring unexpected output path: ${block.relativePath}`);
+      continue;
+    }
+    if (write(path.join(ROOT, normalizedPath), block.content)) {
+      written++;
+      writtenPaths.add(normalizedPath);
+    }
   }
   log(`📦 ${written}/${blocks.length} files written`);
+  if (writtenPaths.has('earth/state.json')) {
+    const missingOutputs = [...EXPECTED_OUTPUTS].filter(output => !writtenPaths.has(output));
+    if (missingOutputs.length) {
+      log(`⚠  Missing expected output blocks: ${missingOutputs.join(', ')}`);
+    }
+  }
 
   // Stamp model & timestamp into state
   try {
