@@ -104,6 +104,10 @@
         let time = 0;
         let isDragging = false;
         let previousMouseX = 0;
+        let cloudTexture, cloudContext;
+        let cloudBands = [];
+        let cloudDrift = 0;
+        let cloudFrame = 0;
 
         const VERT_ATMOSPHERE = `
             varying vec3 vNormal;
@@ -408,14 +412,16 @@
             const cloudsCanvas = document.createElement('canvas');
             cloudsCanvas.width = 1024;
             cloudsCanvas.height = 512;
-            const cloudsCtx = cloudsCanvas.getContext('2d');
-            cloudsCtx.fillStyle = '#ffffff';
-            drawCloudBlobs(cloudsCtx);
+            cloudContext = cloudsCanvas.getContext('2d');
+            cloudBands = createCloudBands();
+            drawCloudLayer(cloudDrift);
+            cloudTexture = new THREE.CanvasTexture(cloudsCanvas);
+            cloudTexture.wrapS = THREE.RepeatWrapping;
 
             clouds = new THREE.Mesh(
                 new THREE.SphereGeometry(1.018, 64, 64),
                 new THREE.MeshPhongMaterial({
-                    map: new THREE.CanvasTexture(cloudsCanvas),
+                    map: cloudTexture,
                     transparent: true,
                     opacity: 0.75,
                     depthWrite: false,
@@ -474,26 +480,56 @@
             });
         }
 
-        function drawCloudBlobs(ctx) {
-            const cloudPositions = [
-                { x: 110, y: 75, size: 72 }, { x: 290, y: 95, size: 51 },
-                { x: 470, y: 55, size: 68 }, { x: 710, y: 88, size: 88 },
-                { x: 860, y: 135, size: 44 }, { x: 155, y: 205, size: 39 },
-                { x: 680, y: 255, size: 61 }, { x: 390, y: 295, size: 33 },
-                { x: 920, y: 275, size: 29 }, { x: 530, y: 355, size: 52 },
-                { x: 200, y: 320, size: 45 }, { x: 760, y: 180, size: 38 }
+        function createCloudBands() {
+            return [
+                { x: 110, y: 75, size: 72, stretch: 0.52, speed: 0.45, alpha: 0.78 },
+                { x: 290, y: 95, size: 51, stretch: 0.5, speed: 0.33, alpha: 0.72 },
+                { x: 470, y: 55, size: 68, stretch: 0.46, speed: 0.28, alpha: 0.7 },
+                { x: 710, y: 88, size: 88, stretch: 0.48, speed: 0.4, alpha: 0.76 },
+                { x: 860, y: 135, size: 44, stretch: 0.56, speed: 0.31, alpha: 0.68 },
+                { x: 155, y: 205, size: 39, stretch: 0.5, speed: 0.22, alpha: 0.67 },
+                { x: 680, y: 255, size: 61, stretch: 0.54, speed: 0.36, alpha: 0.73 },
+                { x: 390, y: 295, size: 33, stretch: 0.58, speed: 0.18, alpha: 0.62 },
+                { x: 920, y: 275, size: 29, stretch: 0.52, speed: 0.27, alpha: 0.6 },
+                { x: 530, y: 355, size: 52, stretch: 0.49, speed: 0.26, alpha: 0.71 },
+                { x: 200, y: 320, size: 45, stretch: 0.55, speed: 0.34, alpha: 0.66 },
+                { x: 760, y: 180, size: 38, stretch: 0.44, speed: 0.24, alpha: 0.63 }
             ];
-            cloudPositions.forEach(cloud => {
-                ctx.globalAlpha = 0.65 + Math.random() * 0.25;
-                ctx.beginPath();
-                ctx.ellipse(cloud.x, cloud.y, cloud.size, cloud.size * 0.52, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 0.38;
-                ctx.beginPath();
-                ctx.ellipse(cloud.x - cloud.size * 0.4, cloud.y - 12, cloud.size * 0.65, cloud.size * 0.45, 0, 0, Math.PI * 2);
-                ctx.fill();
+        }
+
+        function drawCloudPuff(x, y, size, stretch, alpha) {
+            cloudContext.globalAlpha = alpha;
+            cloudContext.beginPath();
+            cloudContext.ellipse(x, y, size, size * stretch, 0, 0, Math.PI * 2);
+            cloudContext.fill();
+
+            cloudContext.globalAlpha = alpha * 0.7;
+            cloudContext.beginPath();
+            cloudContext.ellipse(x - size * 0.42, y - 12, size * 0.68, size * (stretch - 0.07), 0, 0, Math.PI * 2);
+            cloudContext.fill();
+
+            cloudContext.globalAlpha = alpha * 0.48;
+            cloudContext.beginPath();
+            cloudContext.ellipse(x + size * 0.36, y + 7, size * 0.58, size * (stretch - 0.09), 0, 0, Math.PI * 2);
+            cloudContext.fill();
+        }
+
+        function drawCloudLayer(drift) {
+            if (!cloudContext) return;
+
+            cloudContext.clearRect(0, 0, 1024, 512);
+            cloudContext.fillStyle = '#ffffff';
+
+            cloudBands.forEach(cloud => {
+                const baseX = (cloud.x + drift * cloud.speed) % 1024;
+                drawCloudPuff(baseX, cloud.y, cloud.size, cloud.stretch, cloud.alpha);
+
+                if (baseX < cloud.size * 1.4) {
+                    drawCloudPuff(baseX + 1024, cloud.y, cloud.size, cloud.stretch, cloud.alpha);
+                }
             });
-            ctx.globalAlpha = 1.0;
+
+            cloudContext.globalAlpha = 1.0;
         }
 
         function createLights() {
@@ -526,7 +562,14 @@
             time += 0.0012;
 
             if (!isDragging && earth) earth.rotation.y += 0.00095;
-            if (clouds) clouds.rotation.y += 0.00135;
+            if (clouds) clouds.rotation.y += 0.00095;
+            cloudDrift += 0.35;
+            cloudFrame++;
+            if (cloudTexture && cloudFrame % 8 === 0) {
+                // Redraw the canvas texture so the cloud map itself evolves, not only the mesh rotation.
+                drawCloudLayer(cloudDrift);
+                cloudTexture.needsUpdate = true;
+            }
 
             const drift = 0.22;
             camera.position.x = Math.sin(time * 0.35) * drift;

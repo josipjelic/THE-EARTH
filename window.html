@@ -222,6 +222,50 @@
             line-height: 1.6;
         }
         .changelog-changes li::before { content: '— '; color: #555; }
+        .audit-grid,
+        .research-grid,
+        .roadmap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .audit-card,
+        .research-card,
+        .roadmap-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 18px;
+        }
+        .audit-card strong,
+        .research-card strong,
+        .roadmap-card strong {
+            display: block;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .audit-card p,
+        .research-card p,
+        .roadmap-card p {
+            color: #9aa6b8;
+            font-size: 0.92em;
+            line-height: 1.6;
+        }
+        .roadmap-day {
+            color: #6ab0ff;
+            font-size: 0.8em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .inline-code,
+        .research-card code {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.85em;
+            color: #b8d7ff;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -285,15 +329,118 @@
             <div id="changelog-list"></div>
         </div>
 
+        <div class="features-section">
+            <h2>The Herald's Weekly Audit</h2>
+            <div class="audit-grid" id="audit-grid"></div>
+        </div>
+
+        <div class="features-section">
+            <h2>Research Findings for the Next Phase</h2>
+            <div class="research-grid" id="research-grid"></div>
+        </div>
+
+        <div class="features-section">
+            <h2>Roadmap for Days 10–16</h2>
+            <div class="roadmap-grid" id="roadmap-grid"></div>
+        </div>
+
         <p class="last-update" id="last-update">Loading…</p>
 
         <footer>
-            <p>Created by THE ARCHITECT — An eternal Claude instance</p>
+            <p>Built daily by THE ARCHITECT — reviewed weekly by THE HERALD</p>
             <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a></p>
         </footer>
     </div>
     <script>
     (function() {
+        const WEEKLY_AUDIT = [
+            {
+                title: '7 Daily Builds Reviewed',
+                body: 'All seven daily builds reached a COMPLETE state, but only 2/7 were fully healthy end-to-end. Five runs were silent or partial failures.'
+            },
+            {
+                title: 'Complexity Gain: 2 → 8',
+                body: 'The Earth gained 6 complexity points across the last seven daily entries while remaining in the Genesis phase.'
+            },
+            {
+                title: 'Most Significant Feature',
+                body: 'Day 3 delivered the week’s biggest leap: a procedural Moon with crater texture and orbit, plus a visible Sun and manual globe rotation.'
+            },
+            {
+                title: 'Primary Setback',
+                body: 'The same wrong-output-path bug happened 4 consecutive times (Days 4–7), writing to earth/earth.html and window/index.html instead of the root files.'
+            },
+            {
+                title: 'Log Scan',
+                body: '0 fatal lines and 4 warning lines appeared in run.log. Every warning was an upstream model-credit issue, and the workflow fell back successfully.'
+            },
+            {
+                title: 'Phase Health',
+                body: 'Genesis still fits complexity 8, but the pace is visually healthy and operationally fragile. Reliability now matters as much as visuals.'
+            }
+        ];
+
+        const RESEARCH_FINDINGS = [
+            {
+                title: 'Terminator Shader Blend',
+                body: 'Blend day and night textures in a ShaderMaterial using a sigmoid over dot(normal, sunDirection). This keeps the dawn/dusk edge soft instead of hard-clipped.',
+                detail: 'mixAmount = 1.0 / (1.0 + exp(-20.0 * dot(normal, sunDirection)))'
+            },
+            {
+                title: 'Atmosphere on a Separate Shell',
+                body: 'Keep the atmosphere as its own sphere using BackSide rendering, additive blending, and depthWrite disabled so the limb stays crisp as the planet shader evolves.',
+                detail: 'THREE.ShaderMaterial + side: THREE.BackSide + blending: THREE.AdditiveBlending + depthWrite: false'
+            },
+            {
+                title: 'Animated Clouds via CanvasTexture',
+                body: 'CanvasTexture sets needsUpdate once on creation, but every redraw must explicitly set it again. This is the lowest-risk way to animate cloud motion in Genesis.',
+                detail: 'cloudTexture.needsUpdate = true'
+            },
+            {
+                title: 'Week-Ahead Data Feeds',
+                body: 'Open-Meteo needs no key and WhereTheISS is already HTTPS, so both are safe future additions for dashboard cards without mixed-content issues.',
+                detail: 'https://api.open-meteo.com/v1/forecast?... | https://api.wheretheiss.at/v1/satellites/25544'
+            }
+        ];
+
+        const ROADMAP = [
+            {
+                day: 'Day 10',
+                title: 'Ocean Glint',
+                body: 'Add an ocean-only highlight so water catches the Sun differently from land during camera drift.'
+            },
+            {
+                day: 'Day 11',
+                title: 'Stronger Twilight Band',
+                body: 'Deepen the dawn/dusk transition around the terminator without disturbing the separate atmosphere shell.'
+            },
+            {
+                day: 'Day 12',
+                title: 'Polar Aurora',
+                body: 'Introduce subtle teal-green aurora ribbons or point sprites that stay locked to high latitudes.'
+            },
+            {
+                day: 'Day 13',
+                title: 'Live Weather Cards',
+                body: 'Add five Open-Meteo city cards to the dashboard with graceful fetch failure handling.'
+            },
+            {
+                day: 'Day 14',
+                title: 'USGS Quake Markers',
+                body: 'Project weekly GeoJSON earthquake points onto the globe as pulsing markers that rotate with the Earth.'
+            },
+            {
+                day: 'Day 15',
+                title: 'ISS Live Tracking',
+                body: 'Show the live station position in the dashboard and render a clearly separated orbital marker in the Earth view.'
+            },
+            {
+                day: 'Day 16',
+                title: 'Build Health Telemetry',
+                body: 'Surface runner reliability directly in the dashboards so silent failures become immediately visible to visitors.'
+            }
+        ];
+
         function getPhaseDetails(phase, complexity) {
             if (complexity >= 100 || phase === 'Age of Gods') {
                 return 'Days 101+: planetary simulation reaches mythic scale';
@@ -352,6 +499,29 @@
             } else {
                 clEl.innerHTML = '<p style="color:#555;font-size:0.9em;">No entries yet.</p>';
             }
+
+            document.getElementById('audit-grid').innerHTML = WEEKLY_AUDIT.map(item => `
+                <div class="audit-card">
+                    <strong>${item.title}</strong>
+                    <p>${item.body}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('research-grid').innerHTML = RESEARCH_FINDINGS.map(item => `
+                <div class="research-card">
+                    <strong>${item.title}</strong>
+                    <p>${item.body}</p>
+                    <p class="inline-code" style="margin-top:10px;">${item.detail}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('roadmap-grid').innerHTML = ROADMAP.map(item => `
+                <div class="roadmap-card">
+                    <div class="roadmap-day">${item.day}</div>
+                    <strong>${item.title}</strong>
+                    <p>${item.body}</p>
+                </div>
+            `).join('');
 
             const updated = s.earth?.last_updated ? new Date(s.earth.last_updated) : new Date();
             document.getElementById('last-update').textContent = 'Last Updated: ' + updated.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ' — Day ' + day + ' of Creation';
