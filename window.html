@@ -457,6 +457,33 @@
             return 'Days 1–10: the foundations of Earth are still forming';
         }
 
+        function renderStaticHeraldSections() {
+            document.getElementById('audit-grid').innerHTML = WEEKLY_AUDIT.map(item => `
+                <div class="audit-card">
+                    <strong>${item.title}</strong>
+                    <p>${item.body}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('research-grid').innerHTML = RESEARCH_FINDINGS.map(item => `
+                <div class="research-card">
+                    <strong>${item.title}</strong>
+                    <p>${item.body}</p>
+                    <p class="inline-code" style="margin-top:10px;">${item.detail}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('roadmap-grid').innerHTML = ROADMAP.map(item => `
+                <div class="roadmap-card">
+                    <div class="roadmap-day">${item.day}</div>
+                    <strong>${item.title}</strong>
+                    <p>${item.body}</p>
+                </div>
+            `).join('');
+        }
+
+        renderStaticHeraldSections();
+
         fetch('earth/state.json').then(r => r.json()).then(s => {
             const day = s.earth?.day ?? s.day ?? 0;
             const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 0;
@@ -499,29 +526,6 @@
             } else {
                 clEl.innerHTML = '<p style="color:#555;font-size:0.9em;">No entries yet.</p>';
             }
-
-            document.getElementById('audit-grid').innerHTML = WEEKLY_AUDIT.map(item => `
-                <div class="audit-card">
-                    <strong>${item.title}</strong>
-                    <p>${item.body}</p>
-                </div>
-            `).join('');
-
-            document.getElementById('research-grid').innerHTML = RESEARCH_FINDINGS.map(item => `
-                <div class="research-card">
-                    <strong>${item.title}</strong>
-                    <p>${item.body}</p>
-                    <p class="inline-code" style="margin-top:10px;">${item.detail}</p>
-                </div>
-            `).join('');
-
-            document.getElementById('roadmap-grid').innerHTML = ROADMAP.map(item => `
-                <div class="roadmap-card">
-                    <div class="roadmap-day">${item.day}</div>
-                    <strong>${item.title}</strong>
-                    <p>${item.body}</p>
-                </div>
-            `).join('');
 
             const updated = s.earth?.last_updated ? new Date(s.earth.last_updated) : new Date();
             document.getElementById('last-update').textContent = 'Last Updated: ' + updated.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ' — Day ' + day + ' of Creation';
