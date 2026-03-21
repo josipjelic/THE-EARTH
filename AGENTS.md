@@ -20,5 +20,12 @@ Self-Evolving Earth is a zero-dependency Node.js project (no `package.json`, no 
 - Manual verification: ensure `earth.html` renders the 3D globe, `window.html` and `index.html` display correct metrics from `earth/state.json`
 - `run.js` uses only Node.js built-in modules (`fs`, `path`, `https`) — no install step needed
 
-### Secrets
-- `OPENROUTER_API_KEY` is required to run `node run.js` (the daily evolution script). Without it, the script exits with a clear error. The static visualization works without any API key.
+### Running `run.js` (the daily evolution)
+- `OPENROUTER_API_KEY` env var is required. Without it, the script exits with a clear error.
+- The script tries models in priority order (see `MODEL_CANDIDATES` in `run.js`). If the OpenRouter account has insufficient credits, all models will fail with a credit-limit error — this is an account issue, not a code bug.
+- The script writes updated `earth.html`, `window.html`, `earth/state.json`, and `THE-BIBLE.md`. It also appends to `run.log`.
+- The static visualization (serving HTML files) works without any API key.
+
+### Gotchas
+- `run.log` is modified every time `run.js` executes. It is tracked by git but is a runtime artifact — avoid committing incidental changes to it.
+- Three.js r128 is loaded from CDN (`cdn.jsdelivr.net`) in the HTML files, so an internet connection is needed to render the 3D Earth.
