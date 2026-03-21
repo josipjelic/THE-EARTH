@@ -22,15 +22,78 @@ const PATHS = {
   log       : path.join(ROOT, 'run.log'),
 };
 
-// Cheap models — tried in order. GPT 4o mini first for cost efficiency.
-const MODEL_CANDIDATES = [
+// Fallback model list if the live ranking fetch fails
+const FALLBACK_MODELS = [
+  'anthropic/claude-opus-4-5',
+  'anthropic/claude-sonnet-4-5',
+  'google/gemini-2.5-pro-preview',
+  'openai/gpt-4.1',
+  'anthropic/claude-3-7-sonnet',
+];
+const BUDGET_FALLBACK_MODELS = [
+  'google/gemini-2.0-flash-001',
+  'google/gemini-2.5-flash',
   'openai/gpt-4o-mini',
   'anthropic/claude-3.5-haiku',
-  'google/gemini-2.0-flash-001',
-  'anthropic/claude-3.5-sonnet',
 ];
 
-const MAX_TOKENS = 10000;
+const CODING_PROVIDERS   = ['anthropic', 'openai', 'google', 'deepseek', 'x-ai'];
+const MIN_CONTEXT_TOKENS = 32_000;
+const MAX_CANDIDATES     = 5;
+
+// Score = log2(context_M) + log10(price_per_mtok + ε)
+// Balances large context window vs. premium (expensive = flagship) pricing.
+function scoreModel(m) {
+  const ctx   = Math.log2(Math.max(m.context_length ?? 1, 1) / 1_000);
+  const price = Math.log10(parseFloat(m.pricing?.completion ?? '0') * 1_000_000 + 1e-6) + 6;
+  return ctx + price;
+}
+
+function fetchBestCodingModels(apiKey) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'openrouter.ai',
+      path    : '/api/v1/models',
+      method  : 'GET',
+      headers : {
+        'Authorization' : `Bearer ${apiKey}`,
+        'HTTP-Referer'  : 'https://github.com/self-evolving-earth',
+        'X-Title'       : 'THE EARTH - Self-Evolving Simulation',
+      },
+    };
+    const req = https.request(options, res => {
+      let raw = '';
+      res.on('data', c => { raw += c; });
+      res.on('end', () => {
+        try {
+          const { data: models } = JSON.parse(raw);
+          const ranked = models
+            .filter(m => {
+              const provider = m.id.split('/')[0];
+              if (!CODING_PROVIDERS.includes(provider)) return false;
+              if ((m.context_length ?? 0) < MIN_CONTEXT_TOKENS) return false;
+              if (m.id.endsWith(':free')) return false;
+              if (parseFloat(m.pricing?.completion ?? '0') === 0) return false;
+              return true;
+            })
+            .sort((a, b) => scoreModel(b) - scoreModel(a))
+            .slice(0, MAX_CANDIDATES)
+            .map(m => m.id);
+          if (ranked.length === 0) return reject(new Error('No suitable models found'));
+          resolve(ranked);
+        } catch (e) { reject(new Error(`Models parse fail: ${e.message}`)); }
+      });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+const MAX_TOKENS = 9000;
+
+function unique(items) {
+  return [...new Set(items.filter(Boolean))];
+}
 
 // ── Logging ────────────────────────────────────────────────
 function log(msg) {
@@ -111,9 +174,21 @@ function apiRequest(model, userContent, apiKey) {
 }
 
 async function callArchitect(content, apiKey) {
-  log(`🤖 Model candidates: ${MODEL_CANDIDATES.join(', ')}`);
+  let candidates;
+  try {
+    candidates = await fetchBestCodingModels(apiKey);
+    log(`🏆 Live model ranking fetched: ${candidates.join(', ')}`);
+  } catch (e) {
+    log(`⚠  Could not fetch live model list (${e.message}), using fallback`);
+    candidates = FALLBACK_MODELS;
+  }
 
-  for (const model of MODEL_CANDIDATES) {
+  // Prefer budget-friendly models first so daily runs do not burn credits
+  // before reaching a model that can actually complete the task.
+  candidates = unique([...BUDGET_FALLBACK_MODELS, ...candidates, ...FALLBACK_MODELS]);
+  log(`🤖 Final model queue: ${candidates.join(', ')}`);
+
+  for (const model of candidates) {
     log(`🤖 Trying: ${model}`);
     try {
       const { text } = await apiRequest(model, content, apiKey);
@@ -124,7 +199,6 @@ async function callArchitect(content, apiKey) {
   throw new Error('All models failed.');
 }
 
-// ── Ensure HTML files load state.json ───────────────────────
 const WINDOW_STATE_SCRIPT = `<script>
 (function(){fetch('earth/state.json').then(r=>r.json()).then(s=>{
 var d=document;
@@ -135,13 +209,10 @@ if(el('metric-complexity'))el('metric-complexity').textContent=c;
 if(el('metric-features'))el('metric-features').textContent=f.length||s.totalFeatures||0;
 if(el('metric-loc'))el('metric-loc').textContent=loc?'~'+loc:'—';
 if(el('phase-name'))el('phase-name').textContent=(s.phase||'Genesis')+' Phase';
-if(el('phase-days'))el('phase-days').textContent='Days '+Math.max(1,day-9)+'–'+(day+1)+': The foundations are laid';
+if(el('phase-days'))el('phase-days').textContent='Days 1–10: the foundations of Earth are still forming';
 if(el('progress-fill'))el('progress-fill').style.width=c+'%';
 if(el('progress-label'))el('progress-label').textContent=c+' / 100';
 if(el('feature-list'))el('feature-list').innerHTML=(f.length?f:['—']).map(x=>'<li>'+x+'</li>').join('');
-var specs=[];if(s.earthRotation?.speed)specs.push('Earth Rotation: '+s.earthRotation.speed+' rad/frame');
-if(s.camera?.fov)specs.push('Camera FOV: '+s.camera.fov+'°');specs.push('Three.js r128');specs.push('1024×512');specs.push('800 stars');
-if(el('tech-specs-list'))el('tech-specs-list').innerHTML=specs.map(x=>'<li>'+x+'</li>').join('');
 var up=s.earth?.last_updated?new Date(s.earth.last_updated):new Date();
 if(el('last-update'))el('last-update').textContent='Last Updated: '+up.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+' — Day '+day+' of Creation';
 }).catch(function(){if(document.getElementById('last-update'))document.getElementById('last-update').textContent='State unavailable';});})();
@@ -149,26 +220,27 @@ if(el('last-update'))el('last-update').textContent='Last Updated: '+up.toLocaleD
 
 const EARTH_STATE_SCRIPT = `<script>
 fetch('earth/state.json').then(r=>r.json()).then(s=>{
-var day=s.earth?.day??s.day??1,c=s.earth?.complexity_level??s.complexityLevel??1;
-var i=document.getElementById('info');if(i)i.textContent='Day '+day+' of Creation';
-document.title='THE EARTH — Day '+day;console.log('🌍 THE EARTH — Day '+day+' of Creation');
+var day=s.earth?.day??s.day??1,c=s.earth?.complexity_level??s.complexityLevel??1,p=s.phase||'Genesis';
+var i=document.getElementById('info');
+if(i)i.innerHTML='Day '+day+' of Creation<br><span style="font-size:11px;color:rgba(255,255,255,0.45);">Complexity '+c+'/100 · '+p+' Phase</span>';
+document.title='THE EARTH — Day '+day;
 }).catch(function(){var i=document.getElementById('info');if(i)i.textContent='THE EARTH';});
 </script>`;
 
 function ensureHtmlLoadsState() {
   const htmlFiles = [
-    { path: path.join(ROOT, 'window.html'), marker: 'earth/state.json', script: WINDOW_STATE_SCRIPT },
-    { path: path.join(ROOT, 'earth.html'), marker: 'earth/state.json', script: EARTH_STATE_SCRIPT },
+    { filePath: PATHS.window, marker: 'earth/state.json', script: WINDOW_STATE_SCRIPT },
+    { filePath: PATHS.earth, marker: 'earth/state.json', script: EARTH_STATE_SCRIPT },
   ];
-  for (const { path: filePath, marker, script } of htmlFiles) {
-    try {
-      let content = read(filePath, '');
-      if (!content.includes(marker)) {
-        content = content.replace(/<\/body>/i, script + '\n</body>');
-        write(filePath, content);
-        log(`📦 Injected state loader into ${path.basename(filePath)}`);
-      }
-    } catch (e) { log(`⚠  Could not ensure state loader in ${path.basename(filePath)}: ${e.message}`); }
+
+  for (const { filePath, marker, script } of htmlFiles) {
+    let content = read(filePath, '');
+    if (!content || content.includes(marker)) continue;
+    if (/<\/body>/i.test(content)) {
+      content = content.replace(/<\/body>/i, script + '\n</body>');
+      write(filePath, content);
+      log(`📦 Injected state loader into ${path.basename(filePath)}`);
+    }
   }
 }
 
@@ -209,8 +281,7 @@ Files live at the repo root: earth.html, window.html, earth/state.json, THE-BIBL
 Use these exact relative paths in FILE_START headers.
 
 CRITICAL: window.html and earth.html MUST preserve the state-loading script that fetches earth/state.json.
-Keep element ids: metric-day, metric-complexity, metric-features, metric-loc, phase-name, phase-days, progress-fill, progress-label, feature-list, last-update.
-index.html already loads from state.json — do not break it.`.trim();
+Keep element ids: metric-day, metric-complexity, metric-features, metric-loc, phase-name, phase-days, progress-fill, progress-label, feature-list, last-update.`.trim();
 }
 
 // ── Main ───────────────────────────────────────────────────
@@ -271,7 +342,6 @@ async function main() {
     write(PATHS.state, JSON.stringify(s, null, 2));
   } catch (_) {}
 
-  // Ensure HTML files load state from state.json (inject if AI overwrote)
   ensureHtmlLoadsState();
 
   divider('═');

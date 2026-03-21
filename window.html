@@ -222,6 +222,45 @@
             line-height: 1.6;
         }
         .changelog-changes li::before { content: '— '; color: #555; }
+        .audit-grid,
+        .next-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .audit-card,
+        .next-card {
+            background: rgba(8, 20, 38, 0.5);
+            border: 1px solid rgba(100, 150, 255, 0.16);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .audit-card h3,
+        .next-card h3 {
+            font-size: 0.92em;
+            color: #9ed0ff;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .audit-value {
+            font-size: 1.8em;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .audit-copy,
+        .next-card p,
+        .next-card li {
+            color: #9ca9ba;
+            line-height: 1.65;
+            font-size: 0.92em;
+        }
+        .next-card ul {
+            margin-left: 18px;
+        }
+        .status-ok { color: #8df0c5; }
+        .status-risk { color: #ffb0a2; }
     </style>
 </head>
 <body>
@@ -271,6 +310,32 @@
         </div>
 
         <div class="features-section">
+            <h2>Weekly Systems Audit</h2>
+            <div class="audit-grid">
+                <div class="audit-card">
+                    <h3>Build Health</h3>
+                    <div class="audit-value" id="audit-build-health">—</div>
+                    <div class="audit-copy" id="audit-build-copy">Scanning the last seven recorded runs.</div>
+                </div>
+                <div class="audit-card">
+                    <h3>Complexity Gain</h3>
+                    <div class="audit-value" id="audit-complexity-gain">—</div>
+                    <div class="audit-copy">Measured across the last seven recorded creation days.</div>
+                </div>
+                <div class="audit-card">
+                    <h3>Greatest Addition</h3>
+                    <div class="audit-value" id="audit-feature">—</div>
+                    <div class="audit-copy" id="audit-feature-copy">Reviewing the changelog for the strongest leap.</div>
+                </div>
+                <div class="audit-card">
+                    <h3>Primary Risk</h3>
+                    <div class="audit-value" id="audit-risk">—</div>
+                    <div class="audit-copy" id="audit-risk-copy">Checking the failure pattern in run.log.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="features-section">
             <h2>Features Bestowed Upon the Earth</h2>
             <ul class="feature-list" id="feature-list"></ul>
         </div>
@@ -285,15 +350,72 @@
             <div id="changelog-list"></div>
         </div>
 
+        <div class="features-section">
+            <h2>Next Seven Days</h2>
+            <div class="next-grid">
+                <div class="next-card">
+                    <h3>Visual Priorities</h3>
+                    <ul>
+                        <li>Sharpen the terminator line with a dusk gradient and night-side city glow.</li>
+                        <li>Layer more procedural cloud motion before moving to heavier volumetric techniques.</li>
+                        <li>Prepare higher quality Earth textures without breaking the current no-build pipeline.</li>
+                    </ul>
+                </div>
+                <div class="next-card">
+                    <h3>Research Findings</h3>
+                    <p>WebGL Fundamentals confirms that day/night should stay in one shader via <code>mix(nightColor, dayColor, mixAmount)</code> driven by the sun-normal dot product. Codrops shows a workable cloud path using two sliding noise textures plus UV distortion rather than a second full simulation pass.</p>
+                </div>
+                <div class="next-card">
+                    <h3>Operational Warning</h3>
+                    <p>The same OpenRouter credit failure pattern has repeated several times this week. That should stay visible until the daily runner consistently reaches a budget-friendly model on the first attempt.</p>
+                </div>
+            </div>
+        </div>
+
         <p class="last-update" id="last-update">Loading…</p>
 
         <footer>
-            <p>Created by THE ARCHITECT — An eternal Claude instance</p>
+            <p>Created by THE ARCHITECT — daily through GitHub Actions</p>
             <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a></p>
         </footer>
     </div>
     <script>
     (function() {
+        function summarizeLog(logText) {
+            const completions = [...logText.matchAll(/✅ COMPLETE — Day (\d+), Complexity (\d+)\/100/g)];
+            const uniqueDays = [];
+            const seen = new Set();
+            for (let i = completions.length - 1; i >= 0; i--) {
+                const day = Number(completions[i][1]);
+                const complexity = Number(completions[i][2]);
+                if (seen.has(day)) continue;
+                seen.add(day);
+                uniqueDays.unshift({ day: day, complexity: complexity });
+                if (uniqueDays.length === 7) break;
+            }
+
+            return {
+                uniqueDays: uniqueDays,
+                fatals: (logText.match(/💀 Fatal/g) || []).length,
+                warnings: (logText.match(/⚠/g) || []).length,
+                creditWarnings: (logText.match(/requires more credits/gi) || []).length
+            };
+        }
+
+        function mostSignificantFeature(entries) {
+            const ranked = entries.map(function(entry) {
+                const text = (entry.changes || []).join(' ');
+                let score = entry.day || 0;
+                if (/moon|sun|orbit/i.test(text)) score += 10;
+                if (/season/i.test(text)) score += 8;
+                if (/weather|cloud/i.test(text)) score += 7;
+                if (/atmosphere/i.test(text)) score += 6;
+                return { entry: entry, score: score };
+            }).sort(function(a, b) { return b.score - a.score; });
+
+            return ranked.length ? ranked[0].entry : null;
+        }
+
         function getPhaseDetails(phase, complexity) {
             if (complexity >= 100 || phase === 'Age of Gods') {
                 return 'Days 101+: planetary simulation reaches mythic scale';
@@ -310,13 +432,24 @@
             return 'Days 1–10: the foundations of Earth are still forming';
         }
 
-        fetch('earth/state.json').then(r => r.json()).then(s => {
+        Promise.all([
+            fetch('earth/state.json').then(function(r) { return r.json(); }),
+            fetch('run.log').then(function(r) { return r.text(); }).catch(function() { return ''; })
+        ]).then(function(results) {
+            const s = results[0];
+            const logText = results[1];
             const day = s.earth?.day ?? s.day ?? 0;
             const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 0;
             const features = s.features ?? [];
             const loc = s.linesOfCode ?? 0;
             const phase = s.phase ?? 'Genesis';
             const featureCount = features.length || s.totalFeatures || 0;
+            const logSummary = summarizeLog(logText);
+            const recentDays = logSummary.uniqueDays;
+            const weeklyGain = recentDays.length > 1
+                ? recentDays[recentDays.length - 1].complexity - recentDays[0].complexity
+                : 0;
+            const standout = mostSignificantFeature((s.changelog || []).slice(-7));
 
             document.getElementById('metric-day').textContent = day;
             document.getElementById('metric-complexity').textContent = complexity;
@@ -352,6 +485,39 @@
             } else {
                 clEl.innerHTML = '<p style="color:#555;font-size:0.9em;">No entries yet.</p>';
             }
+
+            document.getElementById('audit-build-health').textContent =
+                recentDays.length + '/' + Math.max(recentDays.length + logSummary.fatals, 1);
+            document.getElementById('audit-build-copy').innerHTML =
+                '<span class="' + (logSummary.fatals === 0 ? 'status-ok' : 'status-risk') + '">' +
+                (logSummary.fatals === 0 ? 'No fatal build endings recorded.' : logSummary.fatals + ' fatal endings recorded.') +
+                '</span>';
+            document.getElementById('audit-complexity-gain').textContent = '+' + weeklyGain;
+            document.getElementById('audit-feature').textContent = standout ? 'Day ' + standout.day : '—';
+            document.getElementById('audit-feature-copy').textContent = standout
+                ? (standout.changes || []).join(' ')
+                : 'No standout entry found.';
+            document.getElementById('audit-risk').innerHTML = logSummary.creditWarnings >= 3
+                ? '<span class="status-risk">Credits</span>'
+                : '<span class="status-ok">Manageable</span>';
+            document.getElementById('audit-risk-copy').textContent = logSummary.creditWarnings >= 3
+                ? 'The same model-credit warning repeated ' + logSummary.creditWarnings + ' times.'
+                : 'No repeated failure pattern crossed the alert threshold.';
+
+            const tickerFacts = [
+                'Day ' + day + ' now active in the ' + phase + ' phase',
+                'Complexity ' + complexity + '/100 and still accelerating',
+                featureCount + ' features active across the current Earth',
+                'Weekly gain: +' + weeklyGain + ' complexity across recorded creation days',
+                logSummary.creditWarnings >= 3
+                    ? 'Repeated credit warnings detected — runner hardening now matters'
+                    : 'No repeated fatal failure pattern detected this week',
+                features[features.length - 1] || 'New features await the next sunrise'
+            ];
+            const ticker = document.getElementById('ticker');
+            ticker.innerHTML = tickerFacts.concat(tickerFacts).map(function(fact) {
+                return '<span class="ticker-item"><span>✦</span>' + fact + '</span>';
+            }).join('');
 
             const updated = s.earth?.last_updated ? new Date(s.earth.last_updated) : new Date();
             document.getElementById('last-update').textContent = 'Last Updated: ' + updated.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ' — Day ' + day + ' of Creation';

@@ -79,12 +79,12 @@ jobs:
             PHASE=$(node -e "const s=require('./earth/state.json'); console.log(s.phase || s.earth.age || 'Genesis')")
 
             MODEL=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.model_used || 'claude')")
-            COMMIT_MSG=$(printf '🌍 Day %s — Complexity %s/100 — %s\n\nBuilt by THE ARCHITECT using %s\nGitHub Actions Run: %s' \
+            COMMIT_MSG=$(printf '🌍 Day %s — Complexity %s/100 — %s\n\nBuilt by THE ARCHITECT using %s\nGitHub Actions Run: %s\n\n[skip ci]' \
               "${DAY}" "${COMPLEXITY}" "${PHASE}" "${MODEL}" "${GITHUB_RUN_NUMBER}")
             git commit -m "${COMMIT_MSG}"
 
-            git pull --rebase -X theirs origin master
-            git push origin HEAD:master
+            git pull --rebase -X theirs origin main
+            git push origin HEAD:main
             echo "✅ Day ${DAY} committed to the eternal repository."
           fi
 
