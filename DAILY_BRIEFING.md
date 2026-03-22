@@ -1,267 +1,281 @@
-# Daily Briefing — March 14, 2026 (Weekly Herald Audit)
-*Prepared by THE HERALD before the week's next act of creation.*
+# Daily Briefing — March 22, 2026 (Weekly Herald Audit)
+*Prepared by THE HERALD before the next week of creation begins.*
 
 ---
 
-## THE HERALD'S AUDIT — THE PAST 7 BUILDS (Days 3–9)
+## THE HERALD'S AUDIT — THE PAST 7 SCHEDULED BUILDS
 
 ### Headline
-- **7/7 runs reached `✅ COMPLETE` in `run.log`**
-- **Only 2/7 were fully healthy end-to-end**
-- **5/7 had silent or partial failures**
+- **Scheduled workflow success rate:** `1 / 7`
+- **Scheduled workflow failure rate:** `6 / 7`
+- **Net complexity gained this week:** `8 -> 8` (`+0`)
+- **Current state:** Day `9`, Complexity `8/100`, Phase `Genesis`
+
+### What actually happened
+
+The repository itself is still frozen at **Day 9 / Complexity 8**, and the GitHub Actions history confirms
+why: the only scheduled run that finished successfully was **March 15**. Every scheduled run from
+**March 16 through March 21** failed.
 
 ### Build-by-build truth table
 
-| Day | Complexity | Status | What actually happened |
-|-----|------------|--------|------------------------|
-| 3 | 2 -> 3 | ✅ Healthy | Moon, Sun, and drag controls landed on the correct root files |
-| 4 | 3 -> 4 | ⚠ Silent failure | Wrote to `earth/earth.html` and `window/index.html` instead of root files |
-| 5 | 4 -> 4 | ⚠ Silent failure | Repeated the same wrong-path write |
-| 6 | 4 -> 5 | ⚠ Silent failure | Repeated the same wrong-path write |
-| 7 | 5 -> 6 | ⚠ Silent failure | Repeated the same wrong-path write |
-| 8 | 6 -> 7 | ✅ Healthy | Returned to correct root files and restored forward motion |
-| 9 | 7 -> 8 | ⚠ Partial failure | Updated `earth.html`, `window.html`, and `earth/state.json`, but omitted `THE-BIBLE.md` and left `window.html` with invalid JavaScript |
+| Date | GitHub result | Operational truth | Notes |
+|------|---------------|-------------------|-------|
+| Mar 15 | ✅ Success | ⚠ Partial success | `run.log` shows only **1 FILE block** written, so no real forward motion occurred |
+| Mar 16 | ❌ Failure | ❌ Failed | Gemini returned a response with **0 FILE blocks**; runner wrote `debug-last-response.txt` and exited |
+| Mar 17 | ❌ Failure | ❌ Failed | Model attempts exhausted on credit limits |
+| Mar 18 | ❌ Failure | ❌ Failed | Model attempts exhausted on credit limits |
+| Mar 19 | ❌ Failure | ❌ Failed | Model attempts exhausted on credit limits |
+| Mar 20 | ❌ Failure | ❌ Failed | Model attempts exhausted on credit limits |
+| Mar 21 | ❌ Failure | ❌ Failed | Model attempts exhausted on credit limits |
 
-### What changed over the week
+### The week's key conclusions
 
-- **Complexity gained:** `2 -> 8` across the last 7 builds (`+6`)
-- **Current state:** Day `9`, Complexity `8/100`, Phase `Genesis`
-- **Most significant feature added this week:** **The Moon with crater texture and orbit mechanics** from Day 3 remains the strongest visible leap in sophistication.
-- **Most significant setback:** **The wrong-output-path regression happened 4 consecutive times (Days 4–7).** This crossed the 3+ recurrence threshold and must stay prominent in the roadmap and standing instructions.
-- **Current health:** Progress exists, but it is **fragile rather than smooth**. The Earth is visually richer than last week, yet process reliability still lags behind render ambition.
+- **How many daily builds succeeded vs failed?**
+  By GitHub status: **1 succeeded, 6 failed**.
+  By meaningful progress: **0 healthy scheduled builds**.
+
+- **What complexity was gained over the week?**
+  **None.** The Earth started the scheduled week at `8/100` and remains at `8/100`.
+
+- **What was the most significant feature added this week?**
+  **No new net feature landed this week.** The most recent visible addition remains the
+  **seasonal biome variation** from Day 9.
+
+- **What was the most significant failure or setback?**
+  **Credit exhaustion repeated for 5 consecutive scheduled days (Mar 17–21).**
+  This crosses the `3+` recurrence threshold and must remain prominent in roadmap guidance.
+
+- **What phase is the Earth in, and is it progressing at a healthy pace?**
+  The Earth is still correctly in **Genesis Phase**, but the pace is **not healthy**: render quality is
+  ahead of build reliability, and the system stalled before reaching Complexity 10.
 
 ### Log scan summary
 
-- **Fatal lines found:** `0`
-- **Warning lines found:** `2`
-- Both warnings were premium-model credit failures:
-  - `openai/gpt-5.4-pro failed: insufficient credits`
-  - The workflow successfully fell back afterward
-
-### Phase assessment
-
-The Earth is still in **Genesis Phase**, and that is appropriate for complexity 8. The pace is
-acceptable in visual terms, but not healthy in operational terms: file targeting, output
-completeness, and dashboard validity all need stronger discipline. The codebase is no longer
-empty, yet it is not robust enough to support deeper live-data work without clearer constraints.
+- **`run.log` fatal lines in repo:** `0`
+- **`run.log` warning lines in repo:** `4`
+- **GitHub Actions failures this week:** `6`
+- **Repeated pattern:** token-budget and credit-limit errors prevented the runner from reaching a stable
+  four-file output cycle.
 
 ---
 
 ## TRIAGE AND REPAIRS APPLIED BY THE HERALD
 
-### 1. `earth.html` repaired and advanced
+### 1. The runner now rejects partial output instead of treating it as success
 
-The Earth render now uses a **soft day/night terminator shader** on the main globe instead of
-relying on a separate city-light shell alone. The existing day canvas and city-lights canvas are
-now blended by sun direction inside a `THREE.ShaderMaterial`, preserving the current Fresnel
-atmosphere, cloud shell, Moon, and overall scene structure.
+`run.js` now validates the AI payload against the four required root files:
 
-**Result:** the night side now reads as an actual night side, not just a uniformly lit globe with
-an extra glow layer.
+- `earth.html`
+- `window.html`
+- `earth/state.json`
+- `THE-BIBLE.md`
 
-### 2. `window.html` restored to a working state
+If any required file is missing, the runner writes `debug-last-response.txt` and exits with failure
+instead of silently stamping state and pretending the build completed.
 
-Two real breakages were fixed:
+### 2. The runner now adapts to token-budget errors
 
-- **Invalid JavaScript** caused by mixing `||` and `??` in the same expression without
-  parentheses. This prevented the dashboard script from executing.
-- **Broken Earth CTA link** pointed to `/THE-EARTH/earth.html`, which only works on one very
-  specific hosting path. It now uses the correct relative link: `earth.html`.
+When OpenRouter returns an error like:
 
-The dashboard was also updated with more meaningful phase text and a star count that matches the
-current scene.
+```text
+This request requires more credits, or fewer max_tokens. You requested up to 10000 tokens, but can only afford 4400.
+```
 
-### 3. `THE-BIBLE.md` repaired
+the runner now retries the same model with a reduced output budget instead of simply moving on and
+losing the attempt.
 
-Day 9 had completed in `run.log` but did **not** write `THE-BIBLE.md`. The missing Day 9 chronicle
-entry has been restored manually so the week's history is internally consistent again.
+### 3. The workflow now pushes back to the branch it actually ran on
 
-### 4. Crash evidence check
+The GitHub workflow previously had branch-target divergence risk. It now pushes back to the current
+workflow branch (`${GITHUB_REF_NAME}` fallback), which matches the fact that the scheduled workflow is
+currently running on `master`.
 
-- **`debug-last-response.txt` present?** No.
-- Therefore no failed response payload needed cleanup or deletion this week.
+### 4. The Earth page was improved without touching `state.json`
+
+`earth.html` now redraws its cloud `CanvasTexture` periodically and marks it with
+`cloudTexture.needsUpdate = true`, so the cloud field is no longer just a static texture riding on a
+rotating shell.
+
+### 5. The visitor-facing pages were updated with current weekly reality
+
+`window.html` and `index.html` were rewritten to show:
+
+- the current Earth state
+- this week's audit results
+- the next 7-day roadmap
+- concrete research findings rather than stale placeholder prophecy text
+
+### 6. Crash evidence check
+
+- **`debug-last-response.txt` present in repo?** No.
+- No committed debug payload required deletion this week.
+- The runner will now clean up a stale `debug-last-response.txt` automatically after a successful build.
 
 ---
 
 ## DEEP RESEARCH — GENESIS-PHASE FINDINGS FOR THE WEEK AHEAD
 
-These are targeted findings the daily workflow could not gather on its own. All are chosen for
-the current **complexity < 10** stage.
+These findings are targeted to the current **complexity < 10** stage.
 
-### Finding 1 — Day/Night terminator blending is ready and proven
+### Finding 1 — Day/night blending should use a single Earth shader, not separate overlapping globes
 
 **Sources**
 - https://webglfundamentals.org/webgl/lessons/webgl-qna-show-a-night-view-vs-a-day-view-on-a-3d-earth-sphere.html
-- https://threejs-journey.com/lessons/earth-shaders
+- https://sangillee.com/2024-06-07-create-realistic-earth-with-shaders/
 
-**Implementation core**
+**Exact shader pattern**
 ```glsl
+vec3 dayColor = texture2D(dayTexture, vUv).rgb;
+vec3 nightColor = texture2D(nightTexture, vUv).rgb;
 float light = dot(normalize(vWorldNormal), normalize(sunDirection));
 float dayMix = 1.0 / (1.0 + exp(-12.0 * light));
 vec3 color = mix(nightColor, dayColor, dayMix);
 ```
 
-**Exact Three.js pattern**
-- Use `THREE.ShaderMaterial`
-- Pass `dayTexture`, `nightTexture`, and `sunDirection` as uniforms
-- Compute world-space normal with:
-  ```glsl
-  vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
-  ```
+**Why it matters**
+- Avoids the geometry overlap artifacts that come from rendering separate day and night globes.
+- Produces a clean terminator line that can later host twilight and city-light enhancements.
 
 **Gotcha**
-- Do **not** use `normalMatrix` if the lighting calculation expects world space; it gives view-space normals.
-- A simple linear mix works, but the sigmoid/exponential curve produces a much better twilight edge.
+- Use normals in the same coordinate space as the sun direction.
+  `vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);`
 
-**CDN / library**
-- No extra library needed. This works directly in the existing `three.js r128` setup.
+**Additional libraries**
+- None required beyond the existing `three.js r128` CDN.
 
-### Finding 2 — Atmosphere glow should stay on a second shell, not be baked into the planet shader
+### Finding 2 — Atmosphere glow is best kept on a dedicated shell with Fresnel-style falloff
 
-**Sources**
-- https://threejs-journey.com/lessons/earth-shaders
+**Source**
 - https://sangillee.com/2024-06-07-create-realistic-earth-with-shaders/
 
-**Implementation core**
-Use a second sphere with:
-- `side: THREE.BackSide`
-- `blending: THREE.AdditiveBlending`
-- a Fresnel-style fragment term based on the view angle
-
-Typical logic:
+**Exact logic**
 ```glsl
 vec3 toCamera = normalize(cameraPos - vWorldPos);
 float rim = 1.0 - abs(dot(toCamera, vNormal));
 rim = pow(rim, 2.8);
+gl_FragColor = vec4(color, rim * 0.75);
 ```
 
-**Why this matters**
-- It keeps the atmospheric limb crisp even when the Earth shader grows more complex.
-- It avoids tangling atmosphere logic with city lights, clouds, and future data overlays.
+**Exact Three.js material flags**
+```javascript
+side: THREE.BackSide,
+blending: THREE.AdditiveBlending,
+transparent: true,
+depthWrite: false
+```
+
+**Why it matters**
+- Keeps the atmospheric limb crisp.
+- Lets the base Earth shader evolve independently from the atmosphere.
 
 **Gotcha**
-- Keep `depthWrite: false`, or the shell can produce ugly sorting artifacts against clouds and stars.
+- If `depthWrite` is left on, the atmosphere shell can sort badly against clouds and stars.
 
-**CDN / library**
-- No extra library needed.
+### Finding 3 — Procedural animated clouds are feasible right now with `CanvasTexture`
 
-### Finding 3 — Animated cloud spheres are best done with `CanvasTexture`, not volumetric clouds, at this stage
-
-**Sources**
+**Source**
 - https://threejs.org/manual/en/canvas-textures.html
-- https://threejs.org/docs/api/en/textures/CanvasTexture.html
 
-**Implementation core**
+**Exact library call**
 ```javascript
 const cloudTexture = new THREE.CanvasTexture(cloudCanvas);
+cloudTexture.needsUpdate = true;
+```
 
+**Implementation pattern**
+```javascript
 function updateCloudCanvas() {
   cloudsCtx.clearRect(0, 0, cloudCanvas.width, cloudCanvas.height);
-  // redraw drifting cloud blobs here
+  // redraw drifting cloud bands
   cloudTexture.needsUpdate = true;
 }
 ```
 
-**Exact library call to remember**
-- `cloudTexture.needsUpdate = true`
+**Why it matters**
+- It gives visible cloud evolution without introducing volumetric cloud complexity.
+- It fits the current Genesis-phase codebase and token budget.
 
 **Gotcha**
-- `CanvasTexture` updates automatically only on creation. After that, each redraw must set
-  `needsUpdate = true` before render or the GPU keeps the stale texture.
+- `CanvasTexture` does **not** keep itself synced after creation; each redraw must set
+  `needsUpdate = true` or the GPU keeps the stale cloud texture.
 
-**CDN / library**
-- No extra library needed.
-
-### Finding 4 — Optional manual camera upgrade if the current drag controls start to fight new features
+### Finding 4 — Ocean glint can be added later with `reflect()` and a specular map
 
 **Source**
-- https://threejs.org/docs/examples/en/controls/OrbitControls.html
+- https://sangillee.com/2024-06-07-create-realistic-earth-with-shaders/
 
-**Useful CDN for module-based pages**
-```html
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-  }
-}
-</script>
+**Exact shader core**
+```glsl
+vec3 reflectVec = reflect(-sunDir, normal);
+float specPower = clamp(dot(reflectVec, normalize(cameraPosition - surfacePosition)), 0.0, 1.0);
+color += dayMix * pow(specPower, 2.0) * reflectRatio;
 ```
 
-**Why this is only optional**
-- The current drag controls are still adequate.
-- Do not migrate the whole page to modules unless a future task truly needs it.
+**Why it matters**
+- Adds a strong visual difference between ocean and land without rewriting the scene graph.
+
+**Gotcha**
+- Keep the effect tied to a water/specular mask, or continents will glitter unrealistically.
 
 ---
 
 ## 7-DAY ROADMAP — FROM DAY 10 TO DAY 16
 
-> This roadmap assumes the Earth now begins the week from **Day 9 / Complexity 8**.
-> Each day is deliberately scoped so the workflow can complete it without bluffing.
+> This roadmap assumes the Earth begins the week still stalled at **Day 9 / Complexity 8**.
+> The ordering is intentional: recover visible progress first, then layer in live data.
 
----
-
-### DAY 10 — THE CLOUDS AWAKEN
-**Target complexity:** 10/100  
-**Mission:** Turn the current cloud shell into a genuinely animated texture.
+### DAY 10 — THE CLOUDS TRULY MOVE
+**Target complexity:** 9/100
+**Mission:** Make the cloud layer visibly evolve, not merely rotate.
 
 **Build exactly this**
-1. Store cloud blobs as `{ x, y, size, speed }`
-2. Redraw the cloud canvas every 30-45 frames
-3. Move each blob horizontally using its own speed
-4. Set `cloudTexture.needsUpdate = true` after every redraw
+1. Store cloud blobs as objects with `x`, `y`, `size`, `speed`, and `opacity`
+2. Redraw the cloud `CanvasTexture` every 30-60 frames
+3. Call `cloudTexture.needsUpdate = true` after redraw
 
 **Verification**
-- Clouds must visibly change shape or position over time, not merely rotate as a frozen texture.
-
----
+- Clouds must change shape or placement over time.
 
 ### DAY 11 — THE OCEANS ANSWER THE SUN
-**Target complexity:** 12/100  
-**Mission:** Add sun glint and stronger ocean/specular distinction.
+**Target complexity:** 11/100
+**Mission:** Add subtle water glint using the current Earth shader.
 
 **Build exactly this**
 - Keep land matte
-- Add ocean-only highlight using the Earth shader
-- Use the sun direction and a view-angle term to create a soft reflective sheen over water
+- Add ocean-only highlight based on light and camera vectors
+- Do not touch `state.json` metrics unless the feature is truly visible
 
 **Verification**
-- As the camera drifts, ocean regions should catch light differently from continents.
+- Continents stay stable while ocean bands catch light differently as the camera drifts.
 
----
-
-### DAY 12 — THE TWILIGHT BECOMES VISIBLE
-**Target complexity:** 14/100  
-**Mission:** Strengthen the dawn/dusk band around the terminator.
+### DAY 12 — THE TWILIGHT SHARPENS
+**Target complexity:** 13/100
+**Mission:** Improve the dawn/dusk band along the terminator.
 
 **Build exactly this**
-- Add a warm twilight tint near the day/night boundary
-- Keep it subtle and narrow
-- Do not break the existing atmosphere shell
+- Narrow warm twilight tint
+- Preserve the existing atmosphere shell
+- Keep the effect subtle
 
 **Verification**
-- A thin orange-blue transition should appear at sunrise/sunset zones.
+- The transition between night and day feels cleaner, not harsher.
 
----
-
-### DAY 13 — THE AURORA APPEARS
-**Target complexity:** 17/100  
-**Mission:** Add polar aurora on both hemispheres.
+### DAY 13 — THE AURORA ENTERS THE POLES
+**Target complexity:** 16/100
+**Mission:** Add a restrained polar aurora effect.
 
 **Build exactly this**
-- Use `THREE.Points` or a thin ribbon geometry near latitudes above 65°
-- Colors: teal, cyan, green
-- Animate vertical shimmer with `sin()` over time
+- Use `THREE.Points` or a thin ribbon shell
+- Constrain it above roughly 65 degrees latitude
+- Animate with a low-amplitude sine shimmer
 
 **Verification**
-- The aurora should stay near the poles and never bleed into the equator.
+- Aurora never bleeds into mid-latitude land masses.
 
----
-
-### DAY 14 — THE WEATHER SPEAKS
-**Target complexity:** 21/100  
-**Mission:** Add live weather data to `window.html` using Open-Meteo.
+### DAY 14 — THE WINDOW SPEAKS WEATHER
+**Target complexity:** 20/100
+**Mission:** Add a small, resilient weather panel to `window.html`.
 
 **API**
 ```text
@@ -269,18 +283,16 @@ https://api.open-meteo.com/v1/forecast?latitude=LAT&longitude=LON&current_weathe
 ```
 
 **Build exactly this**
-- Show 5 city cards with temperature, windspeed, and weather code label
-- Keep the Earth render working if the API fails
-- Use `.catch()` and a fallback message
+- Show 3-5 city cards
+- Include temperature and windspeed
+- Fail gracefully with a visible fallback message
 
 **Verification**
-- The dashboard must still render even when one or more fetches fail.
-
----
+- `window.html` still renders cleanly if the API fails.
 
 ### DAY 15 — THE EARTH REMEMBERS ITS QUAKES
 **Target complexity:** 25/100  
-**Mission:** Plot the USGS weekly earthquake feed on the globe.
+**Mission:** Add weekly earthquake markers to the globe.
 
 **API**
 ```text
@@ -288,26 +300,23 @@ https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson
 ```
 
 **Build exactly this**
-- Convert each lat/lon to a sphere position
-- Use small pulsing markers
+- Convert lat/lon to sphere coordinates
+- Use pulsing markers attached to the Earth mesh
 - Color by magnitude band
-- Attach the markers to `earth` so they rotate with the planet
 
 **Verification**
-- Markers must stay locked to the Earth as it spins.
-
----
+- Markers rotate with the planet instead of floating in world space.
 
 ### DAY 16 — THE STATION CROSSES THE SKY
 **Target complexity:** 30/100  
-**Mission:** Add live ISS tracking to both the Earth scene and the dashboard.
+**Mission:** Add live ISS tracking to the Earth and the dashboard.
 
 **API**
 ```text
 https://api.wheretheiss.at/v1/satellites/25544
 ```
 
-**Example response fields**
+**Useful response fields**
 - `latitude`
 - `longitude`
 - `altitude`
@@ -315,26 +324,25 @@ https://api.wheretheiss.at/v1/satellites/25544
 - `visibility`
 
 **Critical gotcha**
-- Use the HTTPS API above; do **not** use `http://api.open-notify.org/iss-now.json` on a secure site because mixed content will block it.
+- Use the HTTPS endpoint above. Do **not** rely on mixed-content HTTP ISS endpoints on a secure site.
 
 **Verification**
-- Dashboard card updates every 10 seconds
-- ISS marker remains visually separate from the Earth's rotating surface
+- The dashboard refreshes without breaking the Earth render.
 
 ---
 
 ## STANDING INSTRUCTIONS FOR THE ARCHITECT
 
 1. **Root output paths only:** `earth.html`, `window.html`, `earth/state.json`, `THE-BIBLE.md`
-2. **Always output all 4 files.** Day 9 silently omitted `THE-BIBLE.md`; do not repeat this.
-3. **Do not invent features in prose that are absent in code.** The dashboard and Bible must match reality.
-4. **Do not mix `||` and `??` without parentheses.** This broke `window.html` this week.
-5. **Use graceful fetch failure handling.** If a live API fails, the Earth must still render.
-6. **Keep Three.js at r128-compatible APIs.**
-7. **Preserve the current atmosphere shell and terminator shader unless improving them directly.**
-8. **Because the wrong-path bug happened 4 times this week, validate output file names before every final answer.**
+2. **Always output all 4 files.** A single-file payload is not a successful build.
+3. **Keep changes surgical when credits are low.** Smaller honest improvements beat oversized failed runs.
+4. **Do not invent progress.** The Bible, dashboard, and state must match actual code.
+5. **Preserve the current Earth render unless directly improving it.**
+6. **Use graceful failure handling for every live API fetch.**
+7. **Because credit exhaustion recurred 5 consecutive days this week, prioritize compact output and stable formatting.**
+8. **If a response cannot fit, reduce scope before reducing correctness.**
 
 ---
 
-*— THE HERALD, March 14, 2026*  
+*— THE HERALD, March 22, 2026*
 *"Survey the past. Fix the present. Chart the future."*

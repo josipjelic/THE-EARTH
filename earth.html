@@ -83,10 +83,36 @@
             z-index: 100;
             text-shadow: 0 0 8px rgba(100, 150, 255, 0.5);
         }
+        #readout {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            max-width: 260px;
+            padding: 12px 14px;
+            color: rgba(220, 235, 255, 0.75);
+            background: rgba(4, 10, 22, 0.45);
+            border: 1px solid rgba(120, 170, 255, 0.16);
+            border-radius: 8px;
+            font-size: 11px;
+            line-height: 1.65;
+            letter-spacing: 1.1px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 24px rgba(20, 50, 110, 0.15);
+        }
+        #readout strong {
+            display: block;
+            margin-bottom: 6px;
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
     <div id="title">THE EARTH</div>
+    <div id="readout"><strong>Orbital Readout</strong>Synchronizing state...</div>
     <div id="info">Loading…</div>
     <div id="instructions">DRAG TO ROTATE &nbsp;•&nbsp; THE MOON ORBITS</div>
     <div id="nav">
@@ -101,9 +127,27 @@
         let scene, camera, renderer;
         let earth, stars, atmosphere, clouds, moon, sun;
         let earthMaterial, atmosphereMaterial;
+        let cloudsCanvas, cloudsCtx, cloudTexture;
         let time = 0;
         let isDragging = false;
         let previousMouseX = 0;
+        let cloudDrift = 0;
+        let cloudRefreshFrame = 0;
+
+        const CLOUD_BANDS = [
+            { x: 110, y: 75, size: 72, squash: 0.52, speed: 0.45, opacity: 0.72 },
+            { x: 290, y: 95, size: 51, squash: 0.48, speed: 0.28, opacity: 0.64 },
+            { x: 470, y: 55, size: 68, squash: 0.56, speed: 0.31, opacity: 0.75 },
+            { x: 710, y: 88, size: 88, squash: 0.5, speed: 0.19, opacity: 0.7 },
+            { x: 860, y: 135, size: 44, squash: 0.54, speed: 0.35, opacity: 0.63 },
+            { x: 155, y: 205, size: 39, squash: 0.44, speed: 0.52, opacity: 0.69 },
+            { x: 680, y: 255, size: 61, squash: 0.47, speed: 0.24, opacity: 0.68 },
+            { x: 390, y: 295, size: 33, squash: 0.58, speed: 0.41, opacity: 0.62 },
+            { x: 920, y: 275, size: 29, squash: 0.5, speed: 0.6, opacity: 0.57 },
+            { x: 530, y: 355, size: 52, squash: 0.52, speed: 0.26, opacity: 0.66 },
+            { x: 200, y: 320, size: 45, squash: 0.49, speed: 0.48, opacity: 0.64 },
+            { x: 760, y: 180, size: 38, squash: 0.46, speed: 0.34, opacity: 0.61 }
+        ];
 
         const VERT_ATMOSPHERE = `
             varying vec3 vNormal;
@@ -405,17 +449,18 @@
             scene.add(earth);
 
             // Clouds
-            const cloudsCanvas = document.createElement('canvas');
+            cloudsCanvas = document.createElement('canvas');
             cloudsCanvas.width = 1024;
             cloudsCanvas.height = 512;
-            const cloudsCtx = cloudsCanvas.getContext('2d');
-            cloudsCtx.fillStyle = '#ffffff';
-            drawCloudBlobs(cloudsCtx);
+            cloudsCtx = cloudsCanvas.getContext('2d');
+            drawCloudBlobs(cloudsCtx, cloudDrift);
+            cloudTexture = new THREE.CanvasTexture(cloudsCanvas);
+            cloudTexture.wrapS = THREE.RepeatWrapping;
 
             clouds = new THREE.Mesh(
                 new THREE.SphereGeometry(1.018, 64, 64),
                 new THREE.MeshPhongMaterial({
-                    map: new THREE.CanvasTexture(cloudsCanvas),
+                    map: cloudTexture,
                     transparent: true,
                     opacity: 0.75,
                     depthWrite: false,
@@ -474,24 +519,33 @@
             });
         }
 
-        function drawCloudBlobs(ctx) {
-            const cloudPositions = [
-                { x: 110, y: 75, size: 72 }, { x: 290, y: 95, size: 51 },
-                { x: 470, y: 55, size: 68 }, { x: 710, y: 88, size: 88 },
-                { x: 860, y: 135, size: 44 }, { x: 155, y: 205, size: 39 },
-                { x: 680, y: 255, size: 61 }, { x: 390, y: 295, size: 33 },
-                { x: 920, y: 275, size: 29 }, { x: 530, y: 355, size: 52 },
-                { x: 200, y: 320, size: 45 }, { x: 760, y: 180, size: 38 }
-            ];
-            cloudPositions.forEach(cloud => {
-                ctx.globalAlpha = 0.65 + Math.random() * 0.25;
-                ctx.beginPath();
-                ctx.ellipse(cloud.x, cloud.y, cloud.size, cloud.size * 0.52, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 0.38;
-                ctx.beginPath();
-                ctx.ellipse(cloud.x - cloud.size * 0.4, cloud.y - 12, cloud.size * 0.65, cloud.size * 0.45, 0, 0, Math.PI * 2);
-                ctx.fill();
+        function drawCloudBlobs(ctx, driftOffset) {
+            ctx.clearRect(0, 0, 1024, 512);
+            ctx.fillStyle = '#ffffff';
+            CLOUD_BANDS.forEach(cloud => {
+                const baseX = (cloud.x + driftOffset * cloud.speed) % 1024;
+                [-1024, 0, 1024].forEach(wrap => {
+                    const x = baseX + wrap;
+                    if (x < -cloud.size * 2 || x > 1024 + cloud.size * 2) return;
+
+                    ctx.globalAlpha = cloud.opacity;
+                    ctx.beginPath();
+                    ctx.ellipse(x, cloud.y, cloud.size, cloud.size * cloud.squash, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.globalAlpha = cloud.opacity * 0.58;
+                    ctx.beginPath();
+                    ctx.ellipse(
+                        x - cloud.size * 0.42,
+                        cloud.y - 12,
+                        cloud.size * 0.65,
+                        cloud.size * (cloud.squash + 0.08),
+                        0,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                });
             });
             ctx.globalAlpha = 1.0;
         }
@@ -524,9 +578,15 @@
         function animate() {
             requestAnimationFrame(animate);
             time += 0.0012;
+            cloudRefreshFrame++;
 
             if (!isDragging && earth) earth.rotation.y += 0.00095;
             if (clouds) clouds.rotation.y += 0.00135;
+            if (cloudTexture && cloudsCtx && cloudRefreshFrame % 48 === 0) {
+                cloudDrift += 10;
+                drawCloudBlobs(cloudsCtx, cloudDrift);
+                cloudTexture.needsUpdate = true;
+            }
 
             const drift = 0.22;
             camera.position.x = Math.sin(time * 0.35) * drift;
@@ -564,12 +624,22 @@
             const day = s.earth?.day ?? s.day ?? 1;
             const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 1;
             const phase = s.phase ?? 'Genesis';
+            const featureCount = s.features?.length ?? s.totalFeatures ?? 0;
+            const updated = s.earth?.last_updated ? new Date(s.earth.last_updated) : null;
             document.getElementById('info').innerHTML =
                 'Day ' + day + ' of Creation' +
                 '<br><span style="font-size:11px;color:rgba(255,255,255,0.4);">Complexity ' + complexity + '/100 &nbsp;·&nbsp; ' + phase + ' Phase</span>';
+            document.getElementById('readout').innerHTML =
+                '<strong>Orbital Readout</strong>' +
+                'Phase: ' + phase + '<br>' +
+                'Features Active: ' + featureCount + '<br>' +
+                'Cloud Field: CanvasTexture redraw every 48 frames<br>' +
+                'Last Update: ' + (updated ? updated.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Unknown');
             document.title = 'THE EARTH — Day ' + day;
         }).catch(() => {
             document.getElementById('info').textContent = 'THE EARTH';
+            document.getElementById('readout').innerHTML =
+                '<strong>Orbital Readout</strong>State unavailable.<br>Genesis systems remain visible.';
         });
     </script>
 </body>

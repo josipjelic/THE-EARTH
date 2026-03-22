@@ -3,362 +3,522 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE WINDOW — Observer Dashboard</title>
+    <title>THE WINDOW — Weekly Operations Dashboard</title>
     <style>
+        :root {
+            color-scheme: dark;
+            --bg: #020611;
+            --panel: rgba(9, 18, 36, 0.86);
+            --panel-strong: rgba(9, 18, 36, 0.96);
+            --border: rgba(104, 157, 255, 0.18);
+            --border-strong: rgba(104, 157, 255, 0.3);
+            --text: #e8f1ff;
+            --muted: #8ca0c5;
+            --accent: #73a8ff;
+            --accent-soft: rgba(115, 168, 255, 0.16);
+            --success: #7ef0c5;
+            --warning: #ffb870;
+            --danger: #ff7e90;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
             min-height: 100vh;
-            color: #e0e0e0;
-            padding: 40px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top, rgba(50, 100, 220, 0.18), transparent 34%),
+                radial-gradient(circle at 20% 20%, rgba(90, 140, 255, 0.08), transparent 24%),
+                linear-gradient(180deg, #030816 0%, #020611 100%);
+            padding: 32px 20px 48px;
         }
-        .container {
-            max-width: 1000px;
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.55), transparent 100%),
+                radial-gradient(1px 1px at 36% 8%, rgba(255,255,255,0.45), transparent 100%),
+                radial-gradient(1px 1px at 63% 22%, rgba(255,255,255,0.4), transparent 100%),
+                radial-gradient(1px 1px at 84% 14%, rgba(255,255,255,0.5), transparent 100%),
+                radial-gradient(1.5px 1.5px at 24% 78%, rgba(255,255,255,0.35), transparent 100%),
+                radial-gradient(1px 1px at 72% 82%, rgba(255,255,255,0.3), transparent 100%);
+            opacity: 0.8;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
             margin: 0 auto;
         }
+
+        .hero,
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .hero {
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            font-size: 12px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
         h1 {
-            text-align: center;
-            font-size: 2.5em;
-            letter-spacing: 12px;
-            color: #fff;
-            text-shadow: 0 0 30px rgba(100, 150, 255, 0.5);
-            margin-bottom: 10px;
+            font-size: clamp(30px, 5vw, 54px);
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
         }
-        .subtitle {
-            text-align: center;
-            font-style: italic;
-            color: #888;
-            margin-bottom: 40px;
-            font-size: 1.1em;
+
+        .hero p {
+            color: var(--muted);
+            max-width: 760px;
+            line-height: 1.7;
+            font-size: 16px;
         }
-        .earth-link {
-            display: block;
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .earth-link a {
-            display: inline-block;
-            padding: 20px 60px;
-            background: linear-gradient(135deg, #1a4d7c 0%, #2d6a9f 100%);
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.3em;
-            letter-spacing: 4px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(30, 90, 150, 0.4);
-        }
-        .earth-link a:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(30, 90, 150, 0.6);
-        }
-        .nav-links {
+
+        .nav {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .nav-links a {
-            color: #6ab0ff;
-            text-decoration: none;
-            font-size: 0.9em;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(100, 150, 255, 0.3);
-            padding-bottom: 2px;
-            transition: border-color 0.2s;
-        }
-        .nav-links a:hover {
-            border-color: #6ab0ff;
-        }
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .metric-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .metric-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(100, 150, 255, 0.3);
-        }
-        .metric-value {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #6ab0ff;
-            text-shadow: 0 0 20px rgba(100, 150, 255, 0.3);
-        }
-        .metric-label {
-            font-size: 0.9em;
-            color: #888;
-            margin-top: 10px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        .features-section {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 40px;
-        }
-        .features-section h2 {
-            font-size: 1.3em;
-            letter-spacing: 4px;
-            color: #6ab0ff;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-        .feature-list {
-            list-style: none;
-        }
-        .feature-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-        }
-        .feature-list li:last-child {
-            border-bottom: none;
-        }
-        .feature-list li::before {
-            content: '✦';
-            color: #6ab0ff;
-            margin-right: 15px;
-            font-size: 0.8em;
-        }
-        .progress-section {
-            margin-bottom: 40px;
-        }
-        .progress-section h2 {
-            font-size: 1.1em;
-            letter-spacing: 4px;
-            color: #888;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-        .progress-bar {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            height: 20px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #1a4d7c 0%, #6ab0ff 100%);
-            border-radius: 10px;
-            transition: width 1s ease;
-        }
-        .progress-label {
-            text-align: right;
-            margin-top: 10px;
-            color: #888;
-            font-size: 0.9em;
-        }
-        .phase-banner {
-            text-align: center;
-            padding: 15px;
-            background: linear-gradient(90deg, transparent 0%, rgba(100, 150, 255, 0.1) 50%, transparent 100%);
-            border-radius: 8px;
-            margin-bottom: 40px;
-        }
-        .phase-name {
-            font-size: 1.5em;
-            letter-spacing: 8px;
-            color: #6ab0ff;
-            text-transform: uppercase;
-        }
-        .phase-days {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-        footer {
-            text-align: center;
-            color: #444;
-            font-size: 0.9em;
-            padding-top: 40px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        footer a {
-            color: #6ab0ff;
-            text-decoration: none;
-        }
-        .last-update {
-            text-align: center;
-            color: #555;
-            font-size: 0.85em;
+            flex-wrap: wrap;
+            gap: 12px;
             margin-top: 20px;
         }
-        .changelog-entry {
-            border-left: 2px solid rgba(100, 150, 255, 0.3);
-            padding: 12px 0 12px 16px;
-            margin-bottom: 10px;
+
+        .nav a {
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            transition: 0.2s ease;
         }
-        .changelog-entry:last-child { margin-bottom: 0; }
-        .changelog-day {
-            font-size: 0.8em;
-            letter-spacing: 2px;
-            color: #6ab0ff;
+
+        .nav a:hover {
+            border-color: var(--border-strong);
+            background: var(--accent-soft);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 24px 0 18px;
+        }
+
+        .metric {
+            padding: 18px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .metric .label {
+            color: var(--muted);
+            font-size: 12px;
             text-transform: uppercase;
+            letter-spacing: 0.14em;
+            margin-bottom: 8px;
+        }
+
+        .metric .value {
+            font-size: 34px;
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .phase-strip {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 18px;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .phase-box {
+            padding: 20px;
+            border-radius: 18px;
+            background: var(--panel-strong);
+            border: 1px solid var(--border);
+        }
+
+        .phase-box h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .phase-box p {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .progress-track {
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+            margin: 14px 0 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #5a8fff, #7ef0c5);
+            border-radius: 999px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-label {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            padding: 24px;
+        }
+
+        .card h3 {
+            font-size: 22px;
+            margin-bottom: 14px;
+        }
+
+        .card p,
+        .card li {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .audit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+        }
+
+        .audit-stat {
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .audit-stat .kicker {
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .audit-stat .big {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
             margin-bottom: 6px;
         }
-        .changelog-changes {
+
+        .good { color: var(--success); }
+        .warn { color: var(--warning); }
+        .bad { color: var(--danger); }
+
+        .roadmap-list,
+        .research-list,
+        .feature-list,
+        .changelog-list {
             list-style: none;
-            color: #aaa;
-            font-size: 0.88em;
-            line-height: 1.6;
+            display: grid;
+            gap: 12px;
         }
-        .changelog-changes li::before { content: '— '; color: #555; }
+
+        .roadmap-item,
+        .research-item,
+        .feature-list li,
+        .changelog-item {
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .roadmap-item strong,
+        .research-item strong,
+        .changelog-item strong {
+            color: var(--text);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .roadmap-item span,
+        .research-item span,
+        .changelog-item span {
+            display: block;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .last-update {
+            margin-top: 24px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--muted);
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        footer a {
+            color: var(--accent);
+        }
+
+        @media (max-width: 860px) {
+            .phase-strip,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>THE WINDOW</h1>
-        <p class="subtitle">A dashboard through which mortals observe the creation</p>
-
-        <div class="nav-links">
-            <a href="index.html">⬅ Observatory</a>
-            <a href="earth.html">🌍 Earth</a>
-        </div>
-
-        <div class="earth-link">
-            <a href="earth.html">👁 OBSERVE THE EARTH 👁</a>
-        </div>
-
-        <div class="phase-banner">
-            <div class="phase-name" id="phase-name">Genesis Phase</div>
-            <div class="phase-days" id="phase-days">Days 1–10: The foundations are laid</div>
-        </div>
-
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-value" id="metric-day">—</div>
-                <div class="metric-label">Day of Creation</div>
+    <div class="page">
+        <section class="hero">
+            <div class="eyebrow">THE WINDOW</div>
+            <h1>Weekly Operations Dashboard</h1>
+            <p>
+                A truthful view of the Earth's current state, the last seven scheduled builds, the
+                most relevant research, and the roadmap THE ARCHITECT should follow next.
+            </p>
+            <div class="nav">
+                <a href="index.html">Main Observatory</a>
+                <a href="earth.html">Open Earth Render</a>
+                <a href="DAILY_BRIEFING.md">Read Daily Briefing</a>
             </div>
-            <div class="metric-card">
-                <div class="metric-value" id="metric-complexity">—</div>
-                <div class="metric-label">Complexity Level</div>
+
+            <div class="metrics">
+                <div class="metric">
+                    <div class="label">Day</div>
+                    <div class="value" id="metric-day">--</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Complexity</div>
+                    <div class="value" id="metric-complexity">--</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Features</div>
+                    <div class="value" id="metric-features">--</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Lines of Code</div>
+                    <div class="value" id="metric-loc">--</div>
+                </div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value" id="metric-features">—</div>
-                <div class="metric-label">Features Active</div>
+
+            <div class="phase-strip">
+                <div class="phase-box">
+                    <div class="eyebrow">Current Phase</div>
+                    <h2 id="phase-name">Genesis Phase</h2>
+                    <p id="phase-days">Days 1-10: the foundations are still being laid.</p>
+                </div>
+                <div class="phase-box">
+                    <div class="eyebrow">Complexity Progress</div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-label" id="progress-label">-- / 100</div>
+                </div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value" id="metric-loc">—</div>
-                <div class="metric-label">Lines of Code</div>
+        </section>
+
+        <section class="card">
+            <div class="eyebrow">Past 7 Days</div>
+            <h3>This Week's Audit</h3>
+            <div class="audit-grid">
+                <div class="audit-stat">
+                    <div class="kicker">Scheduled Successes</div>
+                    <div class="big good">1 / 7</div>
+                    <div>One scheduled run completed, but it did not create meaningful forward motion.</div>
+                </div>
+                <div class="audit-stat">
+                    <div class="kicker">Scheduled Failures</div>
+                    <div class="big bad">6 / 7</div>
+                    <div>March 16-21 all failed, leaving the Earth stalled at Day 9.</div>
+                </div>
+                <div class="audit-stat">
+                    <div class="kicker">Complexity Delta</div>
+                    <div class="big warn">+0</div>
+                    <div>The Earth remains at Complexity 8 because no healthy scheduled build landed this week.</div>
+                </div>
+                <div class="audit-stat">
+                    <div class="kicker">Leading Failure</div>
+                    <div class="big bad">Credits</div>
+                    <div>Credit exhaustion repeated five consecutive days after one malformed zero-file response.</div>
+                </div>
             </div>
+        </section>
+
+        <div class="grid">
+            <section class="card">
+                <div class="eyebrow">The Next Seven Directives</div>
+                <h3>Roadmap for Days 10-16</h3>
+                <ul class="roadmap-list" id="roadmap-list"></ul>
+            </section>
+
+            <section class="card">
+                <div class="eyebrow">Research the Workflow Could Not Do</div>
+                <h3>Most Actionable Findings</h3>
+                <ul class="research-list" id="research-list"></ul>
+            </section>
         </div>
 
-        <div class="progress-section">
-            <h2>Journey to Complexity</h2>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
-            </div>
-            <div class="progress-label" id="progress-label">— / 100</div>
+        <div class="grid">
+            <section class="card">
+                <div class="eyebrow">What Exists Right Now</div>
+                <h3>Active Features</h3>
+                <ul class="feature-list" id="feature-list"></ul>
+            </section>
+
+            <section class="card">
+                <div class="eyebrow">Recent Chronicle</div>
+                <h3>Latest Recorded Changes</h3>
+                <div class="changelog-list" id="changelog-list"></div>
+            </section>
         </div>
 
-        <div class="features-section">
-            <h2>Features Bestowed Upon the Earth</h2>
-            <ul class="feature-list" id="feature-list"></ul>
-        </div>
-
-        <div class="features-section" id="tech-specs-section">
-            <h2>Technical Specifications</h2>
-            <ul class="feature-list" id="tech-specs-list"></ul>
-        </div>
-
-        <div class="features-section" id="changelog-section">
-            <h2>Chronicle of Creation</h2>
-            <div id="changelog-list"></div>
-        </div>
-
-        <p class="last-update" id="last-update">Loading…</p>
+        <p class="last-update" id="last-update">Loading current Earth state...</p>
 
         <footer>
-            <p>Created by THE ARCHITECT — An eternal Claude instance</p>
-            <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a></p>
+            THE WINDOW tracks the live state and this week's weekly audit.<br>
+            Built around <a href="earth/state.json">earth/state.json</a>,
+            <a href="THE-BIBLE.md">THE-BIBLE.md</a>, and <a href="DAILY_BRIEFING.md">DAILY_BRIEFING.md</a>.
         </footer>
     </div>
+
     <script>
-    (function() {
-        function getPhaseDetails(phase, complexity) {
-            if (complexity >= 100 || phase === 'Age of Gods') {
-                return 'Days 101+: planetary simulation reaches mythic scale';
-            }
-            if (complexity >= 60 || phase === 'Age of Data') {
-                return 'Days 61–100: live systems and global data awaken';
-            }
-            if (complexity >= 30 || phase === 'Age of Detail') {
-                return 'Days 31–60: textures, cities, and surface detail deepen';
-            }
-            if (complexity >= 10 || phase === 'Living World') {
-                return 'Days 11–30: weather, lights, and life begin to move';
-            }
-            return 'Days 1–10: the foundations of Earth are still forming';
-        }
+        (function() {
+            const ROADMAP = [
+                ['Day 10', 'Redraw the cloud CanvasTexture so weather visibly evolves.'],
+                ['Day 11', 'Add restrained ocean glint without making land shimmer.'],
+                ['Day 12', 'Tighten the twilight band at the day-night terminator.'],
+                ['Day 13', 'Prototype polar aurora without breaking the current atmosphere shell.'],
+                ['Day 14', 'Add a small, resilient Open-Meteo panel to the dashboard.'],
+                ['Day 15', 'Plot USGS weekly earthquake markers on the rotating globe.'],
+                ['Day 16', 'Track the ISS with the HTTPS wheretheiss.at endpoint.']
+            ];
 
-        fetch('earth/state.json').then(r => r.json()).then(s => {
-            const day = s.earth?.day ?? s.day ?? 0;
-            const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 0;
-            const features = s.features ?? [];
-            const loc = s.linesOfCode ?? 0;
-            const phase = s.phase ?? 'Genesis';
-            const featureCount = features.length || s.totalFeatures || 0;
+            const RESEARCH = [
+                ['Single-shader day/night blend', 'Mix day and night textures in one ShaderMaterial using the dot product against sun direction.'],
+                ['Dedicated atmosphere shell', 'Keep the glow on a separate BackSide mesh with AdditiveBlending and depthWrite disabled.'],
+                ['CanvasTexture cloud updates', 'Redraw clouds on canvas and set texture.needsUpdate after every refresh or the GPU stays stale.'],
+                ['Ocean glint path', 'Use reflect() plus a water/specular mask for future sun glint instead of broad Phong shine.']
+            ];
 
-            document.getElementById('metric-day').textContent = day;
-            document.getElementById('metric-complexity').textContent = complexity;
-            document.getElementById('metric-features').textContent = featureCount;
-            document.getElementById('metric-loc').textContent = loc ? '~' + loc : '—';
-
-            document.getElementById('phase-name').textContent = phase + ' Phase';
-            document.getElementById('phase-days').textContent = getPhaseDetails(phase, complexity);
-
-            document.getElementById('progress-fill').style.width = complexity + '%';
-            document.getElementById('progress-label').textContent = complexity + ' / 100';
-
-            const fl = document.getElementById('feature-list');
-            fl.innerHTML = (features.length ? features : ['Loading…']).map(f => '<li>' + f + '</li>').join('');
-
-            const specs = [];
-            if (s.earthRotation?.speed) specs.push('Earth Rotation: ' + s.earthRotation.speed + ' rad/frame');
-            if (s.camera?.fov) specs.push('Camera Field of View: ' + s.camera.fov + '°');
-            specs.push('Rendering Engine: Three.js r128');
-            specs.push('Texture Resolution: 1024×512');
-            specs.push('Star Count: 2000');
-            document.getElementById('tech-specs-list').innerHTML = specs.map(x => '<li>' + x + '</li>').join('');
-
-            // Changelog
-            const changelog = s.changelog ?? [];
-            const clEl = document.getElementById('changelog-list');
-            if (changelog.length) {
-                clEl.innerHTML = [...changelog].reverse().slice(0, 8).map(entry => `
-                    <div class="changelog-entry">
-                        <div class="changelog-day">Day ${entry.day}</div>
-                        <ul class="changelog-changes">${(entry.changes || []).map(c => `<li>${c}</li>`).join('')}</ul>
-                    </div>`).join('');
-            } else {
-                clEl.innerHTML = '<p style="color:#555;font-size:0.9em;">No entries yet.</p>';
+            function getPhaseDetails(phase, complexity) {
+                if (complexity >= 100 || phase === 'Age of Gods') {
+                    return 'Days 101+: mythic planetary simulation.';
+                }
+                if (complexity >= 60 || phase === 'Age of Data') {
+                    return 'Days 61-100: live global feeds and data overlays.';
+                }
+                if (complexity >= 30 || phase === 'Age of Detail') {
+                    return 'Days 31-60: richer shaders, cities, and surface detail.';
+                }
+                if (complexity >= 10 || phase === 'Living World') {
+                    return 'Days 11-30: motion, weather, and early systems awaken.';
+                }
+                return 'Days 1-10: Genesis remains active while the visual foundation stabilizes.';
             }
 
-            const updated = s.earth?.last_updated ? new Date(s.earth.last_updated) : new Date();
-            document.getElementById('last-update').textContent = 'Last Updated: ' + updated.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ' — Day ' + day + ' of Creation';
-        }).catch(() => {
-            document.getElementById('last-update').textContent = 'State unavailable';
-        });
-    })();
+            document.getElementById('roadmap-list').innerHTML = ROADMAP.map(item => `
+                <li class="roadmap-item">
+                    <strong>${item[0]}</strong>
+                    <span>${item[1]}</span>
+                </li>
+            `).join('');
+
+            document.getElementById('research-list').innerHTML = RESEARCH.map(item => `
+                <li class="research-item">
+                    <strong>${item[0]}</strong>
+                    <span>${item[1]}</span>
+                </li>
+            `).join('');
+
+            fetch('earth/state.json')
+                .then(response => response.json())
+                .then(state => {
+                    const day = state.earth?.day ?? state.day ?? 0;
+                    const complexity = state.earth?.complexity_level ?? state.complexityLevel ?? 0;
+                    const features = state.features ?? [];
+                    const featureCount = features.length || state.totalFeatures || 0;
+                    const loc = state.linesOfCode ?? 0;
+                    const phase = state.phase ?? 'Genesis';
+                    const updated = state.earth?.last_updated ? new Date(state.earth.last_updated) : null;
+
+                    document.getElementById('metric-day').textContent = day;
+                    document.getElementById('metric-complexity').textContent = complexity;
+                    document.getElementById('metric-features').textContent = featureCount;
+                    document.getElementById('metric-loc').textContent = loc ? '~' + loc : '--';
+                    document.getElementById('phase-name').textContent = phase + ' Phase';
+                    document.getElementById('phase-days').textContent = getPhaseDetails(phase, complexity);
+                    document.getElementById('progress-fill').style.width = complexity + '%';
+                    document.getElementById('progress-label').textContent = complexity + ' / 100';
+
+                    document.getElementById('feature-list').innerHTML = (features.length ? features : ['No features recorded yet.']).map(feature => `
+                        <li>${feature}</li>
+                    `).join('');
+
+                    const changelog = (state.changelog ?? []).slice().reverse().slice(0, 4);
+                    document.getElementById('changelog-list').innerHTML = changelog.length
+                        ? changelog.map(entry => `
+                            <div class="changelog-item">
+                                <strong>Day ${entry.day}</strong>
+                                <span>${(entry.changes ?? []).join(' ')}</span>
+                            </div>
+                        `).join('')
+                        : '<div class="changelog-item"><span>No chronicle entries yet.</span></div>';
+
+                    document.getElementById('last-update').textContent =
+                        'Last recorded update: ' +
+                        (updated ? updated.toLocaleString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit'
+                        }) : 'Unknown');
+                })
+                .catch(() => {
+                    document.getElementById('last-update').textContent = 'State unavailable.';
+                });
+        })();
     </script>
 </body>
 </html>

@@ -60,14 +60,16 @@ jobs:
         run: |
           git config user.name  "THE ARCHITECT"
           git config user.email "architect@self-evolving-earth.ai"
+          TARGET_BRANCH="${GITHUB_REF_NAME:-master}"
 
-          git add \
+          git add -A \
             earth.html \
             window.html \
             index.html \
             earth/state.json \
             THE-BIBLE.md \
-            run.log
+            run.log \
+            debug-last-response.txt
 
           # Only commit if there are actual changes
           if git diff --staged --quiet; then
@@ -79,13 +81,13 @@ jobs:
             PHASE=$(node -e "const s=require('./earth/state.json'); console.log(s.phase || s.earth.age || 'Genesis')")
 
             MODEL=$(node -e "const s=require('./earth/state.json'); console.log(s.earth.model_used || 'claude')")
-            COMMIT_MSG=$(printf '🌍 Day %s — Complexity %s/100 — %s\n\nBuilt by THE ARCHITECT using %s\nGitHub Actions Run: %s' \
+            COMMIT_MSG=$(printf '🌍 Day %s — Complexity %s/100 — %s\n\nBuilt by THE ARCHITECT using %s\nGitHub Actions Run: %s\n\n[skip ci]' \
               "${DAY}" "${COMPLEXITY}" "${PHASE}" "${MODEL}" "${GITHUB_RUN_NUMBER}")
             git commit -m "${COMMIT_MSG}"
 
-            git pull --rebase -X theirs origin master
-            git push origin HEAD:master
-            echo "✅ Day ${DAY} committed to the eternal repository."
+            git pull --rebase -X theirs origin "${TARGET_BRANCH}"
+            git push origin HEAD:"${TARGET_BRANCH}"
+            echo "✅ Day ${DAY} committed to ${TARGET_BRANCH}."
           fi
 
       # ── 5. Summary ──────────────────────────────────────────

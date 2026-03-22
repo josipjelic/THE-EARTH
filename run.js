@@ -19,6 +19,7 @@ const PATHS = {
   earth     : path.join(ROOT, 'earth.html'),
   window    : path.join(ROOT, 'window.html'),
   bible     : path.join(ROOT, 'THE-BIBLE.md'),
+  debug     : path.join(ROOT, 'debug-last-response.txt'),
   log       : path.join(ROOT, 'run.log'),
 };
 
@@ -31,6 +32,14 @@ const MODEL_CANDIDATES = [
 ];
 
 const MAX_TOKENS = 10000;
+const MAX_RETRY_TOKENS = 6500;
+const MIN_RETRY_TOKENS = 3500;
+const REQUIRED_OUTPUT_FILES = Object.freeze([
+  'earth.html',
+  'window.html',
+  'earth/state.json',
+  'THE-BIBLE.md',
+]);
 
 // ── Logging ────────────────────────────────────────────────
 function log(msg) {
@@ -71,12 +80,25 @@ function parseFileBlocks(text) {
   return blocks;
 }
 
+function validateFileBlocks(blocks) {
+  const blockPaths = blocks.map(block => block.relativePath);
+  return {
+    missing: REQUIRED_OUTPUT_FILES.filter(filePath => !blockPaths.includes(filePath)),
+    unexpected: blockPaths.filter(filePath => !REQUIRED_OUTPUT_FILES.includes(filePath)),
+  };
+}
+
+function parseAffordableTokens(message) {
+  const match = /can only afford (\d+)/i.exec(message);
+  return match ? Number(match[1]) : null;
+}
+
 // ── OpenRouter API (OpenAI-compatible) ─────────────────────
-function apiRequest(model, userContent, apiKey) {
+function apiRequest(model, userContent, apiKey, maxTokens = MAX_TOKENS) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
       model,
-      max_tokens: MAX_TOKENS,
+      max_tokens: maxTokens,
       messages: [{ role: 'user', content: userContent }],
     });
     const options = {
@@ -114,12 +136,35 @@ async function callArchitect(content, apiKey) {
   log(`🤖 Model candidates: ${MODEL_CANDIDATES.join(', ')}`);
 
   for (const model of MODEL_CANDIDATES) {
-    log(`🤖 Trying: ${model}`);
-    try {
-      const { text } = await apiRequest(model, content, apiKey);
-      log(`✅ Success: ${model} (${text.length} chars)`);
-      return { model, text };
-    } catch (e) { log(`⚠  ${model} failed: ${e.message}`); }
+    const seenBudgets = new Set([MAX_TOKENS]);
+    const budgetQueue = [MAX_TOKENS];
+
+    while (budgetQueue.length > 0) {
+      const maxTokens = budgetQueue.shift();
+      const budgetSuffix = maxTokens === MAX_TOKENS ? '' : ` @ ${maxTokens} max_tokens`;
+      log(`🤖 Trying: ${model}${budgetSuffix}`);
+
+      try {
+        const { text } = await apiRequest(model, content, apiKey, maxTokens);
+        log(`✅ Success: ${model} (${text.length} chars)`);
+        return { model, text };
+      } catch (e) {
+        const affordableTokens = parseAffordableTokens(e.message);
+        const retryBudget = affordableTokens
+          ? Math.min(MAX_RETRY_TOKENS, Math.max(0, affordableTokens - 100))
+          : 0;
+
+        if (retryBudget >= MIN_RETRY_TOKENS && !seenBudgets.has(retryBudget)) {
+          seenBudgets.add(retryBudget);
+          budgetQueue.push(retryBudget);
+          log(`⚠  ${model} failed${budgetSuffix}: ${e.message}`);
+          log(`🔁 Retrying ${model} with reduced output budget (${retryBudget} max_tokens)`);
+          continue;
+        }
+
+        log(`⚠  ${model} failed${budgetSuffix}: ${e.message}`);
+      }
+    }
   }
   throw new Error('All models failed.');
 }
@@ -209,6 +254,9 @@ Files live at the repo root: earth.html, window.html, earth/state.json, THE-BIBL
 Use these exact relative paths in FILE_START headers.
 
 CRITICAL: window.html and earth.html MUST preserve the state-loading script that fetches earth/state.json.
+Never write nested paths like earth/earth.html or window/index.html.
+Never omit one of the 4 required files, even if one of them is unchanged.
+If token budget is tight, make surgical improvements rather than rewriting entire pages.
 Keep element ids: metric-day, metric-complexity, metric-features, metric-loc, phase-name, phase-days, progress-fill, progress-label, feature-list, last-update.
 index.html already loads from state.json — do not break it.`.trim();
 }
@@ -247,11 +295,22 @@ async function main() {
 
   const blocks = parseFileBlocks(response);
   log(`📝 File blocks found: ${blocks.length}`);
+  const validation = validateFileBlocks(blocks);
 
-  if (blocks.length === 0) {
-    log('⚠  No FILE blocks in response. Writing debug file.');
-    write(path.join(ROOT, 'debug-last-response.txt'), response);
+  if (blocks.length === 0 || validation.missing.length > 0) {
+    if (validation.missing.length > 0) {
+      log(`⚠  Missing required FILE blocks: ${validation.missing.join(', ')}`);
+    }
+    if (validation.unexpected.length > 0) {
+      log(`⚠  Unexpected FILE block paths: ${validation.unexpected.join(', ')}`);
+    }
+    log('⚠  Invalid FILE block payload. Writing debug file.');
+    write(PATHS.debug, response);
     process.exit(1);
+  }
+
+  if (validation.unexpected.length > 0) {
+    log(`ℹ️  Ignoring extra FILE block paths after validating required files: ${validation.unexpected.join(', ')}`);
   }
 
   divider();
@@ -273,6 +332,16 @@ async function main() {
 
   // Ensure HTML files load state from state.json (inject if AI overwrote)
   ensureHtmlLoadsState();
+
+  // Clean up stale failure evidence once a build succeeds.
+  try {
+    if (fs.existsSync(PATHS.debug)) {
+      fs.unlinkSync(PATHS.debug);
+      log('🧹 Removed stale debug-last-response.txt');
+    }
+  } catch (e) {
+    log(`⚠  Could not remove debug-last-response.txt: ${e.message}`);
+  }
 
   divider('═');
   try {
