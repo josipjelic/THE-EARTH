@@ -3,359 +3,539 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE WINDOW — Observer Dashboard</title>
+    <title>THE WINDOW — Weekly Earth Audit</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            color-scheme: dark;
+            --bg: #050914;
+            --bg2: #0b1326;
+            --panel: rgba(12, 21, 41, 0.86);
+            --line: rgba(120, 170, 255, 0.16);
+            --text: #d9e7ff;
+            --muted: #88a0c8;
+            --accent: #7db8ff;
+            --accent-2: #78ffd6;
+            --warn: #ffd37d;
+            --danger: #ff8f8f;
         }
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(55, 100, 180, 0.18), transparent 36%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+            color: var(--text);
             min-height: 100vh;
-            color: #e0e0e0;
-            padding: 40px;
         }
-        .container {
-            max-width: 1000px;
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.45), transparent 100%),
+                radial-gradient(1px 1px at 35% 15%, rgba(255,255,255,0.35), transparent 100%),
+                radial-gradient(1px 1px at 62% 30%, rgba(255,255,255,0.28), transparent 100%),
+                radial-gradient(2px 2px at 85% 12%, rgba(255,255,255,0.25), transparent 100%),
+                radial-gradient(1px 1px at 72% 78%, rgba(255,255,255,0.3), transparent 100%);
+            opacity: 0.9;
+        }
+        .shell {
+            position: relative;
+            z-index: 1;
+            width: min(1180px, calc(100% - 32px));
             margin: 0 auto;
+            padding: 32px 0 56px;
         }
-        h1 {
-            text-align: center;
-            font-size: 2.5em;
-            letter-spacing: 12px;
-            color: #fff;
-            text-shadow: 0 0 30px rgba(100, 150, 255, 0.5);
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            text-align: center;
-            font-style: italic;
-            color: #888;
-            margin-bottom: 40px;
-            font-size: 1.1em;
-        }
-        .earth-link {
-            display: block;
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .earth-link a {
-            display: inline-block;
-            padding: 20px 60px;
-            background: linear-gradient(135deg, #1a4d7c 0%, #2d6a9f 100%);
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.3em;
-            letter-spacing: 4px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(30, 90, 150, 0.4);
-        }
-        .earth-link a:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(30, 90, 150, 0.6);
-        }
-        .nav-links {
+        .nav {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .nav-links a {
-            color: #6ab0ff;
-            text-decoration: none;
-            font-size: 0.9em;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(100, 150, 255, 0.3);
-            padding-bottom: 2px;
-            transition: border-color 0.2s;
-        }
-        .nav-links a:hover {
-            border-color: #6ab0ff;
-        }
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .metric-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .metric-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(100, 150, 255, 0.3);
-        }
-        .metric-value {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #6ab0ff;
-            text-shadow: 0 0 20px rgba(100, 150, 255, 0.3);
-        }
-        .metric-label {
-            font-size: 0.9em;
-            color: #888;
-            margin-top: 10px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        .features-section {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 40px;
-        }
-        .features-section h2 {
-            font-size: 1.3em;
-            letter-spacing: 4px;
-            color: #6ab0ff;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-        .feature-list {
-            list-style: none;
-        }
-        .feature-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
+            justify-content: space-between;
             align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
         }
-        .feature-list li:last-child {
-            border-bottom: none;
-        }
-        .feature-list li::before {
-            content: '✦';
-            color: #6ab0ff;
-            margin-right: 15px;
-            font-size: 0.8em;
-        }
-        .progress-section {
-            margin-bottom: 40px;
-        }
-        .progress-section h2 {
-            font-size: 1.1em;
-            letter-spacing: 4px;
-            color: #888;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-        .progress-bar {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            height: 20px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #1a4d7c 0%, #6ab0ff 100%);
-            border-radius: 10px;
-            transition: width 1s ease;
-        }
-        .progress-label {
-            text-align: right;
-            margin-top: 10px;
-            color: #888;
-            font-size: 0.9em;
-        }
-        .phase-banner {
-            text-align: center;
-            padding: 15px;
-            background: linear-gradient(90deg, transparent 0%, rgba(100, 150, 255, 0.1) 50%, transparent 100%);
-            border-radius: 8px;
-            margin-bottom: 40px;
-        }
-        .phase-name {
-            font-size: 1.5em;
-            letter-spacing: 8px;
-            color: #6ab0ff;
-            text-transform: uppercase;
-        }
-        .phase-days {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-        footer {
-            text-align: center;
-            color: #444;
-            font-size: 0.9em;
-            padding-top: 40px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        footer a {
-            color: #6ab0ff;
+        .nav a {
+            color: var(--muted);
             text-decoration: none;
-        }
-        .last-update {
-            text-align: center;
-            color: #555;
-            font-size: 0.85em;
-            margin-top: 20px;
-        }
-        .changelog-entry {
-            border-left: 2px solid rgba(100, 150, 255, 0.3);
-            padding: 12px 0 12px 16px;
-            margin-bottom: 10px;
-        }
-        .changelog-entry:last-child { margin-bottom: 0; }
-        .changelog-day {
-            font-size: 0.8em;
-            letter-spacing: 2px;
-            color: #6ab0ff;
+            border: 1px solid var(--line);
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .hero {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(12px);
+        }
+        .eyebrow {
+            color: var(--accent-2);
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        h1, h2, h3, p { margin: 0; }
+        h1 {
+            font-size: clamp(32px, 4vw, 56px);
+            line-height: 0.95;
+            letter-spacing: 0.04em;
+            margin-bottom: 14px;
+        }
+        .lead {
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.7;
+            max-width: 62ch;
+        }
+        .hero-links {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+        }
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 0 18px;
+            border-radius: 999px;
+            text-decoration: none;
+            border: 1px solid var(--line);
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+            font-weight: 600;
+        }
+        .button.primary {
+            background: linear-gradient(135deg, rgba(104, 166, 255, 0.22), rgba(120, 255, 214, 0.12));
+            border-color: rgba(120, 190, 255, 0.35);
+        }
+        .status-list {
+            display: grid;
+            gap: 14px;
+        }
+        .status-item {
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .status-label {
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            font-size: 11px;
             margin-bottom: 6px;
         }
-        .changelog-changes {
+        .status-value {
+            font-size: 17px;
+            line-height: 1.35;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        .span-3 { grid-column: span 3; }
+        .span-4 { grid-column: span 4; }
+        .span-5 { grid-column: span 5; }
+        .span-6 { grid-column: span 6; }
+        .span-7 { grid-column: span 7; }
+        .span-8 { grid-column: span 8; }
+        .span-12 { grid-column: span 12; }
+        .metric {
+            display: grid;
+            gap: 10px;
+        }
+        .metric-label {
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            font-size: 11px;
+        }
+        .metric-value {
+            font-size: 38px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .metric-sub {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .progress {
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        .progress > div {
+            height: 100%;
+            width: 0%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+        .section-title {
+            font-size: 22px;
+            margin-bottom: 14px;
+        }
+        .section-copy {
+            color: var(--muted);
+            line-height: 1.7;
+            margin-bottom: 18px;
+        }
+        .bullet-list, .roadmap-list, .timeline-list {
             list-style: none;
-            color: #aaa;
-            font-size: 0.88em;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 10px;
+        }
+        .bullet-list li,
+        .roadmap-list li,
+        .timeline-list li {
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 14px 16px;
             line-height: 1.6;
         }
-        .changelog-changes li::before { content: '— '; color: #555; }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .tag {
+            border-radius: 999px;
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .audit-cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .audit-card {
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .audit-card strong {
+            display: block;
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .audit-card span {
+            color: var(--muted);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        .danger { color: var(--danger); }
+        .warn { color: var(--warn); }
+        .good { color: var(--accent-2); }
+        .research-card {
+            border-radius: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            line-height: 1.65;
+        }
+        .research-card h3 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        code {
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+            color: var(--accent-2);
+        }
+        footer {
+            margin-top: 24px;
+            color: var(--muted);
+            text-align: center;
+            line-height: 1.7;
+            font-size: 13px;
+        }
+        @media (max-width: 980px) {
+            .hero, .audit-cards { grid-template-columns: 1fr; }
+            .span-3, .span-4, .span-5, .span-6, .span-7, .span-8 { grid-column: span 12; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>THE WINDOW</h1>
-        <p class="subtitle">A dashboard through which mortals observe the creation</p>
-
-        <div class="nav-links">
-            <a href="index.html">⬅ Observatory</a>
-            <a href="earth.html">🌍 Earth</a>
+    <div class="shell">
+        <div class="nav">
+            <div class="eyebrow">THE WINDOW · WEEKLY OBSERVER DASHBOARD</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <a href="index.html">Observatory</a>
+                <a href="earth.html">Earth Render</a>
+                <a href="THE-BIBLE.md">The Bible</a>
+            </div>
         </div>
 
-        <div class="earth-link">
-            <a href="earth.html">👁 OBSERVE THE EARTH 👁</a>
+        <div class="hero">
+            <section class="panel">
+                <div class="eyebrow">Weekly Situation Report</div>
+                <h1>THE EARTH HAS BEAUTY.<br>ITS BUILDER NEEDS HELP.</h1>
+                <p class="lead">
+                    The render is visually healthy, but the automated creator has stalled. The last live
+                    state is still <strong>Day 9</strong>; the scheduled workflow then failed for the rest of
+                    the week. This dashboard shows the current state, the true build health, and the next
+                    seven moves THE ARCHITECT should make.
+                </p>
+                <div class="hero-links">
+                    <a class="button primary" href="earth.html">Observe the Earth</a>
+                    <a class="button" href="index.html">Open the Observatory</a>
+                </div>
+                <div class="tag-row">
+                    <div class="tag" id="phase-name">Genesis Phase</div>
+                    <div class="tag" id="phase-days">Days 1–10</div>
+                    <div class="tag" id="last-update">Loading state</div>
+                </div>
+            </section>
+
+            <aside class="panel">
+                <div class="eyebrow">This Week at a Glance</div>
+                <div class="status-list">
+                    <div class="status-item">
+                        <div class="status-label">Scheduled build health</div>
+                        <div class="status-value"><span class="danger">0 of 7</span> scheduled runs advanced the Earth between Mar 16 and Mar 22.</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Repeated failure</div>
+                        <div class="status-value">Low OpenRouter credit ceilings caused <span class="warn">6 consecutive fatal build failures</span> after one malformed-response failure on Mar 16.</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Most important visual leap</div>
+                        <div class="status-value">The Moon orbit, atmosphere shell, and day/night rendering remain the strongest recent improvements.</div>
+                    </div>
+                </div>
+            </aside>
         </div>
 
-        <div class="phase-banner">
-            <div class="phase-name" id="phase-name">Genesis Phase</div>
-            <div class="phase-days" id="phase-days">Days 1–10: The foundations are laid</div>
-        </div>
-
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-value" id="metric-day">—</div>
+        <div class="grid">
+            <section class="panel span-3 metric">
                 <div class="metric-label">Day of Creation</div>
-            </div>
-            <div class="metric-card">
+                <div class="metric-value" id="metric-day">—</div>
+                <div class="metric-sub">Current canonical state from <code>earth/state.json</code>.</div>
+            </section>
+            <section class="panel span-3 metric">
+                <div class="metric-label">Complexity</div>
                 <div class="metric-value" id="metric-complexity">—</div>
-                <div class="metric-label">Complexity Level</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value" id="metric-features">—</div>
+                <div class="metric-sub" id="progress-label">— / 100</div>
+                <div class="progress"><div id="progress-fill"></div></div>
+            </section>
+            <section class="panel span-3 metric">
                 <div class="metric-label">Features Active</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value" id="metric-loc">—</div>
+                <div class="metric-value" id="metric-features">—</div>
+                <div class="metric-sub">Tracked features already described in state.</div>
+            </section>
+            <section class="panel span-3 metric">
                 <div class="metric-label">Lines of Code</div>
-            </div>
+                <div class="metric-value" id="metric-loc">—</div>
+                <div class="metric-sub">Current size of the creation surface.</div>
+            </section>
         </div>
 
-        <div class="progress-section">
-            <h2>Journey to Complexity</h2>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
-            </div>
-            <div class="progress-label" id="progress-label">— / 100</div>
+        <div class="grid">
+            <section class="panel span-7">
+                <div class="eyebrow">Audit</div>
+                <h2 class="section-title">What the past week actually says</h2>
+                <p class="section-copy">
+                    The scripture of creation and the workflow logs tell two different stories. The last
+                    seven <em>creation entries</em> added complexity from 2 to 8, but the last seven
+                    <em>calendar-day scheduled runs</em> did not advance the Earth at all.
+                </p>
+                <div class="audit-cards">
+                    <div class="audit-card">
+                        <strong>+6</strong>
+                        <span>Complexity gained across the last seven completed creation days (Day 3 to Day 9).</span>
+                    </div>
+                    <div class="audit-card">
+                        <strong class="danger">7 failures</strong>
+                        <span>Scheduled build failures from Mar 16–22, leaving the Earth frozen at Day 9.</span>
+                    </div>
+                    <div class="audit-card">
+                        <strong>Mar 15</strong>
+                        <span>Last successful scheduled evolution before the stall began.</span>
+                    </div>
+                </div>
+                <ul class="bullet-list" style="margin-top:14px;">
+                    <li><strong>Most significant feature added:</strong> the Earth gained an orbital Moon and stronger planetary composition, then matured through clouds and seasonal biome shifts.</li>
+                    <li><strong>Most significant setback:</strong> one malformed model response on Mar 16 was followed by six straight credit-limit failures. This is now the top operational risk.</li>
+                    <li><strong>Phase assessment:</strong> Genesis is still the correct phase for complexity 8, but the pace is no longer healthy because the system has stopped moving forward.</li>
+                </ul>
+            </section>
+
+            <section class="panel span-5">
+                <div class="eyebrow">Technical state</div>
+                <h2 class="section-title">Current operating envelope</h2>
+                <ul class="bullet-list" id="tech-specs-list">
+                    <li>Loading…</li>
+                </ul>
+            </section>
         </div>
 
-        <div class="features-section">
-            <h2>Features Bestowed Upon the Earth</h2>
-            <ul class="feature-list" id="feature-list"></ul>
+        <div class="grid">
+            <section class="panel span-6">
+                <div class="eyebrow">Active features</div>
+                <h2 class="section-title">What the Earth can already do</h2>
+                <ul class="bullet-list" id="feature-list">
+                    <li>Loading state…</li>
+                </ul>
+            </section>
+
+            <section class="panel span-6">
+                <div class="eyebrow">Recent chronicle</div>
+                <h2 class="section-title">Last seven recorded creation days</h2>
+                <ul class="timeline-list" id="changelog-list">
+                    <li>Loading state…</li>
+                </ul>
+            </section>
         </div>
 
-        <div class="features-section" id="tech-specs-section">
-            <h2>Technical Specifications</h2>
-            <ul class="feature-list" id="tech-specs-list"></ul>
-        </div>
+        <div class="grid">
+            <section class="panel span-6">
+                <div class="eyebrow">Research findings</div>
+                <h2 class="section-title">Actionable discoveries for the week ahead</h2>
+                <div class="research-card" style="margin-bottom:12px;">
+                    <h3>1. Terminator mixing should stay shader-driven</h3>
+                    Use a day texture and night texture together, driven by
+                    <code>dot(normal, sunDirection)</code>, then sharpen the transition with
+                    a sigmoid or clamped multiplier. WebGL Fundamentals shows the exact
+                    <code>mix(nightColor, dayColor, mixAmount)</code> pattern.
+                </div>
+                <div class="research-card" style="margin-bottom:12px;">
+                    <h3>2. Animated clouds are viable with CanvasTexture</h3>
+                    Three.js manual guidance is explicit: redraw the cloud canvas in the render loop and set
+                    <code>texture.needsUpdate = true</code>. This is the simplest reliable Genesis-phase
+                    animation upgrade.
+                </div>
+                <div class="research-card" style="margin-bottom:12px;">
+                    <h3>3. Open-Meteo is browser-friendly</h3>
+                    Weather cards can fetch:
+                    <code>https://api.open-meteo.com/v1/forecast?latitude=35.6762&amp;longitude=139.6503&amp;current=temperature_2m,wind_speed_10m,weather_code&amp;timezone=auto</code>
+                    and expect a <code>current</code> object with temperature, wind speed, and weather code.
+                </div>
+                <div class="research-card">
+                    <h3>4. Live data feeds are ready for the next phase</h3>
+                    ISS tracking is available via <code>https://api.wheretheiss.at/v1/satellites/25544</code>
+                    with no key, while earthquakes can come from
+                    <code>https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson</code>.
+                </div>
+            </section>
 
-        <div class="features-section" id="changelog-section">
-            <h2>Chronicle of Creation</h2>
-            <div id="changelog-list"></div>
+            <section class="panel span-6">
+                <div class="eyebrow">Roadmap</div>
+                <h2 class="section-title">Seven-day roadmap for THE ARCHITECT</h2>
+                <ol class="roadmap-list">
+                    <li><strong>Day 10:</strong> fully animate the cloud texture instead of only rotating a static shell.</li>
+                    <li><strong>Day 11:</strong> deepen ocean response to light with glint and clearer water contrast.</li>
+                    <li><strong>Day 12:</strong> strengthen the twilight band at the terminator without breaking the atmosphere shell.</li>
+                    <li><strong>Day 13:</strong> add polar aurora as a restrained Genesis-to-Living-World bridge feature.</li>
+                    <li><strong>Day 14:</strong> ship Open-Meteo city cards in the dashboard with graceful fetch fallback.</li>
+                    <li><strong>Day 15:</strong> project USGS earthquake markers onto the globe surface.</li>
+                    <li><strong>Day 16:</strong> add ISS live tracking to both the Earth scene and this dashboard.</li>
+                </ol>
+            </section>
         </div>
-
-        <p class="last-update" id="last-update">Loading…</p>
 
         <footer>
-            <p>Created by THE ARCHITECT — An eternal Claude instance</p>
-            <p style="margin-top: 10px;">Read the full chronicle in <a href="THE-BIBLE.md">THE-BIBLE.md</a></p>
+            THE WINDOW reflects the current repository state plus this Monday audit.<br>
+            Read the full roadmap in <a href="DAILY_BRIEFING.md" style="color:var(--accent);">DAILY_BRIEFING.md</a>.
         </footer>
     </div>
+
     <script>
-    (function() {
+    (function () {
         function getPhaseDetails(phase, complexity) {
-            if (complexity >= 100 || phase === 'Age of Gods') {
-                return 'Days 101+: planetary simulation reaches mythic scale';
-            }
-            if (complexity >= 60 || phase === 'Age of Data') {
-                return 'Days 61–100: live systems and global data awaken';
-            }
-            if (complexity >= 30 || phase === 'Age of Detail') {
-                return 'Days 31–60: textures, cities, and surface detail deepen';
-            }
-            if (complexity >= 10 || phase === 'Living World') {
-                return 'Days 11–30: weather, lights, and life begin to move';
-            }
-            return 'Days 1–10: the foundations of Earth are still forming';
+            if (complexity >= 100 || phase === 'Age of Gods') return 'Days 101+';
+            if (complexity >= 60 || phase === 'Age of Data') return 'Days 61–100';
+            if (complexity >= 30 || phase === 'Age of Detail') return 'Days 31–60';
+            if (complexity >= 10 || phase === 'Living World') return 'Days 11–30';
+            return 'Days 1–10';
         }
 
-        fetch('earth/state.json').then(r => r.json()).then(s => {
-            const day = s.earth?.day ?? s.day ?? 0;
-            const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 0;
-            const features = s.features ?? [];
-            const loc = s.linesOfCode ?? 0;
-            const phase = s.phase ?? 'Genesis';
-            const featureCount = features.length || s.totalFeatures || 0;
+        function renderChangelog(entries) {
+            const list = document.getElementById('changelog-list');
+            if (!entries.length) {
+                list.innerHTML = '<li>No creation log found.</li>';
+                return;
+            }
+            list.innerHTML = entries.slice().reverse().slice(0, 7).map(function (entry) {
+                const changes = (entry.changes || []).map(function (change) {
+                    return '<div>' + change + '</div>';
+                }).join('');
+                return '<li><strong>Day ' + entry.day + '</strong><div style="color:var(--muted); margin-top:6px;">' + changes + '</div></li>';
+            }).join('');
+        }
+
+        fetch('earth/state.json').then(function (response) {
+            return response.json();
+        }).then(function (state) {
+            const day = state.earth?.day ?? state.day ?? 0;
+            const complexity = state.earth?.complexity_level ?? state.complexityLevel ?? 0;
+            const features = Array.isArray(state.features) ? state.features : [];
+            const featureCount = features.length || state.totalFeatures || 0;
+            const phase = state.phase || 'Genesis';
+            const loc = state.linesOfCode || 0;
+            const lastUpdated = state.earth?.last_updated || state.lastUpdate || state.date || '';
+            const model = state.earth?.model_used || 'unknown';
 
             document.getElementById('metric-day').textContent = day;
             document.getElementById('metric-complexity').textContent = complexity;
             document.getElementById('metric-features').textContent = featureCount;
-            document.getElementById('metric-loc').textContent = loc ? '~' + loc : '—';
-
-            document.getElementById('phase-name').textContent = phase + ' Phase';
-            document.getElementById('phase-days').textContent = getPhaseDetails(phase, complexity);
-
+            document.getElementById('metric-loc').textContent = loc ? String(loc) : '—';
             document.getElementById('progress-fill').style.width = complexity + '%';
             document.getElementById('progress-label').textContent = complexity + ' / 100';
+            document.getElementById('phase-name').textContent = phase + ' Phase';
+            document.getElementById('phase-days').textContent = getPhaseDetails(phase, complexity);
+            document.getElementById('last-update').textContent = lastUpdated ? ('Last update: ' + new Date(lastUpdated).toLocaleString()) : 'Last update unknown';
 
-            const fl = document.getElementById('feature-list');
-            fl.innerHTML = (features.length ? features : ['Loading…']).map(f => '<li>' + f + '</li>').join('');
+            document.getElementById('feature-list').innerHTML = (features.length ? features : ['No features recorded yet.']).map(function (feature) {
+                return '<li>' + feature + '</li>';
+            }).join('');
 
             const specs = [];
-            if (s.earthRotation?.speed) specs.push('Earth Rotation: ' + s.earthRotation.speed + ' rad/frame');
-            if (s.camera?.fov) specs.push('Camera Field of View: ' + s.camera.fov + '°');
-            specs.push('Rendering Engine: Three.js r128');
-            specs.push('Texture Resolution: 1024×512');
-            specs.push('Star Count: 2000');
-            document.getElementById('tech-specs-list').innerHTML = specs.map(x => '<li>' + x + '</li>').join('');
+            if (state.earthRotation?.speed) specs.push('Earth rotation speed: ' + state.earthRotation.speed + ' radians/frame');
+            if (state.camera?.fov) specs.push('Camera field of view: ' + state.camera.fov + ' degrees');
+            if (state.camera?.distance) specs.push('Camera distance: ' + state.camera.distance);
+            specs.push('Rendering engine: Three.js r128');
+            specs.push('Current model of last successful build: ' + model);
+            specs.push('State file still reports Genesis complexity at ' + complexity + '/100');
+            document.getElementById('tech-specs-list').innerHTML = specs.map(function (spec) {
+                return '<li>' + spec + '</li>';
+            }).join('');
 
-            // Changelog
-            const changelog = s.changelog ?? [];
-            const clEl = document.getElementById('changelog-list');
-            if (changelog.length) {
-                clEl.innerHTML = [...changelog].reverse().slice(0, 8).map(entry => `
-                    <div class="changelog-entry">
-                        <div class="changelog-day">Day ${entry.day}</div>
-                        <ul class="changelog-changes">${(entry.changes || []).map(c => `<li>${c}</li>`).join('')}</ul>
-                    </div>`).join('');
-            } else {
-                clEl.innerHTML = '<p style="color:#555;font-size:0.9em;">No entries yet.</p>';
-            }
-
-            const updated = s.earth?.last_updated ? new Date(s.earth.last_updated) : new Date();
-            document.getElementById('last-update').textContent = 'Last Updated: ' + updated.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ' — Day ' + day + ' of Creation';
-        }).catch(() => {
+            renderChangelog(state.changelog || []);
+        }).catch(function () {
+            document.getElementById('feature-list').innerHTML = '<li>State unavailable.</li>';
+            document.getElementById('tech-specs-list').innerHTML = '<li>State unavailable.</li>';
+            document.getElementById('changelog-list').innerHTML = '<li>State unavailable.</li>';
             document.getElementById('last-update').textContent = 'State unavailable';
         });
     })();
