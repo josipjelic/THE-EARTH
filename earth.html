@@ -100,10 +100,13 @@
     <script>
         let scene, camera, renderer;
         let earth, stars, atmosphere, clouds, moon, sun;
-        let earthMaterial, atmosphereMaterial;
+        let earthMaterial, atmosphereMaterial, cloudTexture;
+        let cloudCanvas, cloudContext;
         let time = 0;
         let isDragging = false;
         let previousMouseX = 0;
+        let cloudPhase = 0;
+        let cloudRedrawTick = 0;
 
         const VERT_ATMOSPHERE = `
             varying vec3 vNormal;
@@ -133,9 +136,11 @@
         const VERT_EARTH = `
             varying vec2 vUv;
             varying vec3 vWorldNormal;
+            varying vec3 vWorldPosition;
             void main() {
                 vUv = uv;
                 vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+                vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
                 gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
             }
         `;
@@ -144,10 +149,13 @@
             uniform sampler2D dayTexture;
             uniform sampler2D nightTexture;
             uniform vec3 sunDirection;
+            uniform vec3 cameraPos;
             varying vec2 vUv;
             varying vec3 vWorldNormal;
+            varying vec3 vWorldPosition;
             void main() {
                 vec3 normal = normalize(vWorldNormal);
+                vec3 viewDir = normalize(cameraPos - vWorldPosition);
                 float light = dot(normal, normalize(sunDirection));
                 float dayMix = 1.0 / (1.0 + exp(-12.0 * light));
 
@@ -159,8 +167,12 @@
                 vec3 litNight = nightColor * (0.22 + pow(1.0 - clamp(light, -1.0, 1.0), 2.2) * 0.55);
                 float twilightBand = smoothstep(-0.18, 0.02, light) * (1.0 - smoothstep(0.02, 0.2, light));
                 vec3 twilight = vec3(0.95, 0.35, 0.08) * twilightBand * 0.18;
+                float oceanMask = smoothstep(0.06, 0.28, dayColor.b - (dayColor.g * 0.7 + dayColor.r * 0.45));
+                vec3 reflectDir = reflect(-normalize(sunDirection), normal);
+                float glint = pow(max(dot(viewDir, reflectDir), 0.0), 26.0) * oceanMask * smoothstep(0.0, 0.45, light);
+                vec3 oceanGlint = vec3(0.38, 0.62, 0.92) * glint * 0.6;
 
-                vec3 color = mix(litNight, litDay, dayMix) + twilight;
+                vec3 color = mix(litNight, litDay, dayMix) + twilight + oceanGlint;
                 gl_FragColor = vec4(color, 1.0);
             }
         `;
@@ -394,7 +406,8 @@
                 uniforms: {
                     dayTexture: { value: earthTexture },
                     nightTexture: { value: nightTexture },
-                    sunDirection: { value: new THREE.Vector3(1, 0.25, 0.8).normalize() }
+                    sunDirection: { value: new THREE.Vector3(1, 0.25, 0.8).normalize() },
+                    cameraPos: { value: new THREE.Vector3() }
                 },
                 vertexShader: VERT_EARTH,
                 fragmentShader: FRAG_EARTH
@@ -405,17 +418,18 @@
             scene.add(earth);
 
             // Clouds
-            const cloudsCanvas = document.createElement('canvas');
-            cloudsCanvas.width = 1024;
-            cloudsCanvas.height = 512;
-            const cloudsCtx = cloudsCanvas.getContext('2d');
-            cloudsCtx.fillStyle = '#ffffff';
-            drawCloudBlobs(cloudsCtx);
+            cloudCanvas = document.createElement('canvas');
+            cloudCanvas.width = 1024;
+            cloudCanvas.height = 512;
+            cloudContext = cloudCanvas.getContext('2d');
+            drawCloudBlobs(cloudContext, 0);
+            cloudTexture = new THREE.CanvasTexture(cloudCanvas);
+            cloudTexture.wrapS = THREE.RepeatWrapping;
 
             clouds = new THREE.Mesh(
                 new THREE.SphereGeometry(1.018, 64, 64),
                 new THREE.MeshPhongMaterial({
-                    map: new THREE.CanvasTexture(cloudsCanvas),
+                    map: cloudTexture,
                     transparent: true,
                     opacity: 0.75,
                     depthWrite: false,
@@ -474,24 +488,34 @@
             });
         }
 
-        function drawCloudBlobs(ctx) {
-            const cloudPositions = [
-                { x: 110, y: 75, size: 72 }, { x: 290, y: 95, size: 51 },
-                { x: 470, y: 55, size: 68 }, { x: 710, y: 88, size: 88 },
-                { x: 860, y: 135, size: 44 }, { x: 155, y: 205, size: 39 },
-                { x: 680, y: 255, size: 61 }, { x: 390, y: 295, size: 33 },
-                { x: 920, y: 275, size: 29 }, { x: 530, y: 355, size: 52 },
-                { x: 200, y: 320, size: 45 }, { x: 760, y: 180, size: 38 }
-            ];
+        const cloudPositions = [
+            { x: 110, y: 75, size: 72, speed: 0.45 }, { x: 290, y: 95, size: 51, speed: 0.25 },
+            { x: 470, y: 55, size: 68, speed: 0.35 }, { x: 710, y: 88, size: 88, speed: 0.22 },
+            { x: 860, y: 135, size: 44, speed: 0.3 }, { x: 155, y: 205, size: 39, speed: 0.18 },
+            { x: 680, y: 255, size: 61, speed: 0.28 }, { x: 390, y: 295, size: 33, speed: 0.16 },
+            { x: 920, y: 275, size: 29, speed: 0.24 }, { x: 530, y: 355, size: 52, speed: 0.2 },
+            { x: 200, y: 320, size: 45, speed: 0.32 }, { x: 760, y: 180, size: 38, speed: 0.27 }
+        ];
+
+        function drawCloudBlobs(ctx, phase) {
+            ctx.clearRect(0, 0, 1024, 512);
+            ctx.fillStyle = '#ffffff';
             cloudPositions.forEach(cloud => {
-                ctx.globalAlpha = 0.65 + Math.random() * 0.25;
+                const x = ((cloud.x + phase * cloud.speed) % 1120) - 48;
+                ctx.globalAlpha = 0.55 + (cloud.speed * 0.35);
                 ctx.beginPath();
-                ctx.ellipse(cloud.x, cloud.y, cloud.size, cloud.size * 0.52, 0, 0, Math.PI * 2);
+                ctx.ellipse(x, cloud.y, cloud.size, cloud.size * 0.52, 0, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.globalAlpha = 0.38;
                 ctx.beginPath();
-                ctx.ellipse(cloud.x - cloud.size * 0.4, cloud.y - 12, cloud.size * 0.65, cloud.size * 0.45, 0, 0, Math.PI * 2);
+                ctx.ellipse(x - cloud.size * 0.4, cloud.y - 12, cloud.size * 0.65, cloud.size * 0.45, 0, 0, Math.PI * 2);
                 ctx.fill();
+                if (x < cloud.size) {
+                    ctx.globalAlpha = 0.45;
+                    ctx.beginPath();
+                    ctx.ellipse(x + 1024, cloud.y, cloud.size, cloud.size * 0.52, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             });
             ctx.globalAlpha = 1.0;
         }
@@ -539,6 +563,15 @@
             }
             if (earthMaterial && sun) {
                 earthMaterial.uniforms.sunDirection.value.copy(sun.position).normalize();
+                earthMaterial.uniforms.cameraPos.value.copy(camera.position);
+            }
+            if (cloudTexture && cloudContext) {
+                cloudRedrawTick += 1;
+                if (cloudRedrawTick % 8 === 0) {
+                    cloudPhase += 1.5;
+                    drawCloudBlobs(cloudContext, cloudPhase);
+                    cloudTexture.needsUpdate = true;
+                }
             }
 
             if (moon) {
@@ -564,9 +597,12 @@
             const day = s.earth?.day ?? s.day ?? 1;
             const complexity = s.earth?.complexity_level ?? s.complexityLevel ?? 1;
             const phase = s.phase ?? 'Genesis';
+            const model = s.earth?.model_used ?? 'unknown model';
+            const features = Array.isArray(s.features) ? s.features.length : (s.totalFeatures ?? 0);
             document.getElementById('info').innerHTML =
                 'Day ' + day + ' of Creation' +
-                '<br><span style="font-size:11px;color:rgba(255,255,255,0.4);">Complexity ' + complexity + '/100 &nbsp;·&nbsp; ' + phase + ' Phase</span>';
+                '<br><span style="font-size:11px;color:rgba(255,255,255,0.4);">Complexity ' + complexity + '/100 &nbsp;·&nbsp; ' + phase + ' Phase</span>' +
+                '<br><span style="font-size:11px;color:rgba(255,255,255,0.35);">' + features + ' active features &nbsp;·&nbsp; ' + model + '</span>';
             document.title = 'THE EARTH — Day ' + day;
         }).catch(() => {
             document.getElementById('info').textContent = 'THE EARTH';

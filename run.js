@@ -22,15 +22,15 @@ const PATHS = {
   log       : path.join(ROOT, 'run.log'),
 };
 
-// Cheap models — tried in order. GPT 4o mini first for cost efficiency.
+// Keep the builder on affordable models first so scheduled runs survive low-credit periods.
 const MODEL_CANDIDATES = [
-  'openai/gpt-4o-mini',
-  'anthropic/claude-3.5-haiku',
-  'google/gemini-2.0-flash-001',
-  'anthropic/claude-3.5-sonnet',
+  { name: 'google/gemini-2.0-flash-001', maxTokens: 6200 },
+  { name: 'openai/gpt-4o-mini', maxTokens: 4200 },
+  { name: 'anthropic/claude-3.5-haiku', maxTokens: 2400 },
+  { name: 'anthropic/claude-3.5-sonnet', maxTokens: 2400 },
 ];
 
-const MAX_TOKENS = 10000;
+const FORMAT_REPAIR_MAX_TOKENS = 2200;
 
 // ── Logging ────────────────────────────────────────────────
 function log(msg) {
@@ -71,12 +71,21 @@ function parseFileBlocks(text) {
   return blocks;
 }
 
+function normalizeRelativePath(relativePath) {
+  const clean = relativePath.replace(/\\/g, '/').replace(/^\.?\//, '').trim();
+  const aliasMap = {
+    'earth/earth.html': 'earth.html',
+    'window/index.html': 'window.html',
+  };
+  return aliasMap[clean] || clean;
+}
+
 // ── OpenRouter API (OpenAI-compatible) ─────────────────────
-function apiRequest(model, userContent, apiKey) {
+function apiRequest(model, userContent, apiKey, maxTokens) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
       model,
-      max_tokens: MAX_TOKENS,
+      max_tokens: maxTokens,
       messages: [{ role: 'user', content: userContent }],
     });
     const options = {
@@ -111,17 +120,52 @@ function apiRequest(model, userContent, apiKey) {
 }
 
 async function callArchitect(content, apiKey) {
-  log(`🤖 Model candidates: ${MODEL_CANDIDATES.join(', ')}`);
+  log(`🤖 Model candidates: ${MODEL_CANDIDATES.map(m => `${m.name}(${m.maxTokens})`).join(', ')}`);
 
-  for (const model of MODEL_CANDIDATES) {
-    log(`🤖 Trying: ${model}`);
+  for (const candidate of MODEL_CANDIDATES) {
+    log(`🤖 Trying: ${candidate.name} (max_tokens=${candidate.maxTokens})`);
     try {
-      const { text } = await apiRequest(model, content, apiKey);
-      log(`✅ Success: ${model} (${text.length} chars)`);
-      return { model, text };
-    } catch (e) { log(`⚠  ${model} failed: ${e.message}`); }
+      const { text } = await apiRequest(candidate.name, content, apiKey, candidate.maxTokens);
+      log(`✅ Success: ${candidate.name} (${text.length} chars)`);
+      return { model: candidate.name, text };
+    } catch (e) { log(`⚠  ${candidate.name} failed: ${e.message}`); }
   }
   throw new Error('All models failed.');
+}
+
+async function repairMalformedResponse(rawResponse, apiKey) {
+  const repairPrompt = `The following model output was supposed to contain files using this exact format:
+===FILE_START: relative/path===
+...full file content...
+===FILE_END===
+
+Allowed paths:
+- earth.html
+- window.html
+- index.html
+- earth/state.json
+- THE-BIBLE.md
+
+Convert the response into only FILE_START/FILE_END blocks. Do not add commentary. Preserve content exactly where possible.
+If the response is not recoverable into file blocks, return exactly NO_RECOVERABLE_FILES.
+
+===RAW_RESPONSE===
+${rawResponse.slice(0, 22000)}
+===END_RAW_RESPONSE===`;
+
+  for (const candidate of MODEL_CANDIDATES.slice(0, 2)) {
+    try {
+      log(`🛠️  Repair attempt via ${candidate.name}`);
+      const { text } = await apiRequest(candidate.name, repairPrompt, apiKey, FORMAT_REPAIR_MAX_TOKENS);
+      if (text.trim() === 'NO_RECOVERABLE_FILES') break;
+      const blocks = parseFileBlocks(text);
+      if (blocks.length) return { model: candidate.name, text, blocks };
+    } catch (e) {
+      log(`⚠  Repair attempt failed on ${candidate.name}: ${e.message}`);
+    }
+  }
+
+  return { model: null, text: rawResponse, blocks: [] };
 }
 
 // ── Ensure HTML files load state.json ───────────────────────
@@ -180,7 +224,7 @@ function buildContext(state) {
   const run     = process.env.GITHUB_RUN_NUMBER   ? `Actions Run: #${process.env.GITHUB_RUN_NUMBER}` : '';
   const earthHtml  = read(PATHS.earth);
   const windowHtml = read(PATHS.window);
-  const bibleSnip  = read(PATHS.bible).slice(-4000);
+  const bibleSnip  = read(PATHS.bible).slice(-3200);
   const godPrompt  = read(PATHS.godPrompt);
 
   return `Today's Date: ${today}
@@ -210,7 +254,8 @@ Use these exact relative paths in FILE_START headers.
 
 CRITICAL: window.html and earth.html MUST preserve the state-loading script that fetches earth/state.json.
 Keep element ids: metric-day, metric-complexity, metric-features, metric-loc, phase-name, phase-days, progress-fill, progress-label, feature-list, last-update.
-index.html already loads from state.json — do not break it.`.trim();
+index.html already loads from state.json — do not break it.
+Keep edits incremental so output remains compact and reliable. Prefer the smallest meaningful improvement instead of rewriting untouched files.`.trim();
 }
 
 // ── Main ───────────────────────────────────────────────────
@@ -245,20 +290,30 @@ async function main() {
   divider();
   const { model, text: response } = await callArchitect(context, apiKey);
 
-  const blocks = parseFileBlocks(response);
+  let blocks = parseFileBlocks(response);
   log(`📝 File blocks found: ${blocks.length}`);
 
   if (blocks.length === 0) {
-    log('⚠  No FILE blocks in response. Writing debug file.');
-    write(path.join(ROOT, 'debug-last-response.txt'), response);
-    process.exit(1);
+    log('⚠  No FILE blocks in response. Attempting repair pass.');
+    const repaired = await repairMalformedResponse(response, apiKey);
+    blocks = repaired.blocks;
+    log(`🛠️  Repair blocks found: ${blocks.length}`);
+    if (blocks.length === 0) {
+      log('⚠  Repair failed. Writing debug file.');
+      write(path.join(ROOT, 'debug-last-response.txt'), response);
+      process.exit(1);
+    }
   }
 
   divider();
   log('🌍 Applying changes...');
   let written = 0;
   for (const block of blocks) {
-    if (write(path.join(ROOT, block.relativePath), block.content)) written++;
+    const normalizedPath = normalizeRelativePath(block.relativePath);
+    if (normalizedPath !== block.relativePath) {
+      log(`⚠  Normalized legacy output path ${block.relativePath} -> ${normalizedPath}`);
+    }
+    if (write(path.join(ROOT, normalizedPath), block.content)) written++;
   }
   log(`📦 ${written}/${blocks.length} files written`);
 
@@ -273,6 +328,17 @@ async function main() {
 
   // Ensure HTML files load state from state.json (inject if AI overwrote)
   ensureHtmlLoadsState();
+
+  // Remove stale debugging artifacts after a successful write cycle.
+  try {
+    const debugPath = path.join(ROOT, 'debug-last-response.txt');
+    if (fs.existsSync(debugPath)) {
+      fs.unlinkSync(debugPath);
+      log('🧹 Removed stale debug-last-response.txt');
+    }
+  } catch (e) {
+    log(`⚠  Could not remove debug-last-response.txt: ${e.message}`);
+  }
 
   divider('═');
   try {
