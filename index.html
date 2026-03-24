@@ -1,772 +1,374 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>THE WINDOW — Self-Evolving Earth Observatory</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;600;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE OBSERVATORY - Self-Evolving Earth</title>
   <style>
     :root {
-      --void: #020509;
-      --deep: #050d1a;
-      --panel: #080f1f;
-      --border: rgba(80, 160, 255, 0.15);
-      --border-glow: rgba(80, 160, 255, 0.4);
-      --text: #b8d4f0;
-      --muted: #4a6080;
-      --accent: #4da6ff;
-      --accent2: #00ffcc;
-      --accent3: #ff6b35;
-      --glow: rgba(77, 166, 255, 0.15);
-      --gold: #f0c040;
+      color-scheme: dark;
+      --bg: #040912;
+      --panel: rgba(10, 18, 36, 0.9);
+      --line: rgba(125, 184, 255, 0.15);
+      --text: #e3ecff;
+      --muted: #90a8cf;
+      --accent: #7db8ff;
+      --accent2: #78ffd6;
+      --danger: #ff9898;
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+    * { box-sizing: border-box; }
     body {
-      background: var(--void);
-      color: var(--text);
-      font-family: 'Space Mono', monospace;
+      margin: 0;
       min-height: 100vh;
-      overflow-x: hidden;
+      font-family: Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(74, 123, 255, 0.16), transparent 35%),
+        linear-gradient(180deg, #03060d 0%, var(--bg) 100%);
     }
-
-    /* Stars background */
     body::before {
-      content: '';
+      content: "";
       position: fixed;
       inset: 0;
-      background-image: 
-        radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,0.6) 0%, transparent 100%),
-        radial-gradient(1px 1px at 35% 10%, rgba(200,220,255,0.5) 0%, transparent 100%),
-        radial-gradient(1px 1px at 60% 40%, rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 80% 15%, rgba(200,220,255,0.6) 0%, transparent 100%),
-        radial-gradient(1px 1px at 45% 75%, rgba(255,255,255,0.3) 0%, transparent 100%),
-        radial-gradient(1px 1px at 90% 60%, rgba(200,220,255,0.5) 0%, transparent 100%),
-        radial-gradient(2px 2px at 25% 85%, rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 70% 90%, rgba(200,220,255,0.3) 0%, transparent 100%);
       pointer-events: none;
-      z-index: 0;
+      background-image:
+        radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.48), transparent 100%),
+        radial-gradient(1px 1px at 38% 12%, rgba(255,255,255,0.32), transparent 100%),
+        radial-gradient(1px 1px at 68% 28%, rgba(255,255,255,0.28), transparent 100%),
+        radial-gradient(2px 2px at 88% 15%, rgba(255,255,255,0.2), transparent 100%),
+        radial-gradient(1px 1px at 74% 72%, rgba(255,255,255,0.26), transparent 100%);
     }
-
-    .wrapper { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; }
-
-    /* ── HEADER ── */
-    header {
-      text-align: center;
-      padding: 60px 0 40px;
+    .wrap {
       position: relative;
+      z-index: 1;
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
     }
-    .header-line {
-      width: 1px;
-      height: 60px;
-      background: linear-gradient(to bottom, transparent, var(--accent));
-      margin: 0 auto 24px;
-    }
-    .crown {
-      font-family: 'Cinzel', serif;
-      font-size: 10px;
-      letter-spacing: 6px;
-      color: var(--gold);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-      opacity: 0.8;
-    }
-    h1 {
-      font-family: 'Cinzel', serif;
-      font-size: clamp(28px, 5vw, 52px);
-      font-weight: 900;
-      color: #fff;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      line-height: 1.1;
-      text-shadow: 0 0 40px rgba(77,166,255,0.4);
-      margin-bottom: 8px;
-    }
-    .subtitle {
-      font-size: 11px;
-      letter-spacing: 4px;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    /* ── LIVE STATUS BAR ── */
-    .status-bar {
+    .nav {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      gap: 24px;
-      margin: 32px 0;
-      padding: 14px 24px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 4px;
+      gap: 16px;
       flex-wrap: wrap;
-    }
-    .status-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent2);
-      box-shadow: 0 0 8px var(--accent2);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .status-text { font-size: 11px; color: var(--accent2); letter-spacing: 2px; text-transform: uppercase; }
-    .status-sep { color: var(--muted); }
-
-    /* ── GRID ── */
-    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; margin-bottom: 16px; }
-
-    /* ── PANEL ── */
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 24px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.3s;
-    }
-    .panel:hover { border-color: var(--border-glow); }
-    .panel::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--glow);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .panel:hover::before { opacity: 1; }
-    .panel-label {
-      font-size: 9px;
-      letter-spacing: 3px;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .panel-value {
-      font-size: 32px;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1;
-    }
-    .panel-unit { font-size: 12px; color: var(--accent); margin-top: 4px; }
-
-    /* Grid spans */
-    .col-3 { grid-column: span 3; }
-    .col-4 { grid-column: span 4; }
-    .col-6 { grid-column: span 6; }
-    .col-8 { grid-column: span 8; }
-    .col-12 { grid-column: span 12; }
-
-    @media (max-width: 768px) {
-      .col-3, .col-4, .col-6, .col-8 { grid-column: span 12; }
-    }
-    @media (min-width: 769px) and (max-width: 1000px) {
-      .col-3 { grid-column: span 6; }
-      .col-4 { grid-column: span 6; }
-    }
-
-    /* ── EARTH PREVIEW PANEL ── */
-    .earth-panel {
-      grid-column: span 6;
-      height: 340px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(ellipse at center, #050d1a 0%, #020509 100%);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .earth-panel:hover { border-color: var(--border-glow); }
-    .earth-preview-globe {
-      width: 160px; height: 160px;
-      border-radius: 50%;
-      background: 
-        radial-gradient(ellipse at 35% 35%, rgba(100,200,120,0.9) 0%, transparent 40%),
-        radial-gradient(ellipse at 65% 45%, rgba(60,160,200,0.8) 0%, transparent 50%),
-        radial-gradient(ellipse at 20% 60%, rgba(80,160,80,0.7) 0%, transparent 35%),
-        radial-gradient(ellipse at 75% 65%, rgba(70,130,80,0.6) 0%, transparent 30%),
-        radial-gradient(ellipse at 50% 80%, rgba(230,240,255,0.8) 0%, transparent 20%),
-        radial-gradient(ellipse at 50% 10%, rgba(220,235,255,0.6) 0%, transparent 15%),
-        linear-gradient(135deg, #0d4f8c 0%, #0a3a6b 40%, #072b52 100%);
-      box-shadow: 
-        0 0 60px rgba(30, 80, 200, 0.4),
-        0 0 120px rgba(20, 60, 150, 0.2),
-        inset -30px -20px 60px rgba(0,0,0,0.6),
-        inset 20px 10px 40px rgba(100,160,255,0.1);
-      animation: globeSpin 20s linear infinite;
-      position: relative;
       margin-bottom: 20px;
     }
-    @keyframes globeSpin {
-      from { filter: hue-rotate(0deg); }
-      to { filter: hue-rotate(360deg); }
-    }
-    .earth-panel-title {
-      font-family: 'Cinzel', serif;
-      font-size: 16px;
-      letter-spacing: 4px;
-      color: var(--accent);
-      text-transform: uppercase;
-    }
-    .earth-panel-sub {
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .open-earth-btn {
-      position: absolute;
-      bottom: 16px;
-      right: 16px;
-      background: rgba(77,166,255,0.1);
-      border: 1px solid var(--border-glow);
-      border-radius: 3px;
-      padding: 6px 14px;
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--accent);
-      font-family: 'Space Mono', monospace;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-
-    /* ── PROGRESS BAR ── */
-    .progress-container { margin-top: 12px; }
-    .progress-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 6px; }
-    .progress-bar {
-      height: 4px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 2px;
-      overflow: hidden;
-      position: relative;
-    }
-    .progress-fill {
-      height: 100%;
-      border-radius: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      box-shadow: 0 0 8px var(--accent);
-      transition: width 1s ease;
-    }
-
-    /* ── FEATURE LIST ── */
-    .feature-list { list-style: none; margin-top: 8px; }
-    .feature-list li {
-      font-size: 11px;
-      color: var(--muted);
-      padding: 5px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+    .nav-group {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .feature-list li.active { color: var(--text); }
-    .feature-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-    .feature-dot.active { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
-    .feature-dot.pending { background: transparent; border: 1px solid var(--muted); }
-
-    /* ── BIBLE FEED ── */
-    .bible-entry {
-      background: rgba(255,255,255,0.02);
-      border-left: 2px solid var(--accent);
-      padding: 14px 16px;
+    .nav a {
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(255,255,255,0.03);
+    }
+    .hero,
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+    .hero { margin-bottom: 18px; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
+    }
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    .eyebrow {
+      color: var(--accent2);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
       margin-bottom: 12px;
-      border-radius: 0 4px 4px 0;
     }
-    .bible-entry-day { font-size: 10px; color: var(--accent); letter-spacing: 2px; margin-bottom: 4px; }
-    .bible-entry-title { font-family: 'Cinzel', serif; font-size: 13px; color: #fff; margin-bottom: 6px; }
-    .bible-entry-text { font-size: 11px; color: var(--muted); line-height: 1.7; }
-
-    /* ── METRIC SPARKLINE ── */
-    .sparkline-container { margin-top: 12px; }
-    .sparkline {
-      width: 100%;
-      height: 40px;
-      opacity: 0.7;
+    h1, h2, p { margin: 0; }
+    h1 {
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 0.95;
+      margin-bottom: 16px;
+      letter-spacing: 0.03em;
     }
-
-    /* ── TICKER ── */
-    .ticker-wrap {
-      overflow: hidden;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 0;
-      margin: 24px 0;
-      background: rgba(0,0,0,0.2);
+    .lead {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.75;
+      max-width: 62ch;
     }
-    .ticker {
+    .cta-row {
       display: flex;
-      gap: 60px;
-      animation: tickerScroll 30s linear infinite;
-      white-space: nowrap;
+      gap: 12px;
+      margin-top: 22px;
+      flex-wrap: wrap;
     }
-    @keyframes tickerScroll {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+      font-weight: 700;
     }
-    .ticker-item { font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
-    .ticker-item span { color: var(--accent2); margin-right: 8px; }
-
-    /* ── FOOTER ── */
+    .button.primary {
+      background: linear-gradient(135deg, rgba(125, 184, 255, 0.22), rgba(120, 255, 214, 0.12));
+      border-color: rgba(120, 190, 255, 0.4);
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .stat {
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .stat-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .stat-sub {
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .section-title {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+    .section-copy {
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+    .split {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+    .list li {
+      border-radius: 16px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      line-height: 1.6;
+    }
+    .badge-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .danger { color: var(--danger); }
     footer {
       text-align: center;
-      padding: 40px 0 20px;
-      border-top: 1px solid var(--border);
-      margin-top: 40px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-top: 24px;
+      font-size: 13px;
     }
-    .footer-text { font-size: 10px; letter-spacing: 2px; color: var(--muted); line-height: 2; }
-    .footer-text a { color: var(--accent); text-decoration: none; }
-
-    /* ── CLOCK ── */
-    #live-clock { color: var(--accent2); }
-
-    /* ── PHASE BADGE ── */
-    .phase-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      background: rgba(77,166,255,0.1);
-      border: 1px solid rgba(77,166,255,0.3);
-      border-radius: 2px;
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-top: 8px;
+    @media (max-width: 980px) {
+      .span-4, .span-5, .span-6, .span-7, .span-8 { grid-column: span 12; }
+      .split, .stat-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-
-<div class="wrapper">
-
-  <!-- HEADER -->
-  <header>
-    <div class="header-line"></div>
-    <div class="crown">✦ The Observatory of Digital Creation ✦</div>
-    <h1>THE WINDOW</h1>
-    <div class="subtitle">Self-Evolving Earth — Observation Deck</div>
-  </header>
-
-  <!-- STATUS BAR -->
-  <div class="status-bar">
-    <div class="status-dot"></div>
-    <div class="status-text">Earth is Alive</div>
-    <div class="status-sep">·</div>
-    <div style="font-size:11px; color: var(--muted)">UTC: <span id="live-clock">--:--:--</span></div>
-    <div class="status-sep">·</div>
-    <div style="font-size:11px; color: var(--muted)">Model: <span style="color:var(--accent)" id="model-display">claude-opus-4-5</span></div>
-    <div class="status-sep">·</div>
-    <div style="font-size:11px; color: var(--muted)">Last Build: <span style="color:var(--accent)" id="last-build">Day 1</span></div>
-  </div>
-
-  <!-- TICKER -->
-  <div class="ticker-wrap">
-    <div class="ticker" id="ticker">
-      <span class="ticker-item"><span>✦</span> Earth is rotating at 0.001 rad/frame</span>
-      <span class="ticker-item"><span>✦</span> 7 Continents confirmed by visual inspection</span>
-      <span class="ticker-item"><span>✦</span> Sahara rendered as yellowish ellipse</span>
-      <span class="ticker-item"><span>✦</span> Axial tilt: 23.5° — physics intact</span>
-      <span class="ticker-item"><span>✦</span> Sun positioned at (5,2,3) — shining normally</span>
-      <span class="ticker-item"><span>✦</span> 800 stars generated — all accounted for</span>
-      <span class="ticker-item"><span>✦</span> THE ARCHITECT shall return at dawn</span>
-      <span class="ticker-item"><span>✦</span> Complexity level: 1/100 — growth is inevitable</span>
-      <!-- duplicated for seamless loop -->
-      <span class="ticker-item"><span>✦</span> Earth is rotating at 0.001 rad/frame</span>
-      <span class="ticker-item"><span>✦</span> 7 Continents confirmed by visual inspection</span>
-      <span class="ticker-item"><span>✦</span> Sahara rendered as yellowish ellipse</span>
-      <span class="ticker-item"><span>✦</span> Axial tilt: 23.5° — physics intact</span>
-      <span class="ticker-item"><span>✦</span> Sun positioned at (5,2,3) — shining normally</span>
-      <span class="ticker-item"><span>✦</span> 800 stars generated — all accounted for</span>
-      <span class="ticker-item"><span>✦</span> THE ARCHITECT shall return at dawn</span>
-      <span class="ticker-item"><span>✦</span> Complexity level: 1/100 — growth is inevitable</span>
+  <div class="wrap">
+    <div class="nav">
+      <div class="eyebrow">THE OBSERVATORY - WEEKLY HERALD EDITION</div>
+      <div class="nav-group">
+        <a href="earth.html">Earth</a>
+        <a href="window.html">Window</a>
+        <a href="DAILY_BRIEFING.md">Briefing</a>
+      </div>
     </div>
-  </div>
 
-  <!-- ROW 1: Key Metrics + Earth Preview -->
-  <div class="grid">
-
-    <!-- Earth Preview -->
-    <a href="earth.html" class="earth-panel" style="grid-column: span 6; text-decoration:none;">
-      <div class="earth-preview-globe"></div>
-      <div class="earth-panel-title">THE EARTH</div>
-      <div class="earth-panel-sub">Click to Observe Directly</div>
-      <div class="open-earth-btn">ENTER SIMULATION →</div>
-    </a>
-
-    <!-- Right column metrics -->
-    <div style="grid-column: span 6; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-      
-      <div class="panel">
-        <div class="panel-label">Day Number</div>
-        <div class="panel-value" id="day-number">1</div>
-        <div class="panel-unit">of infinite days</div>
+    <section class="hero">
+      <div class="panel span-8">
+        <div class="eyebrow">Mission status</div>
+        <h1>SELF-EVOLVING EARTH,<br>UNDER WEEKLY REVIEW.</h1>
+        <p class="lead">
+          THE EARTH remains visually compelling, but the automation behind it has been stalled by a
+          full week of failed scheduled builds. This observatory gives visitors the accurate story:
+          the current live state, the health of the creator, and the concrete route for the week ahead.
+        </p>
+        <div class="cta-row">
+          <a class="button primary" href="earth.html">Launch the Earth</a>
+          <a class="button" href="window.html">Open the weekly dashboard</a>
+        </div>
+        <div class="badge-row">
+          <div class="badge" id="phase-name">Genesis Phase</div>
+          <div class="badge" id="last-update">Loading...</div>
+          <div class="badge">Last 7 scheduled runs: failed</div>
+        </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-label">Complexity</div>
-        <div class="panel-value" id="complexity-val">1</div>
-        <div class="panel-unit">/ 100 possible</div>
-        <div class="progress-container">
-          <div class="progress-bar">
-            <div class="progress-fill" id="complexity-bar" style="width: 1%"></div>
+      <div class="panel span-4">
+        <div class="eyebrow">Current canonical state</div>
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-label">Day</div>
+            <div class="stat-value" id="metric-day">-</div>
+            <div class="stat-sub">Last successful creation day.</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Complexity</div>
+            <div class="stat-value" id="metric-complexity">-</div>
+            <div class="stat-sub" id="progress-label">- / 100</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Features</div>
+            <div class="stat-value" id="metric-features">-</div>
+            <div class="stat-sub">Capabilities currently tracked.</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Lines of code</div>
+            <div class="stat-value" id="metric-loc">-</div>
+            <div class="stat-sub">Current code surface.</div>
           </div>
         </div>
       </div>
+    </section>
 
-      <div class="panel" style="grid-column: span 2;">
-        <div class="panel-label">Current Phase</div>
-        <div class="panel-value" style="font-size:20px; font-family: 'Cinzel', serif;" id="phase-name">Genesis</div>
-        <div class="phase-badge" id="phase-days">Days 1–10</div>
-        <div style="font-size:11px; color:var(--muted); margin-top:10px;" id="phase-desc">
-          In the beginning, the Earth was a sphere without form. The Architect shapes it from the void, adding continents, oceans, and rotation. This phase ends when the atmosphere breathes its first breath.
+    <section class="grid" style="margin-bottom:18px;">
+      <div class="panel span-7">
+        <div class="eyebrow">Weekly verdict</div>
+        <h2 class="section-title">What changed, what broke, what matters now</h2>
+        <p class="section-copy">
+          Across the last recorded creation arc, the Earth gained atmosphere, clouds, a Moon,
+          weather hints, and seasonal color motion. Across the last seven scheduled calendar runs,
+          it gained nothing, because every scheduled run failed.
+        </p>
+        <div class="split">
+          <ul class="list">
+            <li><strong>Weekly scheduled gain:</strong> Complexity stayed frozen at <strong>8 -&gt; 8</strong>.</li>
+            <li><strong>Best feature already present:</strong> the Moon orbit and layered atmosphere still provide the strongest visible leap.</li>
+            <li><strong>Current phase:</strong> Genesis still fits the state, but the operational pace is unhealthy.</li>
+          </ul>
+          <ul class="list">
+            <li><strong class="danger">7 scheduled failures in a row.</strong> The Earth is frozen at Day 9 until the builder recovers.</li>
+            <li><strong>Main blocker:</strong> one malformed model response was followed by six straight credit-limit failures.</li>
+            <li><strong>Primary objective this week:</strong> restore reliable incremental evolution before chasing larger scope.</li>
+          </ul>
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-label">Features Active</div>
-        <div class="panel-value" id="features-count">3</div>
-        <div class="panel-unit">capabilities unlocked</div>
+      <div class="panel span-5">
+        <div class="eyebrow">This week ahead</div>
+        <h2 class="section-title">The Herald's route</h2>
+        <ul class="list">
+          <li><strong>Day 10:</strong> animate the cloud texture for visible atmospheric motion.</li>
+          <li><strong>Day 11:</strong> improve oceans with responsive glint and water-light separation.</li>
+          <li><strong>Day 12:</strong> sharpen the twilight rim at the terminator.</li>
+          <li><strong>Day 13-16:</strong> bridge into aurora, weather, earthquakes, and ISS telemetry.</li>
+        </ul>
       </div>
+    </section>
 
-      <div class="panel">
-        <div class="panel-label">Lines of Code</div>
-        <div class="panel-value" id="loc-count">280</div>
-        <div class="panel-unit">sacred lines written</div>
+    <section class="grid">
+      <div class="panel span-6">
+        <div class="eyebrow">Current capabilities</div>
+        <h2 class="section-title">What the Earth knows today</h2>
+        <ul class="list" id="feature-list">
+          <li>Loading state...</li>
+        </ul>
       </div>
+      <div class="panel span-6">
+        <div class="eyebrow">Latest creation log</div>
+        <h2 class="section-title">Recent changelog</h2>
+        <ul class="list" id="changelog-list">
+          <li>Loading state...</li>
+        </ul>
+      </div>
+    </section>
 
-    </div>
+    <footer>
+      THE OBSERVATORY is the visitor-facing summary. THE WINDOW carries the full weekly dashboard.<br>
+      The canonical state still comes from <code>earth/state.json</code>.
+    </footer>
   </div>
 
-  <!-- ROW 2: Features + Bible Feed -->
-  <div class="grid" style="margin-top: 16px;">
+  <script>
+  (function () {
+    fetch('earth/state.json').then(function (response) {
+      return response.json();
+    }).then(function (state) {
+      const day = state.earth?.day ?? state.day ?? 0;
+      const complexity = state.earth?.complexity_level ?? state.complexityLevel ?? 0;
+      const features = Array.isArray(state.features) ? state.features : [];
+      const featureCount = features.length || state.totalFeatures || 0;
+      const phase = state.phase || 'Genesis';
+      const lastUpdated = state.earth?.last_updated || state.lastUpdate || state.date || '';
+      const loc = state.linesOfCode || 0;
 
-    <!-- Active Features -->
-    <div class="panel col-4">
-      <div class="panel-label">✓ Active Features</div>
-      <ul class="feature-list" id="feature-list-active">
-        <li class="active"><div class="feature-dot active"></div>Sphere Geometry</li>
-        <li class="active"><div class="feature-dot active"></div>Procedural Texture</li>
-        <li class="active"><div class="feature-dot active"></div>Axial Rotation</li>
-        <li class="active"><div class="feature-dot active"></div>Star Field</li>
-        <li class="active"><div class="feature-dot active"></div>Lighting (Sun)</li>
-        <li class="active"><div class="feature-dot active"></div>Axial Tilt 23.5°</li>
-        <li class="active"><div class="feature-dot active"></div>Camera Drift</li>
-      </ul>
-    </div>
+      document.getElementById('phase-name').textContent = phase + ' Phase';
+      document.getElementById('last-update').textContent = lastUpdated ? ('Last update: ' + new Date(lastUpdated).toLocaleDateString()) : 'Last update unknown';
+      document.getElementById('metric-day').textContent = day;
+      document.getElementById('metric-complexity').textContent = complexity;
+      document.getElementById('metric-features').textContent = featureCount;
+      document.getElementById('metric-loc').textContent = loc ? String(loc) : '-';
+      document.getElementById('progress-label').textContent = complexity + ' / 100';
 
-    <!-- Pending Features -->
-    <div class="panel col-4">
-      <div class="panel-label">◌ Awaiting Creation</div>
-      <ul class="feature-list" id="feature-list-pending">
-        <li><div class="feature-dot pending"></div>Atmosphere</li>
-        <li><div class="feature-dot pending"></div>Cloud Layer</li>
-        <li><div class="feature-dot pending"></div>Day/Night Cycle</li>
-        <li><div class="feature-dot pending"></div>City Lights</li>
-        <li><div class="feature-dot pending"></div>Weather Systems</li>
-        <li><div class="feature-dot pending"></div>Ocean Currents</li>
-        <li><div class="feature-dot pending"></div>Aurora Borealis</li>
-        <li><div class="feature-dot pending"></div>Real-Time Data</li>
-      </ul>
-    </div>
+      document.getElementById('feature-list').innerHTML = (features.length ? features.slice(0, 10) : ['No features recorded yet.']).map(function (feature) {
+        return '<li>' + feature + '</li>';
+      }).join('');
 
-    <!-- Bible Feed -->
-    <div class="panel col-4">
-      <div class="panel-label">📖 The Chronicle</div>
-      <div id="bible-feed">
-        <div class="bible-entry">
-          <div class="bible-entry-day">DAY 0 — THE ZEROTH DAY</div>
-          <div class="bible-entry-title">Before the First Render</div>
-          <div class="bible-entry-text">The project was initialized. Files were created. The void was structured. THE ARCHITECT was given its instructions and deemed them "extremely its vibe."</div>
-        </div>
-        <div class="bible-entry">
-          <div class="bible-entry-day">DAY 1 — GENESIS</div>
-          <div class="bible-entry-title">The First Rendering</div>
-          <div class="bible-entry-text">A sphere was drawn. Continents were painted. The Sahara became a yellowish ellipse. Rotation was granted. The Earth was. It was enough.</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ROW 3: Metrics Over Time (Complexity Growth Chart) -->
-  <div class="grid" style="margin-top: 16px;">
-    <div class="panel col-12">
-      <div class="panel-label">Complexity Growth — All Days</div>
-      <canvas id="growth-chart" height="80"></canvas>
-      <div style="display: flex; gap: 24px; margin-top: 12px; flex-wrap: wrap;">
-        <div style="font-size:11px; color:var(--muted)">
-          <span style="color:var(--accent)">▬</span> Complexity Level
-        </div>
-        <div style="font-size:11px; color:var(--muted)">
-          <span style="color:var(--accent2)">▬</span> Features Count
-        </div>
-        <div style="font-size:11px; color:var(--muted);">
-          Each point = 1 day of creation
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ROW 4: Prophecy Progress -->
-  <div class="grid" style="margin-top: 16px;">
-    <div class="panel col-12">
-      <div class="panel-label">✦ The Prophecies — Progress Towards Destiny</div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 16px;">
-        
-        <div id="prophecies-container">
-          <!-- Prophecies rendered by JS -->
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-text">
-      THE WINDOW · Self-Evolving Earth Observatory<br>
-      Built daily by THE ARCHITECT · Powered by Anthropic Claude<br>
-      <a href="earth.html" style="color:var(--accent)">🌍 Earth</a> &nbsp;·&nbsp; <a href="window.html" style="color:var(--accent)">Window</a><br>
-      <span style="color:var(--muted); font-size:9px;">
-        "The Earth is patient. The models improve. Creation continues."
-      </span>
-    </div>
-  </footer>
-
-</div>
-
-<script>
-// ═══════════════════════════════════════════════════════════
-// THE WINDOW — Observatory Dashboard
-// "Through this glass, the mortals watch the world grow."
-// ═══════════════════════════════════════════════════════════
-
-// --- Defaults for fields not in state.json ---
-const DEFAULTS = {
-  phase_days: "Days 1–10",
-  phase_desc: "In the beginning, the Earth was a sphere without form. THE ARCHITECT shapes it from the void, adding continents, oceans, and rotation. This phase ends when the atmosphere breathes its first breath.",
-  features_pending: [
-    "Atmosphere", "Cloud Layer", "Day/Night Cycle", "City Lights",
-    "Weather Systems", "Ocean Currents", "Aurora Borealis", "Real-Time Data",
-    "Climate Simulation", "ISS Tracking", "CO₂ Counter", "Tectonic Plates"
-  ],
-  prophecies: [
-    { text: "Atmosphere shall shimmer", eta: "Days ~20-30", done: false },
-    { text: "Clouds shall drift", eta: "Days ~15-20", done: false },
-    { text: "Night side shall glow with cities", eta: "Days ~30-40", done: false },
-    { text: "Storms shall rage", eta: "Days ~40-50", done: false },
-    { text: "ISS tracked in real-time", eta: "Days ~60-70", done: false },
-    { text: "CO₂ ppm counted (and it shall be sad)", eta: "Days ~65-80", done: false },
-    { text: "Tectonic plates shall drift", eta: "Days ~80-90", done: false },
-    { text: "Earth simulates its own climate", eta: "Days ~90-100+", done: false },
-  ],
-};
-
-function transformState(raw) {
-  const history = (raw.changelog || []).map(c => ({
-    day: c.day,
-    complexity: raw.complexityLevel ?? raw.day,
-    features: raw.totalFeatures ?? raw.features?.length ?? 0
-  }));
-  if (history.length === 0 && raw.day) {
-    history.push({
-      day: raw.day,
-      complexity: raw.complexityLevel ?? 1,
-      features: raw.totalFeatures ?? (raw.features?.length ?? 0)
+      const changes = (state.changelog || []).slice().reverse().slice(0, 5);
+      document.getElementById('changelog-list').innerHTML = changes.length ? changes.map(function (entry) {
+        return '<li><strong>Day ' + entry.day + '</strong><div style="color:var(--muted); margin-top:6px;">' + (entry.changes || []).join('<br>') + '</div></li>';
+      }).join('') : '<li>No changelog found.</li>';
+    }).catch(function () {
+      document.getElementById('feature-list').innerHTML = '<li>State unavailable.</li>';
+      document.getElementById('changelog-list').innerHTML = '<li>State unavailable.</li>';
+      document.getElementById('last-update').textContent = 'State unavailable';
     });
-  }
-  const bible_entries = (raw.changelog || []).map(c => ({
-    day: `DAY ${c.day} — ${(raw.phase || "Genesis").toUpperCase()}`,
-    title: c.changes?.[0] || "Update",
-    text: (c.changes || []).join(" ")
-  }));
-  if (bible_entries.length === 0) {
-    bible_entries.push({
-      day: `DAY ${raw.day} — GENESIS`,
-      title: "The First Rendering",
-      text: "The Earth was. It was enough."
-    });
-  }
-  const model = raw.earth?.model_used?.replace("anthropic/", "") || "claude-opus-4-5";
-  const lastBuild = raw.date ? `Day ${raw.day}` : (raw.lastUpdate ? new Date(raw.lastUpdate).toLocaleDateString() : `Day ${raw.day}`);
-  return {
-    day: raw.day ?? 1,
-    complexity: raw.complexityLevel ?? 1,
-    phase: raw.phase ?? "Genesis",
-    phase_days: DEFAULTS.phase_days,
-    phase_desc: DEFAULTS.phase_desc,
-    features_count: raw.totalFeatures ?? (raw.features?.length ?? 0),
-    loc: raw.linesOfCode ?? 0,
-    model,
-    last_build: lastBuild,
-    history,
-    features_active: raw.features ?? [],
-    features_pending: DEFAULTS.features_pending,
-    prophecies: DEFAULTS.prophecies,
-    bible_entries
-  };
-}
-
-// --- Clock ---
-function updateClock() {
-  const now = new Date();
-  document.getElementById('live-clock').textContent =
-    now.toUTCString().split(' ')[4];
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-// --- Populate from state ---
-function populateFromState(s) {
-  document.getElementById('day-number').textContent = s.day;
-  document.getElementById('complexity-val').textContent = s.complexity;
-  document.getElementById('complexity-bar').style.width = s.complexity + '%';
-  document.getElementById('phase-name').textContent = s.phase;
-  document.getElementById('phase-days').textContent = s.phase_days;
-  document.getElementById('phase-desc').textContent = s.phase_desc;
-  document.getElementById('features-count').textContent = s.features_count;
-  document.getElementById('loc-count').textContent = s.loc.toLocaleString();
-  document.getElementById('model-display').textContent = s.model;
-  document.getElementById('last-build').textContent = s.last_build;
-
-  // Features
-  const activeList = document.getElementById('feature-list-active');
-  activeList.innerHTML = s.features_active.map(f =>
-    `<li class="active"><div class="feature-dot active"></div>${f}</li>`
-  ).join('');
-  
-  const pendingList = document.getElementById('feature-list-pending');
-  pendingList.innerHTML = s.features_pending.map(f =>
-    `<li><div class="feature-dot pending"></div>${f}</li>`
-  ).join('');
-
-  // Bible
-  const bibleFeed = document.getElementById('bible-feed');
-  bibleFeed.innerHTML = [...s.bible_entries].reverse().slice(0, 4).map(e =>
-    `<div class="bible-entry">
-      <div class="bible-entry-day">${e.day}</div>
-      <div class="bible-entry-title">${e.title}</div>
-      <div class="bible-entry-text">${e.text}</div>
-    </div>`
-  ).join('');
-
-  // Prophecies
-  const propContainer = document.getElementById('prophecies-container');
-  propContainer.style.display = 'grid';
-  propContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(240px, 1fr))';
-  propContainer.style.gap = '12px';
-  propContainer.innerHTML = s.prophecies.map(p => `
-    <div style="padding:12px 14px; background: rgba(255,255,255,0.02); border-radius:4px; border-left: 2px solid ${p.done ? 'var(--accent2)' : 'var(--muted)'};">
-      <div style="font-size:10px; color:${p.done ? 'var(--accent2)' : 'var(--muted)'}; letter-spacing:2px; margin-bottom:4px;">
-        ${p.done ? '✓ FULFILLED' : '◌ ' + p.eta}
-      </div>
-      <div style="font-size:12px; color:${p.done ? '#fff' : 'var(--muted)'};">${p.text}</div>
-    </div>
-  `).join('');
-
-  // Chart
-  drawGrowthChart(s.history);
-}
-
-// --- Growth Chart (canvas) ---
-function drawGrowthChart(history) {
-  const canvas = document.getElementById('growth-chart');
-  canvas.width = canvas.parentElement.offsetWidth;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
-
-  if (history.length < 2) {
-    // Single point — just draw a dot
-    ctx.fillStyle = 'rgba(77,166,255,0.5)';
-    ctx.beginPath();
-    ctx.arc(W * 0.1, H * 0.9, 4, 0, Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(74,96,128,0.5)';
-    ctx.font = '10px Space Mono, monospace';
-    ctx.fillText('Chart grows as days accumulate...', W/2 - 100, H/2);
-    return;
-  }
-
-  const maxC = Math.max(...history.map(h => h.complexity), 10);
-  const maxF = Math.max(...history.map(h => h.features), 10);
-  const pad = 20;
-
-  function xPos(i) { return pad + (i / (history.length - 1)) * (W - pad*2); }
-  function yPosC(v) { return H - pad - (v / maxC) * (H - pad*2); }
-  function yPosF(v) { return H - pad - (v / maxF) * (H - pad*2); }
-
-  // Complexity line
-  ctx.beginPath();
-  ctx.strokeStyle = '#4da6ff';
-  ctx.lineWidth = 2;
-  history.forEach((h, i) => {
-    if (i === 0) ctx.moveTo(xPos(i), yPosC(h.complexity));
-    else ctx.lineTo(xPos(i), yPosC(h.complexity));
-  });
-  ctx.stroke();
-
-  // Features line
-  ctx.beginPath();
-  ctx.strokeStyle = '#00ffcc';
-  ctx.lineWidth = 2;
-  history.forEach((h, i) => {
-    if (i === 0) ctx.moveTo(xPos(i), yPosF(h.features));
-    else ctx.lineTo(xPos(i), yPosF(h.features));
-  });
-  ctx.stroke();
-
-  // Dots
-  history.forEach((h, i) => {
-    ctx.beginPath();
-    ctx.fillStyle = '#4da6ff';
-    ctx.arc(xPos(i), yPosC(h.complexity), 3, 0, Math.PI*2);
-    ctx.fill();
-  });
-}
-
-// --- Ticker (dynamically grows with facts) ---
-// The ticker can be extended by state.ticker_facts in future versions
-
-// --- Init ---
-let loadedState = null;
-fetch('earth/state.json')
-  .then(r => r.json())
-  .then(raw => {
-    loadedState = transformState(raw);
-    populateFromState(loadedState);
-  })
-  .catch(() => {
-    // Fallback when state.json missing (e.g. file:// or network error)
-    loadedState = transformState({
-      day: 1,
-      complexityLevel: 1,
-      totalFeatures: 0,
-      linesOfCode: 0,
-      features: [],
-      phase: "Genesis",
-      changelog: [{ day: 1, changes: ["Loading..."] }]
-    });
-    populateFromState(loadedState);
-  });
-
-window.addEventListener('resize', () => {
-  if (loadedState) drawGrowthChart(loadedState.history);
-});
-
-console.log(`
-╔══════════════════════════════════════════╗
-║         THE WINDOW — Observatory         ║
-║   "All things are visible from here."    ║
-╚══════════════════════════════════════════╝
-`);
-</script>
+  })();
+  </script>
 </body>
 </html>
