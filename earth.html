@@ -99,7 +99,7 @@
 
     <script>
         let scene, camera, renderer;
-        let earth, stars, atmosphere, clouds, moon, sun, windVectors;
+        let earth, stars, atmosphere, clouds, moon, sun, windVectors, tectonicPlates, oceanCurrents;
         let earthMaterial, atmosphereMaterial;
         let time = 0;
         let isDragging = false;
@@ -182,7 +182,9 @@
             createMoon();
             createSun();
             createLights();
-            createWindVectors(); // New function call for wind visualization
+            createWindVectors();
+            createTectonicPlates();
+            createOceanCurrents();
 
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('mousedown', onMouseDown);
@@ -227,7 +229,7 @@
             scene.add(sun);
 
             const glowGeometry = new THREE.SphereGeometry(0.38, 32, 32);
-            const sunGlow = new THREE.Mesh(glowGeometry, new THREE.MeshBasicMaterial({
+            const sunGlow = new THREE.Mesh(sunGeometry, new THREE.MeshBasicMaterial({
                 color: 0xffdd88,
                 transparent: true,
                 opacity: 0.18,
@@ -357,6 +359,30 @@
             earth.add(atmosphere);
         }
 
+        function createTectonicPlates() {
+            const plateGeometry = new THREE.SphereGeometry(1, 64, 64);
+            const plateMaterial = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.2,
+                depthWrite: false
+            });
+            tectonicPlates = new THREE.Mesh(plateGeometry, plateMaterial);
+            tectonicPlates.rotation.x = Math.PI / 6; // Tilting plates for effect
+            earth.add(tectonicPlates);
+        }
+
+        function createOceanCurrents() {
+            const currentMaterial = new THREE.LineBasicMaterial({ color: 0x00ccff, linewidth: 1 });
+            const currentGeometry = new THREE.Geometry();
+            for (let i = 0; i < 30; i++) {
+                const angle = (i / 30) * Math.PI * 2;
+                currentGeometry.vertices.push(new THREE.Vector3(Math.sin(angle) * 1.02, Math.cos(angle) * 1.02, 0));
+            }
+            oceanCurrents = new THREE.Line(currentGeometry, currentMaterial);
+            earth.add(oceanCurrents);
+        }
+
         function createWindVectors() {
             const windMaterial = new THREE.LineBasicMaterial({ color: 0x00ffcc, linewidth: 2 });
             const windGeometry = new THREE.Geometry();
@@ -439,6 +465,14 @@
 
             if (windVectors) {
                 windVectors.rotation.x += windSpeed; // Update wind direction effect
+            }
+
+            if (tectonicPlates) {
+                tectonicPlates.rotation.y += 0.0002; // Rotate tectonic plates slowly for effect
+            }
+
+            if (oceanCurrents) {
+                oceanCurrents.rotation.z += 0.001; // Animate ocean currents subtly
             }
 
             renderer.render(scene, camera);
