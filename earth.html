@@ -434,7 +434,7 @@
                 ctx.ellipse(cloud.x, cloud.y, cloud.size, cloud.size * 0.52, 0, 0, Math.PI * 2);
                 ctx.fill();
             });
-            ctx.globalAlpha = 1.0;
+            ctx.globalAlpha = 1.0; // Reset global alpha
         }
 
         function createLights() {
