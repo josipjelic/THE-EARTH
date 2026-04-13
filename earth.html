@@ -99,7 +99,7 @@
 
     <script>
         let scene, camera, renderer;
-        let earth, stars, atmosphere, clouds, moon, sun, windVectors, tectonicPlates, oceanCurrents;
+        let earth, stars, atmosphere, clouds, moon, sun, windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation;
         let earthMaterial, atmosphereMaterial;
         let time = 0;
         let isDragging = false;
@@ -185,6 +185,8 @@
             createWindVectors();
             createTectonicPlates();
             createOceanCurrents();
+            createThunderstorms(); // New function for thunderstorms
+            createPrecipitation(); // New function for precipitation simulation
 
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('mousedown', onMouseDown);
@@ -389,6 +391,40 @@
             }
             oceanCurrents = new THREE.Line(currentGeometry, currentMaterial);
             earth.add(oceanCurrents);
+
+            // Varying speeds and directions for ocean currents
+            oceanCurrents.rotation.z += (Math.sin(time) * 0.1);
+        }
+
+        function createThunderstorms() {
+            // Create random positions for thunderstorms
+            for (let i = 0; i < 5; i++) {
+                const thunderGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+                const thunderMaterial = new THREE.MeshBasicMaterial({ color: 0xffff33 });
+                const thunder = new THREE.Mesh(thunderGeometry, thunderMaterial);
+                thunder.position.set(
+                    (Math.random() - 0.5) * 1.5,
+                    (Math.random() - 0.5) * 1.5,
+                    (Math.random() - 0.5) * 1.5
+                );
+                scene.add(thunder);
+                thunderstorms.push(thunder);
+            }
+        }
+
+        function createPrecipitation() {
+            // Simulate precipitation with falling particles
+            // Implement particle system for rain or snow
+            const rainGeometry = new THREE.Geometry();
+            for (let i = 0; i < 1000; i++) {
+                const x = (Math.random() - 0.5) * 2;
+                const y = (Math.random() - 0.5) * 2;
+                const z = (Math.random() - 0.5) * 2;
+                rainGeometry.vertices.push(new THREE.Vector3(x, y, z));
+            }
+            const rainMaterial = new THREE.PointsMaterial({ color: 0xaaaaaa, size: 0.05 });
+            precipitation = new THREE.Points(rainGeometry, rainMaterial);
+            scene.add(precipitation);
         }
 
         function createWindVectors() {
@@ -482,6 +518,11 @@
             if (oceanCurrents) {
                 oceanCurrents.rotation.z += 0.001; // Animate ocean currents subtly
             }
+
+            // Animate thunderstorms and precipitation
+            thunderstorms.forEach(thunder => {
+                thunder.rotation.z += Math.sin(time) * 0.1; // Thunderstorm rotation for effect
+            });
 
             renderer.render(scene, camera);
         }
