@@ -1,9 +1,9 @@
 {
-  "day": 25,
-  "date": "2026-04-11",
-  "complexityLevel": 25,
-  "totalFeatures": 42,
-  "linesOfCode": 1675,
+  "day": 26,
+  "date": "2026-04-17",
+  "complexityLevel": 26,
+  "totalFeatures": 45,
+  "linesOfCode": 1710,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -44,7 +44,8 @@
     "Dynamic wildlife simulation across biomes",
     "Interactive weather events: thunderstorms and snow",
     "Enhanced ocean currents visualization",
-    "Detailed precipitation mapping across regions"
+    "Detailed precipitation mapping across regions",
+    "Improved precipitation simulation with active particles"
   ],
   "lighting": {
     "ambient": true,
@@ -61,8 +62,14 @@
     "distance": 3
   },
   "phase": "Genesis",
-  "lastUpdate": "2026-04-11T00:00:00Z",
+  "lastUpdate": "2026-04-17T00:00:00Z",
   "changelog": [
+    {
+      "day": 26,
+      "changes": [
+        "Improved precipitation simulation with active particles"
+      ]
+    },
     {
       "day": 25,
       "changes": [
@@ -140,9 +147,9 @@
     }
   ],
   "earth": {
-    "day": 25,
-    "complexity_level": 25,
+    "day": 26,
+    "complexity_level": 26,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-04-15T09:12:39.461Z"
+    "last_updated": "2026-04-17T09:15:38.145Z"
   }
 }

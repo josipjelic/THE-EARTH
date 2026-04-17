@@ -398,6 +398,7 @@
 
         function createThunderstorms() {
             // Create random positions for thunderstorms
+            thunderstorms = []; // Initialize the thunderstorms array
             for (let i = 0; i < 5; i++) {
                 const thunderGeometry = new THREE.SphereGeometry(0.1, 8, 8);
                 const thunderMaterial = new THREE.MeshBasicMaterial({ color: 0xffff33 });
@@ -414,16 +415,17 @@
 
         function createPrecipitation() {
             // Simulate precipitation with falling particles
-            // Implement particle system for rain or snow
-            const rainGeometry = new THREE.Geometry();
-            for (let i = 0; i < 1000; i++) {
-                const x = (Math.random() - 0.5) * 2;
-                const y = (Math.random() - 0.5) * 2;
-                const z = (Math.random() - 0.5) * 2;
-                rainGeometry.vertices.push(new THREE.Vector3(x, y, z));
-            }
+            precipitation = new THREE.Group(); // Create a group that will house the precipitation particles
             const rainMaterial = new THREE.PointsMaterial({ color: 0xaaaaaa, size: 0.05 });
-            precipitation = new THREE.Points(rainGeometry, rainMaterial);
+            
+            for (let i = 0; i < 1000; i++) {
+                const particle = new THREE.Vector3(
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 2
+                );
+                precipitation.add(new THREE.Points(new THREE.Geometry().setFromPoints([particle]), rainMaterial)); // Create points for each particle
+            }
             scene.add(precipitation);
         }
 
@@ -523,6 +525,14 @@
             thunderstorms.forEach(thunder => {
                 thunder.rotation.z += Math.sin(time) * 0.1; // Thunderstorm rotation for effect
             });
+            if (precipitation) {
+                precipitation.children.forEach((particle, index) => {
+                    particle.position.y -= 0.02; // Simulate falling effect
+                    if (particle.position.y < -1.5) {
+                        particle.position.y = 1.5; // Reset position if too low
+                    }
+                });
+            }
 
             renderer.render(scene, camera);
         }
