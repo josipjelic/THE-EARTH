@@ -99,7 +99,7 @@
 
     <script>
         let scene, camera, renderer;
-        let earth, stars, atmosphere, clouds, moon, sun, windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation;
+        let earth, stars, atmosphere, clouds, moon, sun, windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation, temperatureIndicators;
         let earthMaterial, atmosphereMaterial;
         let time = 0;
         let isDragging = false;
@@ -187,6 +187,7 @@
             createOceanCurrents();
             createThunderstorms(); // New function for thunderstorms
             createPrecipitation(); // New function for precipitation simulation
+            createTemperatureIndicators(); // New function to visualize temperature
 
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('mousedown', onMouseDown);
@@ -429,6 +430,28 @@
             scene.add(precipitation);
         }
 
+        function createTemperatureIndicators() {
+            // Create temperature indicators around the globe
+            temperatureIndicators = new THREE.Group(); // Group for temperature visualizations
+            
+            for (let lat = -90; lat <= 90; lat += 15) { // Create indicators every 15 degrees
+                for (let long = -180; long < 180; long += 15) {
+                    const tempValue = Math.sin(lat * (Math.PI / 180)) * 30 + 50; // Simulated temperature
+                    const indicatorGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+                    const indicatorMaterial = new THREE.MeshBasicMaterial({ color: `hsl(${(tempValue / 90) * 240}, 100%, 50%)` });
+                    const indicator = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
+                    const radius = 1.1; // Radius of the Earth
+                    indicator.position.set(
+                        radius * Math.cos(lat * (Math.PI / 180)) * Math.cos(long * (Math.PI / 180)),
+                        radius * Math.sin(lat * (Math.PI / 180)),
+                        radius * Math.cos(lat * (Math.PI / 180)) * Math.sin(long * (Math.PI / 180))
+                    );
+                    temperatureIndicators.add(indicator);
+                }
+            }
+            earth.add(temperatureIndicators);
+        }
+
         function createWindVectors() {
             const windMaterial = new THREE.LineBasicMaterial({ color: 0x00ffcc, linewidth: 2 });
             const windGeometry = new THREE.Geometry();
@@ -521,7 +544,7 @@
                 oceanCurrents.rotation.z += 0.001; // Animate ocean currents subtly
             }
 
-            // Animate thunderstorms and precipitation
+            // Animate thunderstorms, precipitation and temperature indicators
             thunderstorms.forEach(thunder => {
                 thunder.rotation.z += Math.sin(time) * 0.1; // Thunderstorm rotation for effect
             });
@@ -531,6 +554,11 @@
                     if (particle.position.y < -1.5) {
                         particle.position.y = 1.5; // Reset position if too low
                     }
+                });
+            }
+            if (temperatureIndicators) {
+                temperatureIndicators.children.forEach((indicator) => {
+                    indicator.rotation.y += 0.01; // Rotate the temperature indicators subtly
                 });
             }
 
