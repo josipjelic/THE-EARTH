@@ -549,7 +549,7 @@
                 thunder.rotation.z += Math.sin(time) * 0.1; // Thunderstorm rotation for effect
             });
             if (precipitation) {
-                precipitation.children.forEach((particle, index) => {
+                precipitation.children.forEach((particle) => {
                     particle.position.y -= 0.02; // Simulate falling effect
                     if (particle.position.y < -1.5) {
                         particle.position.y = 1.5; // Reset position if too low
