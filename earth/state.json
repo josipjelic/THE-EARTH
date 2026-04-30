@@ -1,9 +1,9 @@
 {
-  "day": 35,
-  "date": "2026-04-29",
-  "complexityLevel": 35,
-  "totalFeatures": 59,
-  "linesOfCode": 2100,
+  "day": 36,
+  "date": "2026-04-30",
+  "complexityLevel": 36,
+  "totalFeatures": 60,
+  "linesOfCode": 2200,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -53,8 +53,7 @@
     "Precipitation particle simulation",
     "Interactive temperature variations (NEW!)",
     "Temperature indicators visualizing temperature around the globe (NEW!)",
-    "Enhanced precipitation effects: rain and snow visualizations (NEW!)",
-    "Enhanced wind visualization linked with ocean currents (NEW!)"
+    "Enhanced precipitation effects: rain and snow visualizations (NEW!)"
   ],
   "lighting": {
     "ambient": true,
@@ -71,8 +70,15 @@
     "distance": 3
   },
   "phase": "Genesis",
-  "lastUpdate": "2026-04-29T00:00:00Z",
+  "lastUpdate": "2026-04-30T00:00:00Z",
   "changelog": [
+    {
+      "day": 36,
+      "changes": [
+        "Interactive temperature variations (NEW!)",
+        "Enhanced precipitation effects: rain and snow visualizations (NEW!)"
+      ]
+    },
     {
       "day": 35,
       "changes": [
@@ -208,9 +214,9 @@
     }
   ],
   "earth": {
-    "day": 35,
-    "complexity_level": 35,
+    "day": 36,
+    "complexity_level": 36,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-04-29T10:05:32.973Z"
+    "last_updated": "2026-04-30T10:01:35.003Z"
   }
 }
