@@ -1,9 +1,9 @@
 {
-  "day": 59,
-  "date": "2026-05-24",
-  "complexityLevel": 59,
-  "totalFeatures": 113,
-  "linesOfCode": 4290,
+  "day": 60,
+  "date": "2026-05-25",
+  "complexityLevel": 60,
+  "totalFeatures": 116,
+  "linesOfCode": 4390,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -75,7 +75,10 @@
     "Dynamic species population simulation",
     "Cloud formation processes",
     "Impact of temperature shifts on animal behavior",
-    "Global air quality visualization"
+    "Global air quality visualization",
+    "Air pollution heat map across continents",
+    "Particle visualization for atmospheric pollutants",
+    "Ecosystem sensitivity indicators to temperature changes"
   ],
   "lighting": {
     "ambient": true,
@@ -91,9 +94,17 @@
     "fov": 45,
     "distance": 3
   },
-  "phase": "Genesis",
-  "lastUpdate": "2026-05-24T00:00:00Z",
+  "phase": "Living World",
+  "lastUpdate": "2026-05-25T00:00:00Z",
   "changelog": [
+    {
+      "day": 60,
+      "changes": [
+        "New feature: Air pollution heat map visualization (NEW!)",
+        "Added particle visualization for atmospheric pollutants (NEW!)",
+        "Introduced ecosystem sensitivity indicators to temperature shifts (NEW!)"
+      ]
+    },
     {
       "day": 59,
       "changes": [
@@ -101,26 +112,12 @@
         "Added impact of temperature shifts on animal behavior (NEW!)",
         "Introduced global air quality visualization (NEW!)"
       ]
-    },
-    {
-      "day": 58,
-      "changes": [
-        "New feature: Ecosystem interaction visualization (NEW!)",
-        "Added symbiotic relationship mapping (NEW!)",
-        "Introduced dynamic species population simulation (NEW!)"
-      ]
-    },
-    {
-      "day": 57,
-      "changes": [
-        "New feature: Weather pattern simulation across climate zones (NEW!)"
-      ]
     }
   ],
   "earth": {
-    "day": 59,
-    "complexity_level": 59,
-    "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-05-24T09:51:21.810Z"
+    "day": 60,
+    "complexity_level": 60,
+    "model_used": "anthropic/claude-3.5-haiku",
+    "last_updated": "2026-05-25T11:51:28.987Z"
   }
 }
