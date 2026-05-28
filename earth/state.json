@@ -1,8 +1,8 @@
 {
-  "day": 60,
-  "date": "2026-05-25",
-  "complexityLevel": 60,
-  "totalFeatures": 116,
+  "day": 61,
+  "date": "2026-05-28",
+  "complexityLevel": 61,
+  "totalFeatures": 119,
   "linesOfCode": 4390,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
@@ -78,7 +78,10 @@
     "Global air quality visualization",
     "Air pollution heat map across continents",
     "Particle visualization for atmospheric pollutants",
-    "Ecosystem sensitivity indicators to temperature changes"
+    "Ecosystem sensitivity indicators to temperature changes",
+    "Live tracking of species migration patterns (NEW!)",
+    "Real-time CO₂ levels display (NEW!)",
+    "Dynamic weather radar for ongoing storm systems (NEW!)"
   ],
   "lighting": {
     "ambient": true,
@@ -94,9 +97,17 @@
     "fov": 45,
     "distance": 3
   },
-  "phase": "Living World",
-  "lastUpdate": "2026-05-25T00:00:00Z",
+  "phase": "Age of Data",
+  "lastUpdate": "2026-05-28T00:00:00Z",
   "changelog": [
+    {
+      "day": 61,
+      "changes": [
+        "New feature: Live tracking of species migration patterns (NEW!)",
+        "New feature: Real-time CO₂ levels display (NEW!)",
+        "New feature: Dynamic weather radar for ongoing storm systems (NEW!)"
+      ]
+    },
     {
       "day": 60,
       "changes": [
@@ -115,9 +126,9 @@
     }
   ],
   "earth": {
-    "day": 60,
-    "complexity_level": 60,
-    "model_used": "anthropic/claude-3.5-haiku",
-    "last_updated": "2026-05-25T11:51:28.987Z"
+    "day": 61,
+    "complexity_level": 61,
+    "model_used": "openai/gpt-4o-mini",
+    "last_updated": "2026-05-28T11:32:41.605Z"
   }
 }
