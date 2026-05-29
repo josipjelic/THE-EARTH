@@ -1,9 +1,9 @@
 {
-  "day": 61,
-  "date": "2026-05-28",
-  "complexityLevel": 61,
-  "totalFeatures": 119,
-  "linesOfCode": 4390,
+  "day": 62,
+  "date": "2026-05-29",
+  "complexityLevel": 62,
+  "totalFeatures": 122,
+  "linesOfCode": 4490,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -81,7 +81,9 @@
     "Ecosystem sensitivity indicators to temperature changes",
     "Live tracking of species migration patterns (NEW!)",
     "Real-time CO₂ levels display (NEW!)",
-    "Dynamic weather radar for ongoing storm systems (NEW!)"
+    "Dynamic weather radar for ongoing storm systems (NEW!)",
+    "Interactive ocean temperature visualization (NEW!)",
+    "Real-time lightning strike visualization (NEW!)"
   ],
   "lighting": {
     "ambient": true,
@@ -98,8 +100,15 @@
     "distance": 3
   },
   "phase": "Age of Data",
-  "lastUpdate": "2026-05-28T00:00:00Z",
+  "lastUpdate": "2026-05-29T00:00:00Z",
   "changelog": [
+    {
+      "day": 62,
+      "changes": [
+        "New feature: Interactive ocean temperature visualization (NEW!)",
+        "New feature: Real-time lightning strike visualization (NEW!)"
+      ]
+    },
     {
       "day": 61,
       "changes": [
@@ -115,20 +124,12 @@
         "Added particle visualization for atmospheric pollutants (NEW!)",
         "Introduced ecosystem sensitivity indicators to temperature shifts (NEW!)"
       ]
-    },
-    {
-      "day": 59,
-      "changes": [
-        "New feature: Cloud formation processes (NEW!)",
-        "Added impact of temperature shifts on animal behavior (NEW!)",
-        "Introduced global air quality visualization (NEW!)"
-      ]
     }
   ],
   "earth": {
-    "day": 61,
-    "complexity_level": 61,
+    "day": 62,
+    "complexity_level": 62,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-05-28T11:32:41.605Z"
+    "last_updated": "2026-05-29T11:23:55.944Z"
   }
 }
