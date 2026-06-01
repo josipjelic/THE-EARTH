@@ -319,8 +319,7 @@
                 uniforms: {
                     dayTexture: { value: earthTexture },
                     nightTexture: { value: nightTexture },
-                    sunDirection: { value: new THREE.Vector3(1, 0.25, 0.8).normalize()
-                }
+                    sunDirection: { value: new THREE.Vector3(1, 0.25, 0.8).normalize() }
                 },
                 vertexShader: VERT_EARTH,
                 fragmentShader: FRAG_EARTH
@@ -343,8 +342,8 @@
                     map: new THREE.CanvasTexture(cloudsCanvas),
                     transparent: true,
                     opacity: 0.75,
-                    depthWrite: false,
-                    shininess: 1
+        depthWrite: false,
+        shininess: 1
                 })
             );
             earth.add(clouds);
