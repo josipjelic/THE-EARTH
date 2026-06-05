@@ -99,7 +99,7 @@
 
     <script>
         let scene, camera, renderer;
-        let earth, stars, atmosphere, clouds, moon, sun, windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation, temperatureIndicators;
+        let earth, stars, atmosphere, clouds, moon, sun, windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation, temperatureIndicators, oceanTemperatureVisuals;
         let earthMaterial, atmosphereMaterial;
         let time = 0;
         let isDragging = false;
@@ -166,6 +166,32 @@
             }
         `;
 
+        const VERT_OCEAN_TEMP = `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                vec3 pos = position;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                gl_PointSize = 1.0; // Adjust as necessary
+            }
+        `;
+
+        const FRAG_OCEAN_TEMP = `
+            varying vec2 vUv;
+            uniform float temperature;
+            void main() {
+                vec3 color;
+                if (temperature < 10.0) {
+                    color = vec3(0.0, 0.0, 1.0); // Cold - Blue
+                } else if (temperature < 20.0) {
+                    color = vec3(0.0, 1.0, 0.0); // Warm - Green
+                } else {
+                    color = vec3(1.0, 0.0, 0.0); // Hot - Red
+                }
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+
         function init() {
             scene = new THREE.Scene();
 
@@ -188,6 +214,7 @@
             createThunderstorms(); 
             createPrecipitation();
             createTemperatureIndicators(); 
+            createOceanTemperatureVisuals();
 
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('mousedown', onMouseDown);
@@ -342,8 +369,8 @@
                     map: new THREE.CanvasTexture(cloudsCanvas),
                     transparent: true,
                     opacity: 0.75,
-        depthWrite: false,
-        shininess: 1
+                    depthWrite: false,
+                    shininess: 1
                 })
             );
             earth.add(clouds);
@@ -439,6 +466,21 @@
                 }
             }
             earth.add(temperatureIndicators);
+        }
+
+        function createOceanTemperatureVisuals() {
+            const oceanTempGeometry = new THREE.SphereGeometry(1.01, 64, 64);
+            oceanTemperatureVisuals = new THREE.ShaderMaterial({
+                vertexShader: VERT_OCEAN_TEMP,
+                fragmentShader: FRAG_OCEAN_TEMP,
+                uniforms: {
+                    temperature: { value: 20 }
+                },
+                transparent: true,
+            });
+
+            const oceanTempMesh = new THREE.Mesh(oceanTempGeometry, oceanTemperatureVisuals);
+            earth.add(oceanTempMesh);
         }
 
         function createWindVectors() {
@@ -546,6 +588,11 @@
                 temperatureIndicators.children.forEach((indicator) => {
                     indicator.rotation.y += 0.01; 
                 });
+            }
+
+            if (oceanTemperatureVisuals) {
+                // Update the temperature dynamically if needed
+                oceanTemperatureVisuals.uniforms.temperature.value = Math.random() * 30; // Randomize for effect
             }
 
             renderer.render(scene, camera);
