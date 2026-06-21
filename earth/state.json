@@ -1,9 +1,9 @@
 {
-  "day": 83,
-  "date": "2026-06-20",
-  "complexityLevel": 83,
-  "totalFeatures": 189,
-  "linesOfCode": 6348,
+  "day": 84,
+  "date": "2026-06-21",
+  "complexityLevel": 84,
+  "totalFeatures": 192,
+  "linesOfCode": 6358,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -101,8 +101,9 @@
     "New feature: Dynamic coastal habitat simulation",
     "New feature: Ocean thermal layer visualization",
     "New feature: Dynamic tidal simulation",
-    "New feature: Sea level rise simulation (NEW!)",
-    "New feature: Seasonal wildlife behavior simulation (NEW!)"
+    "New feature: Sea level rise simulation",
+    "New feature: Seasonal wildlife behavior simulation",
+    "New feature: Dynamic herbivore migration simulation (NEW!)"
   ],
   "lighting": {
     "ambient": true,
@@ -119,8 +120,14 @@
     "distance": 3
   },
   "phase": "Age of Data",
-  "lastUpdate": "2026-06-20T00:00:00Z",
+  "lastUpdate": "2026-06-21T00:00:00Z",
   "changelog": [
+    {
+      "day": 84,
+      "changes": [
+        "New feature: Dynamic herbivore migration simulation (NEW!)"
+      ]
+    },
     {
       "day": 83,
       "changes": [
@@ -231,9 +238,9 @@
     }
   ],
   "earth": {
-    "day": 83,
-    "complexity_level": 83,
+    "day": 84,
+    "complexity_level": 84,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-06-20T10:29:36.265Z"
+    "last_updated": "2026-06-21T11:12:58.624Z"
   }
 }
