@@ -1,9 +1,9 @@
 {
-  "day": 90,
-  "date": "2026-06-27",
-  "complexityLevel": 90,
-  "totalFeatures": 201,
-  "linesOfCode": 6760,
+  "day": 91,
+  "date": "2026-06-28",
+  "complexityLevel": 91,
+  "totalFeatures": 202,
+  "linesOfCode": 6780,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -109,7 +109,8 @@
     "New feature: Interactive species habitat interaction simulation",
     "New feature: Interactive predator-prey interaction simulation",
     "New feature: Enhanced biodiversity tracking and species interaction visualization (NEW!)",
-    "New feature: Dynamic fire simulation (NEW!)"
+    "New feature: Dynamic fire simulation (NEW!)",
+    "New feature: Enhanced atmospheric data visualization (NEW!)"
   ],
   "lighting": {
     "ambient": true,
@@ -126,8 +127,14 @@
     "distance": 3
   },
   "phase": "Age of Data",
-  "lastUpdate": "2026-06-27T00:00:00Z",
+  "lastUpdate": "2026-06-28T00:00:00Z",
   "changelog": [
+    {
+      "day": 91,
+      "changes": [
+        "New feature: Enhanced atmospheric data visualization (NEW!)"
+      ]
+    },
     {
       "day": 90,
       "changes": [
@@ -280,9 +287,9 @@
     }
   ],
   "earth": {
-    "day": 90,
-    "complexity_level": 90,
+    "day": 91,
+    "complexity_level": 91,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-06-27T10:00:30.046Z"
+    "last_updated": "2026-06-28T10:25:59.878Z"
   }
 }
