@@ -1,9 +1,9 @@
 {
-  "day": 95,
-  "date": "2026-07-02",
-  "complexityLevel": 95,
-  "totalFeatures": 215,
-  "linesOfCode": 6932,
+  "day": 96,
+  "date": "2026-07-03",
+  "complexityLevel": 96,
+  "totalFeatures": 218,
+  "linesOfCode": 6936,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -114,7 +114,8 @@
     "New feature: Enhanced climate change impact tracking visualization (NEW!)",
     "New feature: Quicksand simulation (NEW!)",
     "New feature: Interactive biomes growth simulation (NEW!)",
-    "New feature: Dynamic tide patterns simulation (NEW!)"
+    "New feature: Dynamic tide patterns simulation (NEW!)",
+    "New feature: Interactive geological activity visualization (NEW!)"
   ],
   "lighting": {
     "ambient": true,
@@ -131,8 +132,14 @@
     "distance": 3
   },
   "phase": "Age of Data",
-  "lastUpdate": "2026-07-02T00:00:00Z",
+  "lastUpdate": "2026-07-03T00:00:00Z",
   "changelog": [
+    {
+      "day": 96,
+      "changes": [
+        "New feature: Interactive geological activity visualization (NEW!)"
+      ]
+    },
     {
       "day": 95,
       "changes": [
@@ -315,9 +322,9 @@
     }
   ],
   "earth": {
-    "day": 95,
-    "complexity_level": 95,
+    "day": 96,
+    "complexity_level": 96,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-07-02T10:32:08.021Z"
+    "last_updated": "2026-07-03T10:30:07.382Z"
   }
 }
