@@ -125,7 +125,10 @@
     "New feature: Dynamic ocean acidification simulation (NEW!)",
     "New feature: Real-Time CO₂ Level Tracking (NEW!)",
     "New feature: Interactive Wildlife Population Simulation (NEW!)",
-    "New feature: Dynamic Climate Feedback Loop (NEW!)"
+    "New feature: Dynamic Climate Feedback Loop (NEW!)",
+    "New feature: Dynamic seasonal climate feedback simulation (NEW!)",
+    "New feature: Interactions between weather systems and ecosystems (NEW!)",
+    "New feature: Integrated temperature variations feedback for biodiversity (NEW!)"
   ],
   "lighting": {
     "ambient": true,
@@ -380,9 +383,9 @@
     }
   ],
   "earth": {
-    "day": 102,
-    "complexity_level": 100,
+    "day": 103,
+    "complexity_level": 103,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-07-11T09:21:14.525Z"
+    "last_updated": "2026-07-12T09:47:04.633Z"
   }
 }

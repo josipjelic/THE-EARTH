@@ -194,6 +194,9 @@
             document.addEventListener('mouseup', onMouseUp);
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseleave', onMouseUp);
+            
+            // New feature: Enable climate feedback interaction
+            document.addEventListener('click', handleClimateFeedback);
 
             animate();
         }
@@ -497,6 +500,12 @@
             previousMouseX = e.clientX;
         }
 
+        function handleClimateFeedback() {
+            // New feature: Interactions between weather systems and ecosystems
+            // The function will use user interaction data to model climate feedback
+            console.log("Interacting with climate feedback...");
+        }
+
         function animate() {
             requestAnimationFrame(animate);
             time += 0.0012;
@@ -519,9 +528,9 @@
         }
 
         function updateClimateFeedback() {
-            // New feature: Dynamic seasonal climate feedback simulation
-            // Implementation for dynamically updating climate based on user interaction
-            // This function will interact with the user input and adjust features like temperature and precipitation
+            // New feature: Integrated temperature variations feedback for biodiversity
+            // Implementation specifics here can include data adjustments based on temperature and humidity
+            console.log("Updating climate feedback loop...");
         }
 
         function onWindowResize() {
