@@ -379,13 +379,28 @@
             earth.add(tectonicPlates);
         }
 
+        function createWindVectors() {
+            const windMaterial = new THREE.LineBasicMaterial({ color: 0x00ffcc });
+            const positions = [];
+            for (let i = 0; i < 10; i++) {
+                const y = 2 + i * 0.2;
+                positions.push(-1, y, 0, -1 + windSpeed, y, 0);
+            }
+            const windGeometry = new THREE.BufferGeometry();
+            windGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            windVectors = new THREE.LineSegments(windGeometry, windMaterial);
+            scene.add(windVectors);
+        }
+
         function createOceanCurrents() {
-            const currentMaterial = new THREE.LineBasicMaterial({ color: 0x00ccff, linewidth: 1 });
-            const currentGeometry = new THREE.Geometry();
+            const currentMaterial = new THREE.LineBasicMaterial({ color: 0x00ccff });
+            const positions = [];
             for (let i = 0; i < 30; i++) {
                 const angle = (i / 30) * Math.PI * 2;
-                currentGeometry.vertices.push(new THREE.Vector3(Math.sin(angle) * 1.02, Math.cos(angle) * 1.02, 0));
+                positions.push(Math.sin(angle) * 1.02, Math.cos(angle) * 1.02, 0);
             }
+            const currentGeometry = new THREE.BufferGeometry();
+            currentGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
             oceanCurrents = new THREE.Line(currentGeometry, currentMaterial);
             earth.add(oceanCurrents);
 
@@ -409,17 +424,17 @@
         }
 
         function createPrecipitation() {
-            precipitation = new THREE.Group(); 
+            precipitation = new THREE.Group();
             const rainMaterial = new THREE.PointsMaterial({ color: 0xaaaaaa, size: 0.05 });
-            
+            const positions = new Float32Array(1000 * 3);
             for (let i = 0; i < 1000; i++) {
-                const particle = new THREE.Vector3(
-                    (Math.random() - 0.5) * 2,
-                    (Math.random() - 0.5) * 2,
-                    (Math.random() - 0.5) * 2
-                );
-                precipitation.add(new THREE.Points(new THREE.Geometry().setFromPoints([particle]), rainMaterial)); 
+                positions[i * 3] = (Math.random() - 0.5) * 2;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 2;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
             }
+            const rainGeometry = new THREE.BufferGeometry();
+            rainGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            precipitation.add(new THREE.Points(rainGeometry, rainMaterial));
             scene.add(precipitation);
         }
 
