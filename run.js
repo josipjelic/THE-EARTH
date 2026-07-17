@@ -25,12 +25,14 @@ const PATHS = {
 // Cheap models — tried in order. GPT 4o mini first for cost efficiency.
 const MODEL_CANDIDATES = [
   'openai/gpt-4o-mini',
-  'anthropic/claude-3.5-haiku',
-  'google/gemini-2.0-flash-001',
-  'anthropic/claude-3.5-sonnet',
+  'anthropic/claude-haiku-4.5',
+  'google/gemini-2.5-flash',
+  'anthropic/claude-sonnet-4',
 ];
 
 const MAX_TOKENS = 10000;
+const API_RETRIES = 2;
+const API_TIMEOUT_MS = 180000;
 
 // ── Logging ────────────────────────────────────────────────
 function log(msg) {
@@ -95,16 +97,29 @@ function apiRequest(model, userContent, apiKey) {
       let raw = '';
       res.on('data', c => { raw += c; });
       res.on('end', () => {
+        clearTimeout(timer);
+        if (!raw.trim()) {
+          return reject(new Error(`Empty response body (HTTP ${res.statusCode})`));
+        }
         try {
           const parsed = JSON.parse(raw);
           if (parsed.error) return reject(new Error(`API: ${parsed.error.message}`));
           const text = parsed.choices?.[0]?.message?.content;
           if (!text) return reject(new Error(`No content in response. Body: ${raw.slice(0, 400)}`));
           resolve({ text });
-        } catch (e) { reject(new Error(`Parse fail. Status ${res.statusCode}. Body: ${raw.slice(0, 400)}`)); }
+        } catch (e) {
+          reject(new Error(`Parse fail. Status ${res.statusCode}. Body: ${raw.slice(0, 400)}`));
+        }
       });
     });
-    req.on('error', reject);
+    const timer = setTimeout(() => {
+      req.destroy();
+      reject(new Error(`Request timed out after ${API_TIMEOUT_MS}ms`));
+    }, API_TIMEOUT_MS);
+    req.on('error', err => {
+      clearTimeout(timer);
+      reject(err);
+    });
     req.write(body);
     req.end();
   });
@@ -114,12 +129,18 @@ async function callArchitect(content, apiKey) {
   log(`🤖 Model candidates: ${MODEL_CANDIDATES.join(', ')}`);
 
   for (const model of MODEL_CANDIDATES) {
-    log(`🤖 Trying: ${model}`);
-    try {
-      const { text } = await apiRequest(model, content, apiKey);
-      log(`✅ Success: ${model} (${text.length} chars)`);
-      return { model, text };
-    } catch (e) { log(`⚠  ${model} failed: ${e.message}`); }
+    for (let attempt = 1; attempt <= API_RETRIES; attempt++) {
+      const label = attempt > 1 ? ` (retry ${attempt}/${API_RETRIES})` : '';
+      log(`🤖 Trying: ${model}${label}`);
+      try {
+        const { text } = await apiRequest(model, content, apiKey);
+        log(`✅ Success: ${model} (${text.length} chars)`);
+        return { model, text };
+      } catch (e) {
+        log(`⚠  ${model} failed: ${e.message}`);
+        if (attempt < API_RETRIES) await new Promise(r => setTimeout(r, 2000 * attempt));
+      }
+    }
   }
   throw new Error('All models failed.');
 }

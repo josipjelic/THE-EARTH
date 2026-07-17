@@ -11,7 +11,7 @@ on:
       force_rebuild:
         description: 'Force a rebuild even if Earth was already updated today'
         required: false
-        default: 'false'
+        default: false
         type: boolean
 
 # Allow the workflow to push commits back to the repo
