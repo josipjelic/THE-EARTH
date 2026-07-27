@@ -403,7 +403,6 @@
             currentGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
             oceanCurrents = new THREE.Line(currentGeometry, currentMaterial);
             earth.add(oceanCurrents);
-
             oceanCurrents.rotation.z += (Math.sin(time) * 0.1);
         }
 
@@ -440,7 +439,6 @@
 
         function createTemperatureIndicators() {
             temperatureIndicators = new THREE.Group(); 
-            
             for (let lat = -90; lat <= 90; lat += 15) { 
                 for (let long = -180; long < 180; long += 15) {
                     const tempValue = Math.sin(lat * (Math.PI / 180)) * 30 + 50; 
@@ -517,7 +515,7 @@
 
         function handleClimateFeedback() {
             // New feature: Interactions between weather systems and ecosystems
-            // The function will use user interaction data to model climate feedback
+            // The function will utilize user interaction data to model climate feedback
             console.log("Interacting with climate feedback...");
         }
 
