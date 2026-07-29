@@ -188,6 +188,7 @@
             createThunderstorms();
             createPrecipitation();
             createTemperatureIndicators();
+            createWildlifeIndicators(); // New feature for wildlife tracking (added)
 
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('mousedown', onMouseDown);
@@ -195,9 +196,6 @@
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseleave', onMouseUp);
             
-            // New feature: Enable climate feedback interaction
-            document.addEventListener('click', handleClimateFeedback);
-
             animate();
         }
 
@@ -457,6 +455,20 @@
             earth.add(temperatureIndicators);
         }
 
+        function createWildlifeIndicators() { // New feature for tracking wildlife.
+            const wildlifeMaterial = new THREE.PointsMaterial({ color: 0xff00ff, size: 0.05 }); // Magenta for wildlife.
+            const wildlifePositions = new Float32Array(500 * 3); // Creating 500 wildlife markers.
+            for (let i = 0; i < 500; i++) {
+                wildlifePositions[i * 3] = (Math.random() - 0.5) * 2;
+                wildlifePositions[i * 3 + 1] = (Math.random() - 0.5) * 2;
+                wildlifePositions[i * 3 + 2] = (Math.random() - 0.5) * 2;
+            }
+            const wildlifeGeometry = new THREE.BufferGeometry();
+            wildlifeGeometry.setAttribute('position', new THREE.BufferAttribute(wildlifePositions, 3));
+            const wildlifePoints = new THREE.Points(wildlifeGeometry, wildlifeMaterial);
+            scene.add(wildlifePoints);
+        }
+
         function drawCityLights(ctx) {
             const cities = [
                 { x: 301, y: 139, r: 5 },
@@ -513,12 +525,6 @@
             previousMouseX = e.clientX;
         }
 
-        function handleClimateFeedback() {
-            // New feature: Interactions between weather systems and ecosystems
-            // The function will utilize user interaction data to model climate feedback
-            console.log("Interacting with climate feedback...");
-        }
-
         function animate() {
             requestAnimationFrame(animate);
             time += 0.0012;
@@ -529,20 +535,14 @@
             if (windVectors) { windVectors.rotation.x += windSpeed; }
             if (tectonicPlates) { tectonicPlates.rotation.y += 0.0002; }
             if (oceanCurrents) { oceanCurrents.rotation.z += 0.001; }
+            if (temperatureIndicators) { temperatureIndicators.rotation.y += 0.001; }
+            if (wildlifePoints) { wildlifePoints.rotation.y += 0.001; } // Rotate wildlife points as well.
 
             thunderstorms.forEach(thunder => {
                 thunder.rotation.z += Math.sin(time) * 0.1; 
             });
 
-            // Update Climate Feedback Loop based on user interaction
-            updateClimateFeedback();
-
             renderer.render(scene, camera);
-        }
-
-        function updateClimateFeedback() {
-            // New feature: Integrated temperature variations feedback for biodiversity
-            console.log("Updating climate feedback loop...");
         }
 
         function onWindowResize() {
