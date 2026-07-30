@@ -1,9 +1,9 @@
 {
-  "day": 117,
-  "date": "2026-07-29",
-  "complexityLevel": 117,
-  "totalFeatures": 320,
-  "linesOfCode": 10350,
+  "day": 118,
+  "date": "2026-07-30",
+  "complexityLevel": 118,
+  "totalFeatures": 323,
+  "linesOfCode": 10425,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -155,8 +155,14 @@
     "distance": 3
   },
   "phase": "Age of Gods",
-  "lastUpdate": "2026-07-29T00:00:00Z",
+  "lastUpdate": "2026-07-30T00:00:00Z",
   "changelog": [
+    {
+      "day": 118,
+      "changes": [
+        "New feature: Interactive wildlife tracking indicators (NEW!)"
+      ]
+    },
     {
       "day": 117,
       "changes": [
@@ -504,9 +510,9 @@
     }
   ],
   "earth": {
-    "day": 117,
-    "complexity_level": 117,
+    "day": 118,
+    "complexity_level": 118,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-07-29T10:33:36.404Z"
+    "last_updated": "2026-07-30T10:17:07.747Z"
   }
 }

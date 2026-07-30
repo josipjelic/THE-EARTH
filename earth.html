@@ -99,7 +99,7 @@
 
     <script>
         let scene, camera, renderer;
-        let earth, stars, atmosphere, clouds, moon, sun, windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation, temperatureIndicators;
+        let earth, stars, atmosphere, clouds, moon, sun, windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation, temperatureIndicators, wildlifePoints;
         let earthMaterial, atmosphereMaterial;
         let time = 0;
         let isDragging = false;
@@ -465,7 +465,7 @@
             }
             const wildlifeGeometry = new THREE.BufferGeometry();
             wildlifeGeometry.setAttribute('position', new THREE.BufferAttribute(wildlifePositions, 3));
-            const wildlifePoints = new THREE.Points(wildlifeGeometry, wildlifeMaterial);
+            wildlifePoints = new THREE.Points(wildlifeGeometry, wildlifeMaterial);
             scene.add(wildlifePoints);
         }
 
