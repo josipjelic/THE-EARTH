@@ -188,7 +188,7 @@
             createThunderstorms();
             createPrecipitation();
             createTemperatureIndicators();
-            createWildlifeIndicators(); // New feature for wildlife tracking (added)
+            createWildlifeIndicators();
 
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('mousedown', onMouseDown);
@@ -455,7 +455,7 @@
             earth.add(temperatureIndicators);
         }
 
-        function createWildlifeIndicators() { // New feature for tracking wildlife.
+        function createWildlifeIndicators() {
             const wildlifeMaterial = new THREE.PointsMaterial({ color: 0xff00ff, size: 0.05 }); // Magenta for wildlife.
             const wildlifePositions = new Float32Array(500 * 3); // Creating 500 wildlife markers.
             for (let i = 0; i < 500; i++) {
