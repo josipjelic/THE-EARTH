@@ -1,9 +1,9 @@
 {
-  "day": 124,
-  "date": "2026-08-05",
-  "complexityLevel": 124,
-  "totalFeatures": 334,
-  "linesOfCode": 11000,
+  "day": 125,
+  "date": "2026-08-06",
+  "complexityLevel": 125,
+  "totalFeatures": 335,
+  "linesOfCode": 11100,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -141,7 +141,8 @@
     "New feature: Interactive wildlife tracking indicators (NEW!)",
     "New feature: Interactive ocean ecosystem simulation (NEW!)",
     "New feature: Dynamic foci on climate change indicators (NEW!)",
-    "New feature: Enhanced ecological footprint visualization (NEW!)"
+    "New feature: Enhanced ecological footprint visualization (NEW!)",
+    "New feature: Advanced climate change tracking visualization (NEW!)"
   ],
   "lighting": {
     "ambient": true,
@@ -158,8 +159,14 @@
     "distance": 3
   },
   "phase": "Age of Gods",
-  "lastUpdate": "2026-08-05T00:00:00Z",
+  "lastUpdate": "2026-08-06T00:00:00Z",
   "changelog": [
+    {
+      "day": 125,
+      "changes": [
+        "New feature: Advanced climate change tracking visualization (NEW!)"
+      ]
+    },
     {
       "day": 124,
       "changes": [
@@ -549,9 +556,9 @@
     }
   ],
   "earth": {
-    "day": 124,
-    "complexity_level": 124,
+    "day": 125,
+    "complexity_level": 125,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-08-05T10:29:22.055Z"
+    "last_updated": "2026-08-06T10:33:02.397Z"
   }
 }
