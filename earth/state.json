@@ -1,9 +1,9 @@
 {
-  "day": 128,
-  "date": "2026-08-10",
-  "complexityLevel": 128,
-  "totalFeatures": 347,
-  "linesOfCode": 11450,
+  "day": 129,
+  "date": "2026-08-12",
+  "complexityLevel": 129,
+  "totalFeatures": 348,
+  "linesOfCode": 11600,
   "features": [
     "Spherical Earth geometry (64x64 segments)",
     "Procedural continent texture",
@@ -160,8 +160,15 @@
     "distance": 3
   },
   "phase": "Age of Gods",
-  "lastUpdate": "2026-08-10T00:00:00Z",
+  "lastUpdate": "2026-08-12T00:00:00Z",
   "changelog": [
+    {
+      "day": 129,
+      "changes": [
+        "New feature: Enhanced ecological interaction visualization (NEW!)",
+        "Added feature: Dynamic foci on climate change indicators for better understanding (NEW!)"
+      ]
+    },
     {
       "day": 128,
       "changes": [
@@ -577,9 +584,9 @@
     }
   ],
   "earth": {
-    "day": 128,
-    "complexity_level": 128,
+    "day": 129,
+    "complexity_level": 129,
     "model_used": "openai/gpt-4o-mini",
-    "last_updated": "2026-08-10T09:11:12.425Z"
+    "last_updated": "2026-08-12T09:05:16.156Z"
   }
 }
