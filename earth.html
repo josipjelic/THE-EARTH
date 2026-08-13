@@ -99,13 +99,16 @@
 
     <script>
         let scene, camera, renderer;
-        let earth, stars, atmosphere, clouds, moon, sun, windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation, temperatureIndicators, wildlifePoints;
+        let earth, stars, atmosphere, clouds, moon, sun;
+        let oceanDepths; // New Variable for Ocean Depths
+        let windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation, temperatureIndicators, wildlifePoints;
         let earthMaterial, atmosphereMaterial;
         let time = 0;
         let isDragging = false;
         let previousMouseX = 0;
         const windSpeed = 0.01;
 
+        // Vertex Shader for Atmosphere
         const VERT_ATMOSPHERE = `
             varying vec3 vNormal;
             varying vec3 vWorldPos;
@@ -116,6 +119,7 @@
             }
         `;
 
+        // Fragment Shader for Atmosphere
         const FRAG_ATMOSPHERE = `
             uniform vec3 cameraPos;
             varying vec3 vNormal;
@@ -166,6 +170,7 @@
             }
         `;
 
+        // Initialization Function
         function init() {
             scene = new THREE.Scene();
 
@@ -190,6 +195,9 @@
             createTemperatureIndicators();
             createWildlifeIndicators();
 
+            // **Dynamic Ocean Depth Representation**
+            createOceanDepths(); // Calling new function 
+
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('mousedown', onMouseDown);
             document.addEventListener('mouseup', onMouseUp);
@@ -199,6 +207,7 @@
             animate();
         }
 
+        // Create Stars in the background
         function createStars() {
             const starGeometry = new THREE.BufferGeometry();
             const starCount = 2000;
@@ -226,12 +235,14 @@
             scene.add(stars);
         }
 
+        // Create Sun
         function createSun() {
             const sunGeometry = new THREE.SphereGeometry(0.22, 32, 32);
             sun = new THREE.Mesh(sunGeometry, new THREE.MeshBasicMaterial({ color: 0xffeebb }));
             sun.position.set(9, 3, 8);
             scene.add(sun);
 
+            // Glowing effect for the sun
             const glowGeometry = new THREE.SphereGeometry(0.38, 32, 32);
             const sunGlow = new THREE.Mesh(sunGeometry, new THREE.MeshBasicMaterial({
                 color: 0xffdd88,
@@ -242,6 +253,7 @@
             sun.add(sunGlow);
         }
 
+        // Create Moon
         function createMoon() {
             const moonCanvas = document.createElement('canvas');
             moonCanvas.width = 512;
@@ -270,6 +282,7 @@
             scene.add(moon);
         }
 
+        // Create Earth
         function createEarth() {
             const textureCanvas = document.createElement('canvas');
             textureCanvas.width = 1024;
@@ -364,6 +377,7 @@
             earth.add(atmosphere);
         }
 
+        // Create Tectonic Plates
         function createTectonicPlates() {
             const plateGeometry = new THREE.SphereGeometry(1, 64, 64);
             const plateMaterial = new THREE.MeshPhongMaterial({
@@ -377,6 +391,7 @@
             earth.add(tectonicPlates);
         }
 
+        // Create Wind Vectors
         function createWindVectors() {
             const windMaterial = new THREE.LineBasicMaterial({ color: 0x00ffcc });
             const positions = [];
@@ -390,6 +405,7 @@
             scene.add(windVectors);
         }
 
+        // Create Ocean Currents
         function createOceanCurrents() {
             const currentMaterial = new THREE.LineBasicMaterial({ color: 0x00ccff });
             const positions = [];
@@ -404,6 +420,7 @@
             oceanCurrents.rotation.z += (Math.sin(time) * 0.1);
         }
 
+        // Create Thunderstorms
         function createThunderstorms() {
             thunderstorms = []; 
             for (let i = 0; i < 5; i++) {
@@ -420,6 +437,7 @@
             }
         }
 
+        // Create Precipitation
         function createPrecipitation() {
             precipitation = new THREE.Group();
             const rainMaterial = new THREE.PointsMaterial({ color: 0xaaaaaa, size: 0.05 });
@@ -435,9 +453,10 @@
             scene.add(precipitation);
         }
 
+        // Create Temperature Indicators
         function createTemperatureIndicators() {
             temperatureIndicators = new THREE.Group(); 
-            for (let lat = -90; lat <= 90; lat += 15) { 
+            for (let lat = -90; lat <= 90; lat += 15) {
                 for (let long = -180; long < 180; long += 15) {
                     const tempValue = Math.sin(lat * (Math.PI / 180)) * 30 + 50; 
                     const indicatorGeometry = new THREE.SphereGeometry(0.05, 8, 8);
@@ -455,6 +474,7 @@
             earth.add(temperatureIndicators);
         }
 
+        // Create Wildlife Indicators
         function createWildlifeIndicators() {
             const wildlifeMaterial = new THREE.PointsMaterial({ color: 0xff00ff, size: 0.05 }); // Magenta for wildlife.
             const wildlifePositions = new Float32Array(500 * 3); // Creating 500 wildlife markers.
@@ -467,6 +487,21 @@
             wildlifeGeometry.setAttribute('position', new THREE.BufferAttribute(wildlifePositions, 3));
             wildlifePoints = new THREE.Points(wildlifeGeometry, wildlifeMaterial);
             scene.add(wildlifePoints);
+        }
+
+        // Create Ocean Depths Visualization
+        function createOceanDepths() {
+            const depthGeometry = new THREE.PlaneGeometry(2, 2, 32, 32);
+            const oceanDepthMaterial = new THREE.MeshBasicMaterial({
+                color: 0x1E90FF,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            oceanDepths = new THREE.Mesh(depthGeometry, oceanDepthMaterial);
+            oceanDepths.rotation.x = Math.PI / 2; // Flat in the vertical plane
+            oceanDepths.position.y = -1; // Slightly below the earth
+            scene.add(oceanDepths);
         }
 
         function drawCityLights(ctx) {
