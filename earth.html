@@ -100,7 +100,7 @@
     <script>
         let scene, camera, renderer;
         let earth, stars, atmosphere, clouds, moon, sun;
-        let oceanDepths; // New Variable for Ocean Depths
+        let oceanDepths;
         let windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation, temperatureIndicators, wildlifePoints;
         let earthMaterial, atmosphereMaterial;
         let time = 0;
@@ -195,7 +195,6 @@
             createTemperatureIndicators();
             createWildlifeIndicators();
 
-            // **Dynamic Ocean Depth Representation**
             createOceanDepths(); // Calling new function 
 
             window.addEventListener('resize', onWindowResize);
