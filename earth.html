@@ -169,7 +169,29 @@
                 gl_FragColor = vec4(color, 1.0);
             }
         `;
+        
+        // New Shader for Enhanced Climate Feedback Visuals
+        const VERT_CLIMATE_FEEDBACK = `
+            varying vec3 vNormal;
+            varying vec3 vWorldPos;
+            void main() {
+                vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+                vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
 
+        const FRAG_CLIMATE_FEEDBACK = `
+            uniform vec3 cameraPos;
+            varying vec3 vNormal;
+            varying vec3 vWorldPos;
+            void main() {
+                float distanceToCamera = length(cameraPos - vWorldPos);
+                vec3 color = vec3(0.0, 1.0 - distanceToCamera / 10.0, 1.0); // Simple color gradient based on distance
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+        
         // Initialization Function
         function init() {
             scene = new THREE.Scene();
@@ -195,6 +217,7 @@
             createTemperatureIndicators();
             createWildlifeIndicators();
             createOceanDepths();
+            createClimateFeedback(); // Call the new function
 
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('mousedown', onMouseDown);
@@ -203,6 +226,21 @@
             document.addEventListener('mouseleave', onMouseUp);
             
             animate();
+        }
+
+        // Create Climate Feedback Visualization (New)
+        function createClimateFeedback() {
+            const climateFeedbackGeometry = new THREE.SphereGeometry(1.1, 64, 64);
+            const climateFeedbackMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    cameraPos: { value: camera.position }
+                },
+                vertexShader: VERT_CLIMATE_FEEDBACK,
+                fragmentShader: FRAG_CLIMATE_FEEDBACK,
+                transparent: true
+            });
+            const climateFeedback = new THREE.Mesh(climateFeedbackGeometry, climateFeedbackMaterial);
+            earth.add(climateFeedback);
         }
 
         // Create Stars in the background
@@ -317,7 +355,7 @@
             earthTexture.wrapS = THREE.RepeatWrapping;
 
             const lightsCanvas = document.createElement('canvas');
-            lightsCanvas.width = 1024;
+            lightsCanvas.width = 1024; 
             lightsCanvas.height = 512;
             const lctx = lightsCanvas.getContext('2d');
             lctx.fillStyle = '#000000';
