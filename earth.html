@@ -112,6 +112,7 @@
         const VERT_ATMOSPHERE = `
             varying vec3 vNormal;
             varying vec3 vWorldPos;
+
             void main() {
                 vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
                 vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
@@ -124,6 +125,7 @@
             uniform vec3 cameraPos;
             varying vec3 vNormal;
             varying vec3 vWorldPos;
+
             void main() {
                 vec3 toCamera = normalize(cameraPos - vWorldPos);
                 float rim = 1.0 - abs(dot(toCamera, vNormal));
@@ -138,6 +140,7 @@
         const VERT_EARTH = `
             varying vec2 vUv;
             varying vec3 vWorldNormal;
+
             void main() {
                 vUv = uv;
                 vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
@@ -151,6 +154,7 @@
             uniform vec3 sunDirection;
             varying vec2 vUv;
             varying vec3 vWorldNormal;
+
             void main() {
                 vec3 normal = normalize(vWorldNormal);
                 float light = dot(normal, normalize(sunDirection));
@@ -174,6 +178,7 @@
         const VERT_CLIMATE_FEEDBACK = `
             varying vec3 vNormal;
             varying vec3 vWorldPos;
+
             void main() {
                 vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
                 vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
@@ -185,6 +190,7 @@
             uniform vec3 cameraPos;
             varying vec3 vNormal;
             varying vec3 vWorldPos;
+
             void main() {
                 float distanceToCamera = length(cameraPos - vWorldPos);
                 vec3 color = vec3(0.0, 1.0 - distanceToCamera / 10.0, 1.0); // Simple color gradient based on distance
