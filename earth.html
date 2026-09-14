@@ -101,7 +101,7 @@
         let scene, camera, renderer;
         let earth, stars, atmosphere, clouds, moon, sun;
         let oceanDepths;
-        let windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation, temperatureIndicators, wildlifePoints;
+        let windVectors, tectonicPlates, oceanCurrents, thunderstorms, precipitation, temperatureIndicators, wildlifePoints, climateFeedback;
         let earthMaterial, atmosphereMaterial;
         let time = 0;
         let isDragging = false;
@@ -245,7 +245,7 @@
                 fragmentShader: FRAG_CLIMATE_FEEDBACK,
                 transparent: true
             });
-            const climateFeedback = new THREE.Mesh(climateFeedbackGeometry, climateFeedbackMaterial);
+            climateFeedback = new THREE.Mesh(climateFeedbackGeometry, climateFeedbackMaterial);
             earth.add(climateFeedback);
         }
 
@@ -614,6 +614,7 @@
             if (oceanCurrents) { oceanCurrents.rotation.z += 0.001; }
             if (temperatureIndicators) { temperatureIndicators.rotation.y += 0.001; }
             if (wildlifePoints) { wildlifePoints.rotation.y += 0.001; }
+            if (climateFeedback) { climateFeedback.rotation.y += 0.001; } // Add climate feedback rotation
 
             thunderstorms.forEach(thunder => {
                 thunder.rotation.z += Math.sin(time) * 0.1; 
